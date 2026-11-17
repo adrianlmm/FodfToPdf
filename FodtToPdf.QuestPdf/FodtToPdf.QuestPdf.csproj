@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Generador de PDF con QuestPDF para FodtToPdf.
+    Se separa del ensamblado base para que FodtToPdf (LibreOffice + plantillas)
+    no arrastre QuestPDF/SkiaSharp si no se va a usar ese motor.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FodtToPdf</RootNamespace>
+    <AssemblyName>FodtToPdf.QuestPdf</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QuestPDF" Version="2026.9.1" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FodtToPdf\FodtToPdf.csproj" />
+  </ItemGroup>
+
+</Project>
