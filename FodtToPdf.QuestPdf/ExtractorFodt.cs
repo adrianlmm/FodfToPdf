@@ -336,6 +336,25 @@ internal static class ExtractorFodt
 
         for (var i = 0; i < modelo.Flujo.Count; i++) modelo.Flujo[i].IndiceFlujo = i;
 
+        // Reportes cuyo cuerpo empieza directamente con una tabla y tienen encabezado
+        // (Balanza de comprobación): QuestPDF arranca la tabla ~2 pt más arriba que
+        // LibreOffice y la primera fila se encima al «Fecha» del encabezado.
+        // Se reserva ese aire sólo en ese caso; el encabezado sigue en MargenSupBasePt.
+        if (modelo.Encabezado.Count > 0 && modelo.Flujo.Count > 0 && modelo.Flujo[0].Tipo == "tabla")
+        {
+            modelo.Pagina.MargenSupPt += 2.0;
+
+            // El reporte de compras usa encabezado de 4 líneas de 9 pt; LibreOffice
+            // deja la tabla 1.8 pt más abajo que la Balanza (cuyo último renglón es
+            // de 10 pt). El cálculo por alto de línea no distingue ese caso.
+            var ultimoTamano = modelo.Encabezado[^1].Runs
+                .Select(r => r.TamanoPt)
+                .FirstOrDefault(t => t > 0);
+
+            if (ultimoTamano > 0 && ultimoTamano <= 9.5)
+                modelo.Pagina.MargenSupPt += 1.8;
+        }
+
         return modelo;
     }
 
@@ -1128,7 +1147,7 @@ internal static class ExtractorFodt
     static ParrafoModelo LeerParrafo(XElement p, Dictionary<string, Estilo> estilos, bool enCelda = false,
                                      bool enColumnas = false)
     {
-        var modelo = new ParrafoModelo();
+        var modelo = new ParrafoModelo { EsTitulo = p.Name == TEXT + "h" };
         var nombreEstilo = (string)p.Attribute(TEXT + "style-name") ?? "";
 
         // Alineación, márgenes y sangría SE HEREDAN por la cadena de estilos: los estilos
@@ -1509,8 +1528,18 @@ internal static class ExtractorFodt
         var estiloTabla = tabla.Document?.Descendants(STYLE + "style")
             .FirstOrDefault(e => (string)e.Attribute(STYLE + "name") == nombreEstiloTabla);
 
-        if (estiloTabla?.Element(STYLE + "table-properties")?.Attribute(FO + "margin-left")?.Value is string ml)
+        var propsTabla = estiloTabla?.Element(STYLE + "table-properties");
+
+        if (propsTabla?.Attribute(FO + "margin-left")?.Value is string ml)
             modelo.MargenIzqPt = APt(ml);
+
+        // Ancho total declarado por la tabla (style:width). Es independiente de la suma
+        // de columnas: si la tabla pide 15.24 cm y las columnas suman 12.192 cm,
+        // LibreOffice estira las columnas hasta 15.24; el generador debe hacer lo mismo.
+        var anchoTabla = propsTabla?.Attribute(STYLE + "width")?.Value
+                         ?? propsTabla?.Attribute(FO + "width")?.Value;
+        if (!string.IsNullOrWhiteSpace(anchoTabla))
+            modelo.AnchoDeclaradoPt = APt(anchoTabla);
 
         // table:align del estilo (o del propio elemento): las tablas más angostas que el
         // área de texto pueden ir al centro (la de sueldo del contrato CCI).
@@ -1575,7 +1604,10 @@ internal static class ExtractorFodt
                     mcelda.ColorFondo = estiloCelda.ColorFondo;
                 }
 
-                foreach (var p in celda.Elements(TEXT + "p"))
+                // Las celdas pueden usar text:p o text:h. El comprobante de traslado
+                // pone los encabezados de la tabla como text:h; si sólo se leían text:p,
+                // "Clave del producto...", "Cantidad", "Importe", etc. desaparecían.
+                foreach (var p in celda.Elements().Where(x => x.Name == TEXT + "p" || x.Name == TEXT + "h"))
                     mcelda.Parrafos.Add(LeerParrafo(p, estilos, true));
 
                 // tablas anidadas dentro de la celda (la cabecera de columnas de estos

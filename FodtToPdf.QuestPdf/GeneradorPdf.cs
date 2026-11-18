@@ -1418,6 +1418,8 @@ internal static class GeneradorPdf
             }
         }
 
+        var anchoTabla = tabla.AnchoDeclaradoPt > 0 ? tabla.AnchoDeclaradoPt : tabla.ColumnasPt.Sum();
+
         contenedor.Table(t =>
         {
             // Dos modos:
@@ -1435,7 +1437,7 @@ internal static class GeneradorPdf
 
                     if (anchoDisponible > 0 && total > 0)
                     {
-                        var factor = total > anchoDisponible ? anchoDisponible / total : 1.0;
+                        var factor = Math.Min(anchoTabla, anchoDisponible) / total;
                         c.ConstantColumn((float)Math.Max(ancho * factor, 1), Unit.Point);
                     }
                     else
@@ -1449,7 +1451,9 @@ internal static class GeneradorPdf
             });
 
             // factor con el que se escalaron las columnas de ESTA tabla (ver ColumnsDefinition)
-            var factorColumnas = (anchoDisponible > 0 && total > anchoDisponible) ? anchoDisponible / total : 1.0;
+            var factorColumnas = (anchoDisponible > 0 && total > 0)
+                ? Math.Min(anchoTabla, anchoDisponible) / total
+                : 1.0;
 
             // Si la tabla tiene una columna inservible (en la factura hay una de 1.5 pt a la
             // que, con el padding de 5.5 por lado, no le queda ancho), no se puede pedir
@@ -1580,7 +1584,11 @@ internal static class GeneradorPdf
                     // Sólo "middle": con "bottom" LibreOffice no baja el contenido como
                     // QuestPDF (la caja de totales de la factura lo declara y allá se ve
                     // arriba), así que se deja el comportamiento de siempre.
-                    if (celda.VerticalAlign == "middle") cont = cont.AlignMiddle();
+                    // Los encabezados text:h de una celda (Comprobante de traslado) los
+                    // centra LibreOffice verticalmente, aunque la celda declare top.
+                    if (celda.VerticalAlign == "middle" ||
+                        (celda.VerticalAlign == "top" && celda.Parrafos.Any(p => p.EsTitulo)))
+                        cont = cont.AlignMiddle();
 
                     // "bottom" sólo en bloques de TRES o más filas: la solicitud de traslado
                     // tiene el "Favor de referenciar en el pago…" abarcando tres filas y
@@ -1646,9 +1654,23 @@ internal static class GeneradorPdf
                                 // (160 pt en vez de 58). Si no cabe en la celda se cae al
                                 // ScaleToFit, que es el que evita el DocumentLayoutException.
                                 var anchoImagen = conImagen.ImagenAnchoPt;
+                                var altoImagen = conImagen.ImagenAltoPt;
 
                                 if (anchoImagen > 0 && (anchoTexto <= 0 || anchoImagen <= anchoTexto))
-                                    c.Item().Width((float)anchoImagen).Image(bytes);
+                                {
+                                    var contImagen = c.Item().Width((float)anchoImagen);
+
+                                    if (altoImagen > 0)
+                                        contImagen = contImagen.Height((float)altoImagen);
+
+                                    var img = contImagen.Image(bytes);
+
+                                    // El frame del .fodt puede fijar 100x80 aunque el PNG sea
+                                    // cuadrado. Sin Height + FitUnproportionally QuestPDF
+                                    // conserva la proporción y el logo sale 100x100.
+                                    if (altoImagen > 0)
+                                        img.FitUnproportionally();
+                                }
                                 else
                                     c.Item().ScaleToFit().Image(bytes);
                             }
@@ -1940,6 +1962,28 @@ internal static class GeneradorPdf
 
         try
         {
+            // Open Sans no está instalada en Windows; LibreOffice la sustituye por
+            // Segoe UI. QuestPDF, en cambio, caía a Arial. Se replica la sustitución
+            // sólo cuando Open Sans no existe y Segoe UI sí.
+            if (SkiaSharp.SKFontManager.Default.MatchFamily(limpio, SkiaSharp.SKFontStyle.Normal) == null &&
+                string.Equals(limpio, "Open Sans", StringComparison.OrdinalIgnoreCase) &&
+                SkiaSharp.SKFontManager.Default.MatchFamily("Segoe UI", SkiaSharp.SKFontStyle.Normal) != null)
+            {
+                limpio = "Segoe UI";
+                resuelta = (limpio, 0);
+            }
+
+            // Aptos tampoco está instalada en este Windows. LibreOffice la sustituye por
+            // Liberation Serif; sin esto QuestPDF elegía Cooper Black para la dirección
+            // del cliente ("780 Industrial Avenue").
+            if (SkiaSharp.SKFontManager.Default.MatchFamily(limpio, SkiaSharp.SKFontStyle.Normal) == null &&
+                string.Equals(limpio, "Aptos", StringComparison.OrdinalIgnoreCase) &&
+                SkiaSharp.SKFontManager.Default.MatchFamily("Liberation Serif", SkiaSharp.SKFontStyle.Normal) != null)
+            {
+                limpio = "Liberation Serif";
+                resuelta = (limpio, 0);
+            }
+
             if (SkiaSharp.SKFontManager.Default.MatchFamily(limpio, SkiaSharp.SKFontStyle.Normal) == null)
             {
                 // "Bodoni MT Black" -> familia "Bodoni MT" + peso 900
@@ -2047,9 +2091,13 @@ internal static class GeneradorPdf
             >= 500 => estilo.Medium(),
             >= 300 => estilo.Light(),
             >= 200 => estilo.Thin(),
-            _ => estilo,
+            // Un run normal debe RESETEAR el peso: el DefaultTextStyle del párrafo de
+            // una celda puede venir en negritas (la primera línea "Acme" es Cooper
+            // Black) y los spans siguientes heredaban esa negrita. Así "Building 4"
+            // salía como Segoe UI Black y la dirección como una fuente Type3.
+            _ => estilo.NormalWeight(),
         };
-        if (r.Cursiva) estilo = estilo.Italic(true);
+        estilo = estilo.Italic(r.Cursiva);
         if (r.Subrayado) estilo = estilo.Underline(true);
 
         try

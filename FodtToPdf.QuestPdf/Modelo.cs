@@ -102,6 +102,9 @@ internal class ParrafoModelo
 {
     public List<RunModelo> Runs { get; set; } = new();
 
+    // true cuando viene de text:h (encabezado dentro de una celda)
+    public bool EsTitulo { get; set; }
+
 
 
 
@@ -286,7 +289,12 @@ internal class TablaModelo
     // más angostas que el área de texto se centran (la de sueldo del contrato CCI).
     public string AlineacionTabla { get; set; } = "";
 
-    public double AnchoTotalPt => ColumnasPt.Sum();
+    // style:width del estilo de tabla, en puntos (0 = no declarado). Las columnas
+    // de ODF pueden sumar menos que el ancho de la tabla; LibreOffice estira la
+    // tabla hasta este valor. Antes se usaba sólo la suma de columnas.
+    public double AnchoDeclaradoPt { get; set; }
+
+    public double AnchoTotalPt => AnchoDeclaradoPt > 0 ? AnchoDeclaradoPt : ColumnasPt.Sum();
 }
 
 internal class FilaModelo

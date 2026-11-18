@@ -121,6 +121,14 @@ internal static class PaginarPropio
         var alto = 0.0;
         var columnas = t.ColumnasPt.Count > 0 ? t.ColumnasPt : new List<double> { ancho };
 
+        var totalColumnas = columnas.Sum();
+
+        if (t.AnchoDeclaradoPt > 0 && totalColumnas > 0 && ancho > 0)
+        {
+            var factor = Math.Min(t.AnchoDeclaradoPt, ancho) / totalColumnas;
+            columnas = columnas.Select(c => c * factor).ToList();
+        }
+
         foreach (var fila in t.Filas)
         {
             var altoFila = fila.AltoFijoPt > 0 ? fila.AltoFijoPt : fila.AltoMinimoPt;
