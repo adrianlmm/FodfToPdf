@@ -11,6 +11,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>FodtToPdf</RootNamespace>
     <AssemblyName>FodtToPdf.QuestPdf</AssemblyName>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

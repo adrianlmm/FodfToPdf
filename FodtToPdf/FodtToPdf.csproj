@@ -10,6 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>FodtToPdf</RootNamespace>
     <AssemblyName>FodtToPdf</AssemblyName>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
