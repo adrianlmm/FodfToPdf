@@ -35,6 +35,19 @@ internal static class GeneradorPdf
         // reportes ya validados (liquidaciones 108035 -> 116262 px de diferencia contra
         // LibreOffice) y en los contratos quedÃ³ igual, asÃ­ que se deja como estaba.
         _desplazamientoGlobal = m.DesplazamientoIzqPt;
+        var margenDerBase = Math.Max(m.Pagina.MargenDerPt + m.DesplazamientoIzqPt, 0);
+        var inicioFlujo = m.Pagina.MargenIzqPt + m.DesplazamientoIzqPt;
+        var anchoBaseFlujo = m.Pagina.AnchoPt - inicioFlujo - margenDerBase;
+        var anchoFisicoDisponible = Math.Max(m.Pagina.AnchoPt - inicioFlujo - 4, 0);
+        var anchoTablaConMargenNegativo = m.Flujo
+            .Where(b => b.Tipo == "tabla" && b.Tabla != null && b.Tabla.MargenIzqPt < -0.5)
+            .Select(b => b.Tabla.AnchoDeclaradoPt > 0 ? b.Tabla.AnchoDeclaradoPt : b.Tabla.ColumnasPt.Sum())
+            .DefaultIfEmpty(anchoBaseFlujo)
+            .Max();
+        var expansionParaTabla = Math.Min(
+            Math.Max(anchoTablaConMargenNegativo - anchoBaseFlujo, 0),
+            Math.Max(anchoFisicoDisponible - anchoBaseFlujo, 0));
+        _margenDerechoFlujo = Math.Max(margenDerBase - expansionParaTabla, 0);
 
 
         // se anclan al flujo ANTES de armar los lookups de abajo: AsÃ­ se sabe quÃ©
@@ -90,7 +103,7 @@ internal static class GeneradorPdf
         if (CortesPropiosActivo && unaColumna && m.Flujo.Count > 0)
         {
             var izqPlan = m.Pagina.MargenIzqPt + m.DesplazamientoIzqPt;
-            var derPlan = Math.Max(m.Pagina.MargenDerPt + m.DesplazamientoIzqPt, 0);
+            var derPlan = _margenDerechoFlujo;
             var anchoPlan = m.Pagina.AnchoPt - izqPlan - derPlan;
             var altoPlan = m.Pagina.AltoPt - m.Pagina.MargenSupPt - m.Pagina.MargenInfPt;
 
@@ -298,7 +311,7 @@ internal static class GeneradorPdf
                     // se devuelve lo mismo al derecho para conservar el ANCHO. Antes el margen
                     // derecho se ponÃ­a en 0 y el Ã¡rea quedaba mÃ¡s ancha que la de LibreOffice:
                     // los contratos cortaban menos renglones y salÃ­an en menos pÃ¡ginas.
-                    var derFlujo = Math.Max(m.Pagina.MargenDerPt + m.DesplazamientoIzqPt, 0);
+                    var derFlujo = _margenDerechoFlujo;
 
                     capas.PrimaryLayer()
                          .PaddingLeft((float)izqFlujo)
@@ -1346,6 +1359,7 @@ internal static class GeneradorPdf
     // desplazamiento global del flujo (el margen negativo mayor del documento); cada tabla
     // se recoloca con la diferencia entre el suyo y Ã©ste, para que cada una caiga donde toca
     static double _desplazamientoGlobal;
+    static double _margenDerechoFlujo;
     // capas ancladas a un pÃ¡rrafo dentro de una tabla, por bloque del flujo
     static Dictionary<BloqueModelo, List<CapaModelo>> _capasPorBloque = new();
 
@@ -1466,7 +1480,6 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
         }
 
         var anchoTabla = tabla.AnchoDeclaradoPt > 0 ? tabla.AnchoDeclaradoPt : tabla.ColumnasPt.Sum();
-
         contenedor.Table(t =>
         {
             // Dos modos:

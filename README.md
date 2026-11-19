@@ -22,6 +22,7 @@ The animation shows the original invoice template and the generated result.
 | `samples/InvalidPurchaseOrderSample` | Fills the invalid purchase order template `OrdenDeCompraInvalida.fodt`, including its `COPIA NO VALIDA` watermark, and exports both PDF variants. |
 | `samples/PhysicalSignatureSample` | Fills the physical-signature sheet template `Formato_FirmasPFisica.fodt` with six signer names and exports both PDF variants. |
 | `samples/NestedTableSample` | Renders `nested_table.fodt` with `nestedTables: true` to demonstrate a table nested inside a table cell. |
+| `samples/SupplierPaymentSample` | Fills the supplier-payment master template `PagosFacturasProveedorMaestro.fodt` with header data and exports both PDF variants. |
 | `samples/TransferReceiptSample` | Fills the CFDI transfer receipt template `ComprobanteTraslado.fodt` with header bookmarks and a repeating concept region, then exports both PDF variants. |
 | `samples/ExitInterviewSample` | Fills the employee exit-interview template `EntrevistaSalida.fodt` with 67 database-display fields and exports both PDF variants. |
 | `samples/DaycareLetterSample` | Fills the IMSS daycare letter template `CartaGuarderia.fodt` using its bookmarks and exports both PDF variants. |
