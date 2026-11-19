@@ -24,6 +24,10 @@ internal class ModeloPlantilla
     // de TODAS las páginas, con las coordenadas absolutas del marco.
     public List<CapaModelo> MarcasAgua { get; set; } = new();
 
+    // Campos text:page-number dentro de frames del encabezado del master-page. Se dibujan
+    // en cada hoja usando el número de página actual, no el valor de muestra del FODT.
+    public List<CapaModelo> NumerosPagina { get; set; } = new();
+
     // Marcas de agua de TEXTO: el encabezado del master-page trae un draw:custom-shape con
     // draw:text-path="true" (WordArt/fontwork) en vez de una imagen. La orden de compra
     // inválida escribe «COPIA NO VALIDA» y no se dibujaba (el extractor sólo leía marcos
@@ -230,6 +234,7 @@ internal class CapaModelo
     public string VerticalPos { get; set; } = "";
     public string HorizontalPos { get; set; } = "";
     public bool EnFlujo { get; set; }             // ancla as-char: se dibuja dentro del flujo, no en capa absoluta
+    public bool EsNumeroPaginaActual { get; set; }
 
     // índice del bloque del flujo cuyo párrafo la ancla (-1 si no está anclada a un
     // párrafo del flujo, p.ej. si vive dentro de una celda de tabla). Con anchor-type

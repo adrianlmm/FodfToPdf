@@ -15,6 +15,16 @@ The animation shows the original invoice template and the generated result.
 | `samples/InvoiceSample` | Fills `invoice-template.fodt` with sample invoice data and writes both QuestPDF and LibreOffice PDFs. |
 | `samples/DailySalesReportSample` | Fills `daily-sales-report.fodt` with sample daily-sales data and writes both PDF variants. |
 | `samples/RegionalSalesReportSample` | Builds a grouped master/detail report with 12 regions, cloning a detail template and appending it to the master document. |
+| `samples/TrainingContractSample` | Fills the individual training contract template `C_CapacitacionInicialPTractocamion.fodt` with sample worker, company, date, salary, and witness data, then exports both PDF variants. |
+| `samples/DividendCertificateSample` | Fills the Mexican dividend withholding certificate template `formatoDividendos.fodt` using its bookmarks and exports both PDF variants. |
+| `samples/CancellationReceiptSample` | Fills the CFDI cancellation acknowledgement template `AcuseCancelacion.fodt` using its bookmarks and exports both PDF variants. |
+| `samples/PurchaseOrderSample` | Fills the purchase order template `OrdenDeCompra.fodt` with a header and a repeating detail region, then exports both PDF variants. |
+| `samples/InvalidPurchaseOrderSample` | Fills the invalid purchase order template `OrdenDeCompraInvalida.fodt`, including its `COPIA NO VALIDA` watermark, and exports both PDF variants. |
+| `samples/PhysicalSignatureSample` | Fills the physical-signature sheet template `Formato_FirmasPFisica.fodt` with six signer names and exports both PDF variants. |
+| `samples/NestedTableSample` | Renders `nested_table.fodt` with `nestedTables: true` to demonstrate a table nested inside a table cell. |
+| `samples/TransferReceiptSample` | Fills the CFDI transfer receipt template `ComprobanteTraslado.fodt` with header bookmarks and a repeating concept region, then exports both PDF variants. |
+| `samples/ExitInterviewSample` | Fills the employee exit-interview template `EntrevistaSalida.fodt` with 67 database-display fields and exports both PDF variants. |
+| `samples/DaycareLetterSample` | Fills the IMSS daycare letter template `CartaGuarderia.fodt` using its bookmarks and exports both PDF variants. |
 
 ## Main features
 

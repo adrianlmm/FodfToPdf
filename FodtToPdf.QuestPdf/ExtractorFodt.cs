@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Xml.Linq;
 
 namespace FodtToPdf;
@@ -17,7 +17,7 @@ internal static class ExtractorFodt
 
     public const double CM_PT = 28.3464567;
 
-    // estilos por nombre: propiedades de texto y de párrafo ya resueltas con herencia
+    // estilos por nombre: propiedades de texto y de pÃ¡rrafo ya resueltas con herencia
     class Estilo
     {
         public string Fuente, Color, Alineacion;
@@ -36,11 +36,11 @@ internal static class ExtractorFodt
         public double? AltoFijoFilaPt;
 
 
-        // alto de línea (fo:line-height en cm, o en % del tamaño)
+        // alto de lÃ­nea (fo:line-height en cm, o en % del tamaÃ±o)
         public double? AltoLineaPt, AltoLineaPct;
 
         // style:text-position (null = no declarado; se hereda por la cadena).
-        // Posicion = "super" | "sub" sólo cuando el .fodt usa la palabra clave.
+        // Posicion = "super" | "sub" sÃ³lo cuando el .fodt usa la palabra clave.
         public double? EscalaPosicion;
         public string Posicion;
 
@@ -51,25 +51,25 @@ internal static class ExtractorFodt
         public string VerticalAlign;
         public double PaddingIzqPt, PaddingDerPt, PaddingSupPt, PaddingInfPt;
 
-        // base de las coordenadas de un marco/imagen (style:vertical-rel del estilo gráfico)
+        // base de las coordenadas de un marco/imagen (style:vertical-rel del estilo grÃ¡fico)
         public string VerticalRel, HorizontalRel;
 
-        // draw:color-mode del estilo gráfico ("watermark" en las marcas de agua)
+        // draw:color-mode del estilo grÃ¡fico ("watermark" en las marcas de agua)
         public string ModoColor;
 
         // style:vertical-pos / horizontal-pos ("middle", "center", "from-top"...)
         public string VerticalPos, HorizontalPos;
 
-        // style:tab-stops declaradas por el párrafo (posiciones en pt desde su sangría);
-        // null = no declara (LibreOffice usa paradas por omisión cada 1.25 cm)
+        // style:tab-stops declaradas por el pÃ¡rrafo (posiciones en pt desde su sangrÃ­a);
+        // null = no declara (LibreOffice usa paradas por omisiÃ³n cada 1.25 cm)
         public List<double> TabsPt;
 
-        // color de fondo de la celda (fo:background-color); "transparent" o vacío = ninguno
-        // en estilos gráficos (family="graphic") guarda el draw:fill-color: es el relleno de
+        // color de fondo de la celda (fo:background-color); "transparent" o vacÃ­o = ninguno
+        // en estilos grÃ¡ficos (family="graphic") guarda el draw:fill-color: es el relleno de
         // las draw:custom-shape, como la barra que va antes de "ORDEN DE COMPRA".
         public string ColorFondo;
 
-        // párrafo: borde y fondo declarados en style:paragraph-properties (el encabezado
+        // pÃ¡rrafo: borde y fondo declarados en style:paragraph-properties (el encabezado
         // del contrato CCI va dentro de una caja con borde y relleno gris)
         public string SaltoPagina;
         public bool ParBorde, ParSoloBordeInf;
@@ -84,25 +84,25 @@ internal static class ExtractorFodt
     public static ModeloPlantilla Extraer(byte[] archivoFodt, string nombre = "factura.fodt")
         => Extraer(XDocument.Load(new MemoryStream(archivoFodt), LoadOptions.PreserveWhitespace), nombre);
 
-    // trazo de los estilos gráficos (draw:style-name de los draw:line): grosor y color.
+    // trazo de los estilos grÃ¡ficos (draw:style-name de los draw:line): grosor y color.
     // Los contratos firman con draw:line y sin esto los renglones no se pintaban.
     static readonly Dictionary<string, (double Grosor, string Color)> _trazo = new();
 
     static readonly Dictionary<string, Dictionary<int, (string Formato, string Plantilla, string Sufijo, string Vineta, double Margen, double Indent)>> _listas = new();
     static double _sangriaPendiente;
     static double _margenPendiente;
-    // alto natural de una fuente respecto a su tamaño (ascendente + descendente +
+    // alto natural de una fuente respecto a su tamaÃ±o (ascendente + descendente +
     // interlineado interno). Arial: ~1.15 em; es la base del fo:line-height en %.
     const double AltoNaturalTexto = 1.15;
 
     // Mismo valor que GeneradorPdf.AltoNaturalFuente: EstiloDe pide el LineHeight dividiendo
-    // por él, así que el alto que se le entrega al generador tiene que venir multiplicado.
+    // por Ã©l, asÃ­ que el alto que se le entrega al generador tiene que venir multiplicado.
     const double FactorInterlineadoQuestPdf = 1.05;
 
-    // Alto de línea natural de la fuente, en em: es la base sobre la que LibreOffice aplica
+    // Alto de lÃ­nea natural de la fuente, en em: es la base sobre la que LibreOffice aplica
     // el fo:line-height en %. MEDIDO en la tabla hhea de los TTF: Arial y Times 1,1499;
     // Calibri y Carlito 1,2207. El motor usaba 1,15 para todo y las plantillas en Calibri
-    // salían con los renglones ~8 % más apretados que LibreOffice.
+    // salÃ­an con los renglones ~8 % mÃ¡s apretados que LibreOffice.
     static double NaturalDeFuente(string fuente)
     {
         var f = (fuente ?? "").Trim();
@@ -114,14 +114,14 @@ internal static class ExtractorFodt
         return AltoNaturalTexto;
     }
 
-    // fuente del primer run con texto (la que LibreOffice usa para el renglón)
+    // fuente del primer run con texto (la que LibreOffice usa para el renglÃ³n)
     static string FuenteDelRun(ParrafoModelo p)
         => p.Runs.Select(x => x.Fuente).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
 
-    // Caja de línea de un párrafo VACÍO dentro de una celda: LibreOffice no tiene glifos
-    // que posicionar y usa la línea completa de la fuente. MEDIDO en las filas en blanco
-    // de las liquidaciones (Calibri 11 pt al 115 %): 15,8 pt de línea y fila de 25,8 con
-    // el margen inferior de 0,353 cm del estilo Standard. Contrastado con más casos
+    // Caja de lÃ­nea de un pÃ¡rrafo VACÃO dentro de una celda: LibreOffice no tiene glifos
+    // que posicionar y usa la lÃ­nea completa de la fuente. MEDIDO en las filas en blanco
+    // de las liquidaciones (Calibri 11 pt al 115 %): 15,8 pt de lÃ­nea y fila de 25,8 con
+    // el margen inferior de 0,353 cm del estilo Standard. Contrastado con mÃ¡s casos
     // (11 pt al 100 % -> 13,75; 9 pt al 115 % -> 12,94): el factor es 1,25 em, no 1,15.
     const double AltoNaturalFuenteCelda = 1.25;
 
@@ -155,7 +155,7 @@ internal static class ExtractorFodt
                         margenNivel,
                         indentNivel);
                 else if (nivel.Name == TEXT + "list-level-style-bullet")
-                    niveles[num] = ("", "", "", (string)nivel.Attribute(TEXT + "bullet-char") ?? "•", margenNivel, indentNivel);
+                    niveles[num] = ("", "", "", (string)nivel.Attribute(TEXT + "bullet-char") ?? "â€¢", margenNivel, indentNivel);
             }
 
             _listas[((string)estiloLista.Attribute(STYLE + "name")) ?? ""] = niveles;
@@ -180,12 +180,12 @@ internal static class ExtractorFodt
                     estilosDeParrafo.Add(nombreEstilo);
             }
 
-        // <style:default-style style:family="paragraph"> es el ÚLTIMO eslabón de la cadena
-        // de estilos de párrafo, y muchas plantillas dejan ahí el nombre de la fuente: la
-        // orden de compra no lo declara en Standard ni en sus estilos, sólo en el default
-        // (Calibri). Sin esto el texto salía en Arial y LibreOffice lo pone en Calibri.
-        // Sólo se enlazan los estilos de PÁRRAFO: los de texto (span) no heredan el default
-        // de párrafo en ODF y colgarían su tamaño (10 pt) sobre el del párrafo.
+        // <style:default-style style:family="paragraph"> es el ÃšLTIMO eslabÃ³n de la cadena
+        // de estilos de pÃ¡rrafo, y muchas plantillas dejan ahÃ­ el nombre de la fuente: la
+        // orden de compra no lo declara en Standard ni en sus estilos, sÃ³lo en el default
+        // (Calibri). Sin esto el texto salÃ­a en Arial y LibreOffice lo pone en Calibri.
+        // SÃ³lo se enlazan los estilos de PÃRRAFO: los de texto (span) no heredan el default
+        // de pÃ¡rrafo en ODF y colgarÃ­an su tamaÃ±o (10 pt) sobre el del pÃ¡rrafo.
         var estiloPorDefecto = doc.Descendants(STYLE + "default-style")
                                   .FirstOrDefault(x => ((string)x.Attribute(STYLE + "family")) == "paragraph");
 
@@ -217,7 +217,7 @@ internal static class ExtractorFodt
 
         modelo.Pagina = LeerPagina(doc, estilos);
 
-        // metadatos de secciones (número de columnas y anchos relativos)
+        // metadatos de secciones (nÃºmero de columnas y anchos relativos)
         var seccionesPorEstilo = new Dictionary<string, SeccionModelo>();
         foreach (var st in doc.Descendants(STYLE + "style").Where(e => (string)e.Attribute(STYLE + "family") == "section"))
         {
@@ -225,17 +225,17 @@ internal static class ExtractorFodt
             seccionesPorEstilo[nombre] = LeerSeccion(st, nombre);
         }
 
-        // Las tablas de los reportes se salen del área de texto con fo:margin-left negativo
-        // (la bitácora lo hace: -1.501cm). Se guarda el mayor para desplazar el flujo.
+        // Las tablas de los reportes se salen del Ã¡rea de texto con fo:margin-left negativo
+        // (la bitÃ¡cora lo hace: -1.501cm). Se guarda el mayor para desplazar el flujo.
         foreach (var st in doc.Descendants(STYLE + "style").Where(e => (string)e.Attribute(STYLE + "family") == "table"))
         {
             var props = st.Element(STYLE + "table-properties");
             var margen = props?.Attribute(FO + "margin-left")?.Value is string ml ? APt(ml) : 0;
 
-            // LibreOffice NO desplaza el flujo por un margen negativo pequeño (la tabla
-            // estándar, -0.191 cm): sólo mueve la tabla. Aplicarlo movía todo el texto
-            // ~5.8 pt a la izquierda y cambiaba los cortes de renglón (se notaba en el
-            // justificado de las cartas de crédito). Se ignoran los menores de 0.5 cm.
+            // LibreOffice NO desplaza el flujo por un margen negativo pequeÃ±o (la tabla
+            // estÃ¡ndar, -0.191 cm): sÃ³lo mueve la tabla. Aplicarlo movÃ­a todo el texto
+            // ~5.8 pt a la izquierda y cambiaba los cortes de renglÃ³n (se notaba en el
+            // justificado de las cartas de crÃ©dito). Se ignoran los menores de 0.5 cm.
             const double umbralDesplazamientoPt = 14.17;   // 0.5 cm
             if (margen <= -umbralDesplazamientoPt && margen < modelo.DesplazamientoIzqPt)
                 modelo.DesplazamientoIzqPt = margen;
@@ -245,7 +245,7 @@ internal static class ExtractorFodt
         if (cuerpo == null) return modelo;
 
         // 1) capas: cualquier draw:frame / draw:custom-shape, en cualquier nivel.
-        //    Se guardan también por elemento para saber después qué párrafo las ancla.
+        //    Se guardan tambiÃ©n por elemento para saber despuÃ©s quÃ© pÃ¡rrafo las ancla.
         var capaPorElemento = new Dictionary<XElement, CapaModelo>();
 
         foreach (var el in cuerpo.Descendants().Where(e => e.Name == DRAW + "frame" || e.Name == DRAW + "custom-shape"))
@@ -255,8 +255,8 @@ internal static class ExtractorFodt
             capaPorElemento[el] = capa;
         }
 
-        // 2) flujo: párrafos y tablas en orden. El contenido del .fodt va dentro de
-        //    <text:section> (y puede haber varias), así que hay que descender.
+        // 2) flujo: pÃ¡rrafos y tablas en orden. El contenido del .fodt va dentro de
+        //    <text:section> (y puede haber varias), asÃ­ que hay que descender.
         foreach (var hijo in cuerpo.Elements())
             RecorrerFlujo(hijo, modelo, estilos, seccionesPorEstilo, -1, capaPorElemento);
 
@@ -264,8 +264,8 @@ internal static class ExtractorFodt
             .Select(b => (string)b.Attribute(TEXT + "name"))
             .Where(n => !string.IsNullOrEmpty(n)).Distinct().ToList();
 
-        // 3) pie de página: vive en el master-page (style:footer), NO en office:text.
-        //    Es donde va la línea "Referencia" de la factura.
+        // 3) pie de pÃ¡gina: vive en el master-page (style:footer), NO en office:text.
+        //    Es donde va la lÃ­nea "Referencia" de la factura.
         var pie = doc.Descendants(STYLE + "footer").FirstOrDefault();
 
         if (pie != null)
@@ -276,8 +276,8 @@ internal static class ExtractorFodt
                     modelo.Pie.Add(parrafo);
             }
 
-        // 4) encabezado del master-page (style:header). La bitácora de pedidos pone ahí el
-        //    título, la ruta y la fecha de entrega. Sólo párrafos con texto: el marco de la
+        // 4) encabezado del master-page (style:header). La bitÃ¡cora de pedidos pone ahÃ­ el
+        //    tÃ­tulo, la ruta y la fecha de entrega. SÃ³lo pÃ¡rrafos con texto: el marco de la
         //    marca de agua de la factura no se dibuja (queda como diferencia conocida).
         var encabezado = doc.Descendants(STYLE + "header").FirstOrDefault();
 
@@ -286,8 +286,9 @@ internal static class ExtractorFodt
             foreach (var p in encabezado.Elements(TEXT + "p"))
             {
                 var parrafo = LeerParrafo(p, estilos);
-                if (parrafo.Runs.Count > 0 && parrafo.Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto) || r.Slot != null))
-                    modelo.Encabezado.Add(parrafo);
+                // Los párrafos vacíos del encabezado también ocupan su altura en Writer.
+                // Algunos (como P2 de la carta de guardería) separan el nombre del domicilio.
+                modelo.Encabezado.Add(parrafo);
             }
 
             // marcos con imagen del encabezado (la marca de agua de la factura)
@@ -295,7 +296,22 @@ internal static class ExtractorFodt
             {
                 var imagen = marco.Element(DRAW + "image");
                 var datos = imagen?.Element(OFFICE + "binary-data")?.Value;
-                if (imagen == null || string.IsNullOrWhiteSpace(datos)) continue;
+                if (imagen == null || string.IsNullOrWhiteSpace(datos))
+                {
+                    // Los números de página del formato de entrevista viven en un
+                    // draw:frame del encabezado, no como texto directo del master-page.
+                    // El valor del XML ("1") es sólo una muestra: el generador escribe
+                    // el número actual en cada hoja.
+                    if (marco.Descendants(TEXT + "page-number").Any() && modelo.NumerosPagina.Count == 0)
+                    {
+                        var numero = LeerCapa(marco, estilos);
+                        numero.EsNumeroPaginaActual = true;
+                        if (numero.AltoPt <= 0) numero.AltoPt = 14.4;
+                        modelo.NumerosPagina.Add(numero);
+                    }
+
+                    continue;
+                }
 
                 var capa = LeerCapa(marco, estilos);
                 capa.ImagenBase64 = datos.Trim();
@@ -304,8 +320,8 @@ internal static class ExtractorFodt
             }
 
             // marcas de agua de TEXTO: draw:custom-shape con draw:text-path="true"
-            // («COPIA NO VALIDA» de la orden de compra inválida). LibreOffice estira el texto
-            // hasta llenar la forma, así que se guarda la caja y el color del relleno.
+            // (Â«COPIA NO VALIDAÂ» de la orden de compra invÃ¡lida). LibreOffice estira el texto
+            // hasta llenar la forma, asÃ­ que se guarda la caja y el color del relleno.
             foreach (var forma in encabezado.Descendants(DRAW + "custom-shape"))
             {
                 // draw:text-path va en el <draw:enhanced-geometry> de dentro, no en la forma
@@ -337,16 +353,16 @@ internal static class ExtractorFodt
         for (var i = 0; i < modelo.Flujo.Count; i++) modelo.Flujo[i].IndiceFlujo = i;
 
         // Reportes cuyo cuerpo empieza directamente con una tabla y tienen encabezado
-        // (Balanza de comprobación): QuestPDF arranca la tabla ~2 pt más arriba que
-        // LibreOffice y la primera fila se encima al «Fecha» del encabezado.
-        // Se reserva ese aire sólo en ese caso; el encabezado sigue en MargenSupBasePt.
+        // (Balanza de comprobaciÃ³n): QuestPDF arranca la tabla ~2 pt mÃ¡s arriba que
+        // LibreOffice y la primera fila se encima al Â«FechaÂ» del encabezado.
+        // Se reserva ese aire sÃ³lo en ese caso; el encabezado sigue en MargenSupBasePt.
         if (modelo.Encabezado.Count > 0 && modelo.Flujo.Count > 0 && modelo.Flujo[0].Tipo == "tabla")
         {
             modelo.Pagina.MargenSupPt += 2.0;
 
-            // El reporte de compras usa encabezado de 4 líneas de 9 pt; LibreOffice
-            // deja la tabla 1.8 pt más abajo que la Balanza (cuyo último renglón es
-            // de 10 pt). El cálculo por alto de línea no distingue ese caso.
+            // El reporte de compras usa encabezado de 4 lÃ­neas de 9 pt; LibreOffice
+            // deja la tabla 1.8 pt mÃ¡s abajo que la Balanza (cuyo Ãºltimo renglÃ³n es
+            // de 10 pt). El cÃ¡lculo por alto de lÃ­nea no distingue ese caso.
             var ultimoTamano = modelo.Encabezado[^1].Runs
                 .Select(r => r.TamanoPt)
                 .FirstOrDefault(t => t > 0);
@@ -358,7 +374,7 @@ internal static class ExtractorFodt
         return modelo;
     }
 
-    // ancho reservado al marcador: el fo:text-indent negativo del nivel (0.635 cm típico).
+    // ancho reservado al marcador: el fo:text-indent negativo del nivel (0.635 cm tÃ­pico).
     // En las listas con fo:margin-left grande (las obligaciones: 6.985 cm) el marcador va
     // pegado al texto, no al margen de la hoja.
     static double AnchoDeMarca(string estilo, int nivel)
@@ -369,7 +385,7 @@ internal static class ExtractorFodt
         return def.Indent < -0.5 ? -def.Indent : 0;
     }
 
-    // sangría del bloque: fo:margin-left + fo:text-indent (el renglón sangrado arranca ahí)
+    // sangrÃ­a del bloque: fo:margin-left + fo:text-indent (el renglÃ³n sangrado arranca ahÃ­)
     static double MargenDeInciso(string estilo, int nivel)
     {
         if (!_listas.TryGetValue(estilo, out var niveles)) return 0;
@@ -446,8 +462,8 @@ internal static class ExtractorFodt
     {
         if (el.Name == TEXT + "p" || el.Name == TEXT + "h")
         {
-            // en una sección de varias columnas los párrafos vacíos son los espaciadores
-            // que el autor puso a mano; su alto debe salir del tamaño de su estilo
+            // en una secciÃ³n de varias columnas los pÃ¡rrafos vacÃ­os son los espaciadores
+            // que el autor puso a mano; su alto debe salir del tamaÃ±o de su estilo
             var enColumnas = seccion >= 0 && seccion < modelo.Secciones.Count &&
                              modelo.Secciones[seccion].Columnas > 1;
 
@@ -488,17 +504,17 @@ internal static class ExtractorFodt
             }
             else if (!string.IsNullOrWhiteSpace(p.ImagenBase64) && p.ImagenEnFlujo)
             {
-                // Párrafo que sólo lleva una imagen anclada "as-char": el QR del final de
+                // PÃ¡rrafo que sÃ³lo lleva una imagen anclada "as-char": el QR del final de
                 // la orden de compra. Se manda como bloque de texto (sin runs) para que
-                // el generador la pinte; antes caía en "espacio" y la imagen se perdía,
-                // porque sólo se dibujaban las imágenes metidas en celdas de tabla.
+                // el generador la pinte; antes caÃ­a en "espacio" y la imagen se perdÃ­a,
+                // porque sÃ³lo se dibujaban las imÃ¡genes metidas en celdas de tabla.
                 modelo.Flujo.Add(new BloqueModelo { Tipo = "texto", Parrafo = p, Seccion = seccion });
             }
             else
             {
-                // Los párrafos vacíos SON el espacio vertical del documento: si se
+                // Los pÃ¡rrafos vacÃ­os SON el espacio vertical del documento: si se
                 // descartan, todo el flujo se colapsa contra el margen superior.
-                // El alto sale del fo:line-height real del estilo, no de una estimación.
+                // El alto sale del fo:line-height real del estilo, no de una estimaciÃ³n.
                 modelo.Flujo.Add(new BloqueModelo
                 {
                     Tipo = "espacio",
@@ -508,22 +524,23 @@ internal static class ExtractorFodt
                 });
             }
 
-            // Las capas ancladas a un carácter DE ESTE párrafo traen svg:x/svg:y relativos
-            // a esa posición, no a la página: se anota qué bloque las ancla para que el
-            // generador les sume dónde cae el flujo (ver GeneradorPdf.AnclarAlFlujo).
+            // Las capas ancladas a un carÃ¡cter DE ESTE pÃ¡rrafo traen svg:x/svg:y relativos
+            // a esa posiciÃ³n, no a la pÃ¡gina: se anota quÃ© bloque las ancla para que el
+            // generador les sume dÃ³nde cae el flujo (ver GeneradorPdf.AnclarAlFlujo).
             var posicion = modelo.Flujo.Count - 1;
 
             foreach (var dibujo in el.Elements().Where(x => x.Name == DRAW + "frame" || x.Name == DRAW + "custom-shape"))
                 if (capaPorElemento != null && capaPorElemento.TryGetValue(dibujo, out var anclada))
                     anclada.BloqueAncla = posicion;
+
         }
         else if (el.Name == TABLE + "table")
         {
             modelo.Flujo.Add(new BloqueModelo { Tipo = "tabla", Tabla = LeerTabla(el, estilos), Seccion = seccion });
 
-            // Marcos anclados a un párrafo de ESTA tabla (la liquidaciones pone ahí el
-            // bloque de firmas): su y es relativo al párrafo ancla, que no sabemos dónde
-            // cae; se dibujan en el flujo justo después de la tabla.
+            // Marcos anclados a un pÃ¡rrafo de ESTA tabla (la liquidaciones pone ahÃ­ el
+            // bloque de firmas): su y es relativo al pÃ¡rrafo ancla, que no sabemos dÃ³nde
+            // cae; se dibujan en el flujo justo despuÃ©s de la tabla.
             var posicionTabla = modelo.Flujo.Count - 1;
 
             foreach (var marco in el.Descendants(DRAW + "frame"))
@@ -536,7 +553,7 @@ internal static class ExtractorFodt
                     capaAnclada.BloqueAncla = posicionTabla;
                     capaAnclada.AnclaEnTabla = true;
 
-                    // el svg:y se cuenta desde el párrafo ancla, no desde el fin de la tabla
+                    // el svg:y se cuenta desde el pÃ¡rrafo ancla, no desde el fin de la tabla
                     var parrafoAncla = marco.Ancestors(TEXT + "p").FirstOrDefault();
 
                     if (parrafoAncla != null)
@@ -546,7 +563,7 @@ internal static class ExtractorFodt
         }
         else if (el.Name == TEXT + "section")
         {
-            // la sección define cuántas columnas tiene el contenido que la sigue
+            // la secciÃ³n define cuÃ¡ntas columnas tiene el contenido que la sigue
             var nombreEstilo = (string)el.Attribute(TEXT + "style-name") ?? "";
             var meta = seccionesPorEstilo.TryGetValue(nombreEstilo, out var s)
                 ? s
@@ -591,7 +608,7 @@ internal static class ExtractorFodt
         }
     }
 
-    // Lee la definición de columnas de una section: cuántas y con qué ancho relativo
+    // Lee la definiciÃ³n de columnas de una section: cuÃ¡ntas y con quÃ© ancho relativo
     static SeccionModelo LeerSeccion(XElement estilo, string nombre)
     {
         var sec = new SeccionModelo { Nombre = nombre };
@@ -618,7 +635,7 @@ internal static class ExtractorFodt
 
     // Alto del TEXTO que lleva el encabezado del master-page. NO cuenta los marcos de
     // imagen: la marca de agua de la factura mide 16 cm y LibreOffice no la usa para
-    // separar el cuerpo. 0 si el encabezado no existe o no tiene párrafos.
+    // separar el cuerpo. 0 si el encabezado no existe o no tiene pÃ¡rrafos.
     static double AltoTextoEncabezado(XDocument doc, Dictionary<string, Estilo> estilos)
     {
         var encabezado = doc.Descendants(STYLE + "header").FirstOrDefault();
@@ -630,7 +647,7 @@ internal static class ExtractorFodt
         {
             var actual = (string)p.Attribute(TEXT + "style-name") ?? "";
             double tamano = 0, lineaPt = 0;
-            double? pct = null;
+            double? pct = null, margenSupPt = null, margenInfPt = null;
             var vistos = 0;
 
             while (!string.IsNullOrEmpty(actual) && estilos.TryGetValue(actual, out var e) && vistos++ < 20)
@@ -638,15 +655,25 @@ internal static class ExtractorFodt
                 if (tamano <= 0 && e.TamanoPt is double t && t > 0) tamano = t;
                 if (lineaPt <= 0 && e.AltoLineaPt is double l && l > 0) lineaPt = l;
                 if (pct == null && e.AltoLineaPct is double pc && pc > 0) pct = pc;
+                if (margenSupPt == null && e.MargenSupPt is double ms) margenSupPt = ms;
+                if (margenInfPt == null && e.MargenInfPt is double mi) margenInfPt = mi;
                 actual = e.Padre;
             }
 
-            if (lineaPt > 0) { alto += lineaPt; continue; }
+            var altoParrafo = lineaPt;
+            if (altoParrafo <= 0)
+            {
+                // fo:line-height en % se aplica sobre el alto natural de la fuente,
+                // que en Arial/Times ronda 1.15 x el tamaño. Sin fo:line-height sólo
+                // se usa ese alto natural; aplicar además el 115 % por defecto duplicaba
+                // el factor y desplazaba el cuerpo debajo de encabezados con texto grande.
+                altoParrafo = (tamano <= 0 ? 12 : tamano) * AltoNaturalTexto * (pct ?? 1);
+            }
 
-            // fo:line-height en % se aplica sobre el alto de línea de la FUENTE, que en
-            // Arial/Times ronda 1.15 x el tamaño: 12 pt al 100% = 13.8 pt (medido en la
-            // orden de compra contra el PDF de LibreOffice).
-            alto += (tamano <= 0 ? 12 : tamano) * (pct ?? 1.15) * 1.15;
+            // Los mÃ¡rgenes del pÃ¡rrafo del encabezado cuentan en la altura que separa al
+            // cuerpo. Si se omite el margen inferior heredado de Standard, la primera
+            // fila del comprobante de traslado sube 8 pt respecto a LibreOffice.
+            alto += (margenSupPt ?? 0) + altoParrafo + (margenInfPt ?? 0);
         }
 
         return alto;
@@ -657,11 +684,11 @@ internal static class ExtractorFodt
         var pg = new PaginaModelo();
 
         // OJO: el .fodt puede traer VARIOS style:page-layout-properties. Los .docx
-        // convertidos empiezan con un <style:default-page-layout> vacío (sólo la rejilla)
-        // y el bueno —el que usan las páginas de verdad— vive dentro del style:page-layout
+        // convertidos empiezan con un <style:default-page-layout> vacÃ­o (sÃ³lo la rejilla)
+        // y el bueno â€”el que usan las pÃ¡ginas de verdadâ€” vive dentro del style:page-layout
         // que referencia el master-page. Tomar el primero dejaba la orden de compra en A4
-        // cuando la plantilla es Carta (21.59 x 27.94 cm): el título y todo el encabezado
-        // salían corridos. Primero se busca el del master-page; si no aparece, se combinan
+        // cuando la plantilla es Carta (21.59 x 27.94 cm): el tÃ­tulo y todo el encabezado
+        // salÃ­an corridos. Primero se busca el del master-page; si no aparece, se combinan
         // todas las declaraciones (gana la primera que defina cada medida).
         var props = PaginaDelMasterPage(doc);
 
@@ -688,26 +715,26 @@ internal static class ExtractorFodt
         pg.MargenInfPt = Leer(FO + "margin-bottom") ?? pg.MargenInfPt;
 
         // El encabezado y el pie OCUPAN espacio aunque no tengan texto: lo que empuja el
-        // cuerpo es el alto del encabezado (aquí el margen superior declarado es 0 cm).
-        // OJO con style:dynamic-spacing="true": LibreOffice colapsa la separación del
-        // encabezado, así que sumarla dejaría el cuerpo ~18 pt más abajo de lo real.
+        // cuerpo es el alto del encabezado (aquÃ­ el margen superior declarado es 0 cm).
+        // OJO con style:dynamic-spacing="true": LibreOffice colapsa la separaciÃ³n del
+        // encabezado, asÃ­ que sumarla dejarÃ­a el cuerpo ~18 pt mÃ¡s abajo de lo real.
         var header = doc.Descendants(STYLE + "header-style").Elements(STYLE + "header-footer-properties").FirstOrDefault();
         if (header != null)
         {
             var minimo = header.Attribute(FO + "min-height")?.Value is string h ? APt(h) : 0;
 
-            // LibreOffice usa el MAYOR entre la altura mínima y el alto del TEXTO del
-            // encabezado: en la orden de compra el encabezado es un párrafo vacío con el
+            // LibreOffice usa el MAYOR entre la altura mÃ­nima y el alto del TEXTO del
+            // encabezado: en la orden de compra el encabezado es un pÃ¡rrafo vacÃ­o con el
             // estilo "Header" de 12 pt, que ocupa ~13.8 pt aunque no tenga nada escrito.
-            // Sin contarlo, todo el cuerpo subía ~11 pt y el título quedaba más alto que
-            // en el PDF de LibreOffice. Si el encabezado sólo lleva un marco (la marca de
-            // agua de la factura, 16 cm) no hay texto que contar y manda la altura mínima.
+            // Sin contarlo, todo el cuerpo subÃ­a ~11 pt y el tÃ­tulo quedaba mÃ¡s alto que
+            // en el PDF de LibreOffice. Si el encabezado sÃ³lo lleva un marco (la marca de
+            // agua de la factura, 16 cm) no hay texto que contar y manda la altura mÃ­nima.
             var alto = Math.Max(minimo, AltoTextoEncabezado(doc, estilos));
 
             var dinamico = ((string)header.Attribute(STYLE + "dynamic-spacing")) == "true";
             var separacion = dinamico ? 0 : header.Attribute(FO + "margin-bottom")?.Value is string mb ? APt(mb) : 0;
 
-            // el encabezado arranca en el margen declarado; el cuerpo, después del alto
+            // el encabezado arranca en el margen declarado; el cuerpo, despuÃ©s del alto
             pg.MargenSupBasePt = pg.MargenSupPt;
             pg.AltoEncabezadoPt = alto;
 
@@ -730,7 +757,7 @@ internal static class ExtractorFodt
     }
 
     // Devuelve las propiedades del style:page-layout que usa el master-page (el que
-    // LibreOffice aplica de verdad). Si el documento no las declara ahí, null.
+    // LibreOffice aplica de verdad). Si el documento no las declara ahÃ­, null.
     static XElement PaginaDelMasterPage(XDocument doc)
     {
         foreach (var master in doc.Descendants(STYLE + "master-page"))
@@ -749,9 +776,9 @@ internal static class ExtractorFodt
     }
 
     // style:text-position: "super 58%", "sub 58%" o "-6% 100%". El primer valor es el
-    // desplazamiento de la línea base (en % del tamaño) y el segundo, opcional, el tamaño
+    // desplazamiento de la lÃ­nea base (en % del tamaÃ±o) y el segundo, opcional, el tamaÃ±o
     // relativo. "super" equivale a "33% 58%" y "sub" a "-33% 58%" (DFLT_ESC_AUTO_SUPER /
-    // DFLT_ESC_AUTO_SUB de LibreOffice); sin porcentaje, el tamaño relativo es 58 %.
+    // DFLT_ESC_AUTO_SUB de LibreOffice); sin porcentaje, el tamaÃ±o relativo es 58 %.
     static (double Escala, string Posicion)? PosicionTexto(string valor)
     {
         if (string.IsNullOrWhiteSpace(valor)) return null;
@@ -773,15 +800,15 @@ internal static class ExtractorFodt
 
         if (Pct(partes[0]) == null) return null;
 
-        // los 370 "-6% 100%" de los contratos caen aquí: escala 100 % y sólo se mueve la
-        // línea base 6 %, un desplazamiento que QuestPDF no sabe expresar (mínimo ~33 %).
+        // los 370 "-6% 100%" de los contratos caen aquÃ­: escala 100 % y sÃ³lo se mueve la
+        // lÃ­nea base 6 %, un desplazamiento que QuestPDF no sabe expresar (mÃ­nimo ~33 %).
         return (partes.Length > 1 ? Pct(partes[1]) ?? 100 : 100, null);
     }
 
-    // Alto que ocupa el párrafo que ancla un marco dibujado en el flujo tras su tabla
-    // (las firmas de la liquidaciones). Es el mismo cálculo que la celda hace para un
-    // párrafo VACÍO: línea del estilo + sus márgenes. Si el párrafo trae texto se
-    // aproxima igual (la diferencia sería de una línea), que es lo que basta para
+    // Alto que ocupa el pÃ¡rrafo que ancla un marco dibujado en el flujo tras su tabla
+    // (las firmas de la liquidaciones). Es el mismo cÃ¡lculo que la celda hace para un
+    // pÃ¡rrafo VACÃO: lÃ­nea del estilo + sus mÃ¡rgenes. Si el pÃ¡rrafo trae texto se
+    // aproxima igual (la diferencia serÃ­a de una lÃ­nea), que es lo que basta para
     // descontar el svg:y.
     static double AltoParrafoAncla(XElement p, Dictionary<string, Estilo> estilos)
     {
@@ -814,7 +841,7 @@ internal static class ExtractorFodt
         var cel = st.Element(STYLE + "table-cell-properties");
         var fila = st.Element(STYLE + "table-row-properties");
 
-        // style:text-position se interpreta una sola vez: escala y posición vienen juntas
+        // style:text-position se interpreta una sola vez: escala y posiciÃ³n vienen juntas
         var posicion = PosicionTexto((string)tp?.Attribute(STYLE + "text-position"));
 
         static bool HayBorde(string v) => !string.IsNullOrWhiteSpace(v) && v != "none";
@@ -865,15 +892,15 @@ internal static class ExtractorFodt
             MargenInfPt = pp?.Attribute(FO + "margin-bottom")?.Value is string mbo ? APt(mbo) : null,
             SangriaPt = pp?.Attribute(FO + "text-indent")?.Value is string ti ? APt(ti) : null,
 
-            // §20.255: si es "true", el margin-bottom de este párrafo y el margin-top del
-            // siguiente se ignoran cuando además comparten estilo y área de contenido
+            // Â§20.255: si es "true", el margin-bottom de este pÃ¡rrafo y el margin-top del
+            // siguiente se ignoran cuando ademÃ¡s comparten estilo y Ã¡rea de contenido
             Contextual = ((string)pp?.Attribute(STYLE + "contextual-spacing")) is string cs
                 ? cs == "true" : (bool?)null,
             ColumnWidthCm = cp?.Attribute(STYLE + "column-width")?.Value is string cw ? ACm(cw) : null,
             AltoMinimoFilaPt = fila?.Attribute(STYLE + "min-row-height")?.Value is string amh ? APt(amh) : null,
             AltoFijoFilaPt = fila?.Attribute(STYLE + "row-height")?.Value is string rh ? APt(rh) : null,
 
-            // alto de línea real del párrafo (fo:line-height puede venir en cm o en %)
+            // alto de lÃ­nea real del pÃ¡rrafo (fo:line-height puede venir en cm o en %)
             AltoLineaPt = pp?.Attribute(FO + "line-height")?.Value is string lh && !lh.EndsWith("%") ? APt(lh) : null,
             AltoLineaPct = pp?.Attribute(FO + "line-height")?.Value is string lhp && lhp.EndsWith("%")
                 ? (double.TryParse(lhp[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var pct) ? pct / 100 : (double?)null)
@@ -903,11 +930,11 @@ internal static class ExtractorFodt
             PaddingInfPt = cel?.Attribute(FO + "padding-bottom")?.Value is string pin ? APt(pin)
                          : cel?.Attribute(FO + "padding")?.Value is string pg5 ? APt(pg5) : 0,
 
-            // borde y fondo del PÁRRAFO (style:paragraph-properties)
+            // borde y fondo del PÃRRAFO (style:paragraph-properties)
             SaltoPagina = (string)pp?.Attribute(FO + "break-before"),
             ParBorde = HayBorde((string)pp?.Attribute(FO + "border") ?? (string)pp?.Attribute(FO + "border-top")),
 
-            // sólo el renglón de abajo (P24 de la solicitud): no hay borde ni arriba ni a los lados
+            // sÃ³lo el renglÃ³n de abajo (P24 de la solicitud): no hay borde ni arriba ni a los lados
             ParSoloBordeInf = !HayBorde((string)pp?.Attribute(FO + "border")) &&
                               !HayBorde((string)pp?.Attribute(FO + "border-top")) &&
                               HayBorde((string)pp?.Attribute(FO + "border-bottom")),
@@ -923,7 +950,7 @@ internal static class ExtractorFodt
             ParPaddingIzqPt = pp?.Attribute(FO + "padding-left")?.Value is string ptl ? APt(ptl) : 0,
             ParPaddingDerPt = pp?.Attribute(FO + "padding-right")?.Value is string ptr ? APt(ptr) : 0,
 
-            // color de fondo de la celda (los títulos de las tablas de los reportes lo llevan)
+            // color de fondo de la celda (los tÃ­tulos de las tablas de los reportes lo llevan)
             TabsPt = paradas != null && paradas.Count > 0
                 ? paradas.Select(x => APt((string)x.Attribute(STYLE + "position"))).Where(x => x > 0).ToList()
                 : null,
@@ -941,7 +968,7 @@ internal static class ExtractorFodt
         };
     }
 
-    // aplica una cadena de estilos (de raíz a hijo: gana el más específico)
+    // aplica una cadena de estilos (de raÃ­z a hijo: gana el mÃ¡s especÃ­fico)
     static void AplicarCadena(Dictionary<string, Estilo> estilos, string nombre, RunModelo run)
     {
         var cadena = new List<Estilo>();
@@ -961,8 +988,8 @@ internal static class ExtractorFodt
             if (!string.IsNullOrEmpty(e.Fuente)) run.Fuente = e.Fuente;
             if (e.TamanoPt.HasValue) run.TamanoPt = e.TamanoPt.Value;
 
-            // style:text-position="super 58%": se acumulan escala y elevación y se aplican
-            // al final de Resolver, porque el tamaño puede venir de otro estilo de la cadena.
+            // style:text-position="super 58%": se acumulan escala y elevaciÃ³n y se aplican
+            // al final de Resolver, porque el tamaÃ±o puede venir de otro estilo de la cadena.
             if (e.EscalaPosicion.HasValue) run.EscalaPosicion = e.EscalaPosicion.Value;
             if (e.Posicion != null) run.Posicion = e.Posicion;
             if (e.Color != null) run.Color = e.Color;
@@ -973,14 +1000,14 @@ internal static class ExtractorFodt
     }
 
     // Resuelve el formato de un run.
-    // IMPORTANTE: primero el estilo del PÁRRAFO y después el del SPAN. Un span suele
-    // traer sólo algún atributo (o ninguno): si se resuelve aislado, el tamaño de fuente
-    // se pierde y cae al valor por defecto (10 pt) en vez de heredar los 6.5 pt del párrafo.
-    // Los SPAN anidados también se acumulan: en la orden de compra el correo va como
-    // <text:a style="Internet_20_link"><span "Internet_20_link"><span "T11">…</text:a>.
-    // T11 sólo declara Arial 7 pt negrita, así que el azul y el subrayado del enlace
-    // viven en el span de FUERA; resolver únicamente el más interno los perdía y el
-    // correo salía en negro y sin subrayar (parecía texto normal, no un hipervínculo).
+    // IMPORTANTE: primero el estilo del PÃRRAFO y despuÃ©s el del SPAN. Un span suele
+    // traer sÃ³lo algÃºn atributo (o ninguno): si se resuelve aislado, el tamaÃ±o de fuente
+    // se pierde y cae al valor por defecto (10 pt) en vez de heredar los 6.5 pt del pÃ¡rrafo.
+    // Los SPAN anidados tambiÃ©n se acumulan: en la orden de compra el correo va como
+    // <text:a style="Internet_20_link"><span "Internet_20_link"><span "T11">â€¦</text:a>.
+    // T11 sÃ³lo declara Arial 7 pt negrita, asÃ­ que el azul y el subrayado del enlace
+    // viven en el span de FUERA; resolver Ãºnicamente el mÃ¡s interno los perdÃ­a y el
+    // correo salÃ­a en negro y sin subrayar (parecÃ­a texto normal, no un hipervÃ­nculo).
     static RunModelo Resolver(Dictionary<string, Estilo> estilos, IReadOnlyList<string> estilosSpan,
                               string texto = "", string slot = null, string nombreParrafo = null)
     {
@@ -995,7 +1022,7 @@ internal static class ExtractorFodt
 
         if (string.IsNullOrEmpty(run.Fuente)) run.Fuente = "Arial";
 
-        // style:text-position: LibreOffice dibuja "super 58%" al 58 % del tamaño declarado
+        // style:text-position: LibreOffice dibuja "super 58%" al 58 % del tamaÃ±o declarado
         // (medido en la solicitud de traslado: T11 dice 12 pt y LO pinta 7 pt; 12 x 0,583).
         if (run.EscalaPosicion is double escala)
             run.TamanoPt = run.TamanoPt * escala / 100;
@@ -1034,8 +1061,8 @@ internal static class ExtractorFodt
         return null;
     }
 
-    // Estilo "común" del párrafo para la comparación de §20.255: si text:style-name
-    // apunta a un estilo automático, se toma su style:parent-style-name.
+    // Estilo "comÃºn" del pÃ¡rrafo para la comparaciÃ³n de Â§20.255: si text:style-name
+    // apunta a un estilo automÃ¡tico, se toma su style:parent-style-name.
     static string EstiloComun(Dictionary<string, Estilo> estilos, string nombre)
     {
         if (string.IsNullOrEmpty(nombre) || !estilos.TryGetValue(nombre, out var e)) return nombre ?? "";
@@ -1057,7 +1084,7 @@ internal static class ExtractorFodt
         return false;
     }
 
-    // parada por omisión de LibreOffice cuando el estilo no declara ninguna
+    // parada por omisiÃ³n de LibreOffice cuando el estilo no declara ninguna
     const double ParadaPorOmisionPt = 1.25 * CM_PT;
 
     static List<double> TabuladoresDe(Dictionary<string, Estilo> estilos, string nombre)
@@ -1080,7 +1107,7 @@ internal static class ExtractorFodt
             foreach (var p in paradas)
                 if (p > x + 0.5) return p;
 
-        // por omisión (y después de la última declarada): múltiplos de 1.25 cm
+        // por omisiÃ³n (y despuÃ©s de la Ãºltima declarada): mÃºltiplos de 1.25 cm
         var desde = paradas != null && paradas.Count > 0 ? Math.Max(x, paradas.Max()) : x;
         return (Math.Floor(desde / ParadaPorOmisionPt) + 1) * ParadaPorOmisionPt;
     }
@@ -1101,7 +1128,7 @@ internal static class ExtractorFodt
     };
 
     // Cambia cada tabulador por los espacios que lo llevan a la parada. La x se lleva
-    // midiendo el texto con Skia (mismo motor que la paginación propia).
+    // midiendo el texto con Skia (mismo motor que la paginaciÃ³n propia).
     static void ExpandirTabuladores(List<RunModelo> runs, List<double> paradas)
     {
         if (!runs.Any(r => r.Texto != null && r.Texto.Contains('	'))) return;
@@ -1150,9 +1177,9 @@ internal static class ExtractorFodt
         var modelo = new ParrafoModelo { EsTitulo = p.Name == TEXT + "h" };
         var nombreEstilo = (string)p.Attribute(TEXT + "style-name") ?? "";
 
-        // Alineación, márgenes y sangría SE HEREDAN por la cadena de estilos: los estilos
-        // automáticos de LibreOffice normalmente sólo declaran lo que cambia y el margen
-        // vive en el padre (el párrafo vacío P19 no declara nada y hereda el
+        // AlineaciÃ³n, mÃ¡rgenes y sangrÃ­a SE HEREDAN por la cadena de estilos: los estilos
+        // automÃ¡ticos de LibreOffice normalmente sÃ³lo declaran lo que cambia y el margen
+        // vive en el padre (el pÃ¡rrafo vacÃ­o P19 no declara nada y hereda el
         // fo:margin-bottom="0.353cm" de Standard, que es el hueco que faltaba antes del QR).
         modelo.Alineacion = CadenaTexto(estilos, nombreEstilo, x => x.Alineacion) ?? "";
         modelo.MargenIzqPt = Cadena(estilos, nombreEstilo, x => x.MargenIzqPt) ?? 0;
@@ -1166,7 +1193,7 @@ internal static class ExtractorFodt
         modelo.SaltoPaginaAntes = salto == "page";
         modelo.SaltoColumnaAntes = salto == "column";
 
-        // caja del párrafo: borde, fondo y paddings
+        // caja del pÃ¡rrafo: borde, fondo y paddings
         modelo.BordeParrafo = Cadena<bool>(estilos, nombreEstilo, x => x.ParBorde ? (bool?)true : null) ?? false;
         modelo.BordeInferiorParrafo = Cadena<bool>(estilos, nombreEstilo, x => x.ParSoloBordeInf ? (bool?)true : null) ?? false;
         modelo.ColorBordeParrafo = CadenaTexto(estilos, nombreEstilo, x => x.ParColorBorde);
@@ -1177,8 +1204,8 @@ internal static class ExtractorFodt
         modelo.PaddingIzqParrafoPt = Cadena<double>(estilos, nombreEstilo, x => (double?)x.ParPaddingIzqPt) ?? 0;
         modelo.PaddingDerParrafoPt = Cadena<double>(estilos, nombreEstilo, x => (double?)x.ParPaddingDerPt) ?? 0;
 
-        // §20.255: contextual-spacing y el estilo "común" (el padre, si el estilo es
-        // automático) hacen falta para saber si se colapsa el espacio entre párrafos.
+        // Â§20.255: contextual-spacing y el estilo "comÃºn" (el padre, si el estilo es
+        // automÃ¡tico) hacen falta para saber si se colapsa el espacio entre pÃ¡rrafos.
         modelo.EstiloComun = EstiloComun(estilos, nombreEstilo);
         modelo.Contextual = ContextualDe(estilos, nombreEstilo);
 
@@ -1186,11 +1213,11 @@ internal static class ExtractorFodt
 
         // <text:tab/> avanza hasta la siguiente parada de tabulador. QuestPDF no tiene
         // tabuladores: se convierten en espacios contados (el avance lo da la parada, no
-        // el número de espacios). Sin esto la segunda línea del bloque «Ubicación» quedaba
-        // 35 pt a la izquierda (el ancho de la parada por omisión).
+        // el nÃºmero de espacios). Sin esto la segunda lÃ­nea del bloque Â«UbicaciÃ³nÂ» quedaba
+        // 35 pt a la izquierda (el ancho de la parada por omisiÃ³n).
         ExpandirTabuladores(modelo.Runs, TabuladoresDe(estilos, nombreEstilo));
 
-        // alto de línea: fo:line-height del estilo (en cm o en %), con herencia
+        // alto de lÃ­nea: fo:line-height del estilo (en cm o en %), con herencia
         var actual = nombreEstilo;
         var vistos = 0;
 
@@ -1202,19 +1229,19 @@ internal static class ExtractorFodt
             if (estiloCadena.AltoLineaPt is double alto && alto > 0) { modelo.AltoLineaPt = alto; break; }
             if (estiloCadena.AltoLineaPct is double pct && pct > 0)
             {
-                var tamano = modelo.Runs.Select(r => r.TamanoPt).FirstOrDefault(t => t > 0);
+                var tamano = modelo.Runs.Where(r => !string.IsNullOrWhiteSpace(r.Texto)).Select(r => r.TamanoPt).FirstOrDefault(t => t > 0);
 
                 // El porcentaje se aplica sobre el ALTO NATURAL de la fuente, no sobre el
-                // tamaño de letra: en LibreOffice es AttrSetToLineHeight() ->
+                // tamaÃ±o de letra: en LibreOffice es AttrSetToLineHeight() ->
                 // GetTextHeight() (ascendente + descendente + interlineado interno,
                 // sw/source/core/txtnode/swfont.cxx). Con Arial son ~1.15 em.
-                // En las CELDAS se sigue con el factor anterior: ahí el alto lo gobiernan
-                // las reglas de tabla y cambiar el interlineado movía los reportes ya validados.
+                // En las CELDAS se sigue con el factor anterior: ahÃ­ el alto lo gobiernan
+                // las reglas de tabla y cambiar el interlineado movÃ­a los reportes ya validados.
                 //
-                // Excepción MEDIDA: un párrafo VACÍO dentro de una celda. Ahí no hay texto
-                // que posicionar y LibreOffice arma la caja completa de la línea
-                // (AltoNaturalFuenteCelda), con el tamaño del ESTILO y no con el respaldo
-                // de 10 pt: la fila en blanco de las liquidaciones daba 11,5 pt de línea y
+                // ExcepciÃ³n MEDIDA: un pÃ¡rrafo VACÃO dentro de una celda. AhÃ­ no hay texto
+                // que posicionar y LibreOffice arma la caja completa de la lÃ­nea
+                // (AltoNaturalFuenteCelda), con el tamaÃ±o del ESTILO y no con el respaldo
+                // de 10 pt: la fila en blanco de las liquidaciones daba 11,5 pt de lÃ­nea y
                 // LibreOffice mide 15,8 (fila de 25,8 con el margen inferior de 0,353 cm
                 // del estilo Standard).
                 if (tamano > 0)
@@ -1223,7 +1250,7 @@ internal static class ExtractorFodt
                     // Arial 1,15) y se multiplica por AltoNaturalFuente (1,05) porque EstiloDe
                     // divide por ese factor al pedirle el interlineado a QuestPDF. Antes se
                     // usaba 1,15 para todo: el aviso de privacidad (Calibri 10 pt al 115 %)
-                    // daba 12,6 pt por renglón contra 14,0 de LibreOffice y salía en 2 hojas
+                    // daba 12,6 pt por renglÃ³n contra 14,0 de LibreOffice y salÃ­a en 2 hojas
                     // en vez de 3.
                     modelo.AltoLineaPt = enCelda
                         ? tamano * pct
@@ -1236,7 +1263,12 @@ internal static class ExtractorFodt
                 }
                 else
                 {
-                    modelo.AltoLineaPt = 10 * AltoNaturalTexto * pct;
+                    // Los párrafos vacíos no tienen run del que tomar el tamaño, pero
+                    // sí pueden declararlo en el estilo (P4 de 14 pt en el acuse). LO
+                    // calcula su alto usando ese tamaño; el respaldo fijo de 10 pt los
+                    // comprimía y subía los párrafos siguientes.
+                    var tamEstiloVacio = modelo.TamanoBasePt > 0 ? modelo.TamanoBasePt : 10;
+                    modelo.AltoLineaPt = tamEstiloVacio * AltoNaturalTexto * pct;
                 }
 
                 break;
@@ -1246,23 +1278,26 @@ internal static class ExtractorFodt
 
         if (modelo.AltoLineaPt <= 0)
         {
-            var tamano = modelo.Runs.Select(r => r.TamanoPt).FirstOrDefault(t => t > 0);
+            var tamano = modelo.Runs.Where(r => !string.IsNullOrWhiteSpace(r.Texto)).Select(r => r.TamanoPt).FirstOrDefault(t => t > 0);
 
-            // MEDIDO contra LibreOffice (caso controlado de 5 párrafos vacíos): un párrafo
-            // vacío sin fo:line-height mide el alto natural de su fuente, 1,15 x tamaño
-            // (7 pt -> 8,04 pt; 12 pt -> 13,8 pt). Aquí sólo se corrige en las secciones
+            // MEDIDO contra LibreOffice (caso controlado de 5 pÃ¡rrafos vacÃ­os): un pÃ¡rrafo
+            // vacÃ­o sin fo:line-height mide el alto natural de su fuente, 1,15 x tamaÃ±o
+            // (7 pt -> 8,04 pt; 12 pt -> 13,8 pt). AquÃ­ sÃ³lo se corrige en las secciones
             // de varias columnas: son los espaciadores del encabezado de la factura y de
             // la solicitud. En el resto se deja el 10 pt de siempre porque de esos altos
-            // dependen los cortes de página ya validados (el CCI cambiaba de 8 a 9 hojas).
-            if (tamano <= 0 && enColumnas) tamano = modelo.TamanoBasePt;
+            // dependen los cortes de pÃ¡gina ya validados (el CCI cambiaba de 8 a 9 hojas).
+            // Respeta también el tamaño grande declarado para párrafos vacíos. En el
+            // acuse de cancelación, LibreOffice usa los cuatro espaciadores P4 de 14 pt;
+            // el respaldo de 10 pt los hacía demasiado bajos y subía la fecha de solicitud.
+            if (tamano <= 0 && (enColumnas || modelo.TamanoBasePt > 12)) tamano = modelo.TamanoBasePt;
 
             modelo.AltoLineaPt = (tamano <= 0 ? 10 : tamano) * (enColumnas ? AltoNaturalTexto : 1.2);
         }
 
-        // Un draw:frame anclado "as-char" o "char" ocupa espacio en la línea: la línea
-        // crece hasta el alto del objeto (así el QR empuja el texto que viene debajo).
-        // Si además trae imagen, se guarda aquí para dibujarla DENTRO del flujo: su
-        // posición depende del texto de arriba y no se puede fijar en una capa absoluta.
+        // Un draw:frame anclado "as-char" o "char" ocupa espacio en la lÃ­nea: la lÃ­nea
+        // crece hasta el alto del objeto (asÃ­ el QR empuja el texto que viene debajo).
+        // Si ademÃ¡s trae imagen, se guarda aquÃ­ para dibujarla DENTRO del flujo: su
+        // posiciÃ³n depende del texto de arriba y no se puede fijar en una capa absoluta.
         foreach (var marco in p.Descendants().Where(x => x.Name == DRAW + "frame" || x.Name == DRAW + "custom-shape"))
         {
             var ancla = (string)marco.Attribute(TEXT + "anchor-type") ?? "";
@@ -1270,17 +1305,17 @@ internal static class ExtractorFodt
 
             var altoObjeto = APt((string)marco.Attribute(SVG + "height"));
 
-            // Sólo el ancla "as-char" ocupa espacio en la línea. Los de ancla "char" se
-            // dibujan como capa con posición propia (LibreOffice hace lo mismo: el marco
-            // «SOLICITUD DE CREDITO» de la solicitud de crédito PF va en svg:x=-6.7 cm,
-            // fuera de la celda). Reservarles alto dejaba esa fila ~33 pt más alta.
+            // SÃ³lo el ancla "as-char" ocupa espacio en la lÃ­nea. Los de ancla "char" se
+            // dibujan como capa con posiciÃ³n propia (LibreOffice hace lo mismo: el marco
+            // Â«SOLICITUD DE CREDITOÂ» de la solicitud de crÃ©dito PF va en svg:x=-6.7 cm,
+            // fuera de la celda). Reservarles alto dejaba esa fila ~33 pt mÃ¡s alta.
             if (ancla == "as-char" && altoObjeto > modelo.AltoObjetoPt)
                 modelo.AltoObjetoPt = altoObjeto;
 
             var imagen = marco.Descendants(DRAW + "image").FirstOrDefault();
             var binario = imagen?.Element(OFFICE + "binary-data")?.Value;
 
-            // sólo "as-char" se dibuja en el flujo: las de ancla "char" ya salen como
+            // sÃ³lo "as-char" se dibuja en el flujo: las de ancla "char" ya salen como
             // capa absoluta (ver ImagenEnFlujo en el modelo)
             if (ancla == "as-char") modelo.ImagenEnFlujo = true;
 
@@ -1294,7 +1329,7 @@ internal static class ExtractorFodt
         }
 
         // draw:line: los renglones de firma de los contratos ("PATRON / TRABAJADOR").
-        // Van anclados al carácter, dentro de un párrafo, con coordenadas propias.
+        // Van anclados al carÃ¡cter, dentro de un pÃ¡rrafo, con coordenadas propias.
         foreach (var lineaFodt in p.Elements(DRAW + "line"))
         {
             var x1 = APt((string)lineaFodt.Attribute(SVG + "x1"));
@@ -1316,18 +1351,18 @@ internal static class ExtractorFodt
             });
         }
 
-        // Última pasada: quitar los glifos del área privada (viñetas Symbol) que hacen
-        // abortar a QuestPDF. Se hace aquí para cubrir también los textos que se pegan
-        // directamente a un run (text:s, text:tab, marcas de combinación).
+        // Ãšltima pasada: quitar los glifos del Ã¡rea privada (viÃ±etas Symbol) que hacen
+        // abortar a QuestPDF. Se hace aquÃ­ para cubrir tambiÃ©n los textos que se pegan
+        // directamente a un run (text:s, text:tab, marcas de combinaciÃ³n).
         foreach (var runParrafo in modelo.Runs)
             runParrafo.Texto = LimpiarGlifos(runParrafo.Texto);
 
         return modelo;
     }
 
-    // estilosSpan: estilos de carácter que ENVUELVEN al contenido, de fuera hacia dentro.
+    // estilosSpan: estilos de carÃ¡cter que ENVUELVEN al contenido, de fuera hacia dentro.
     // Se acumulan al bajar por los <text:span> para que un span interno herede lo que
-    // declara el de fuera (si no, el enlace del correo perdía color y subrayado).
+    // declara el de fuera (si no, el enlace del correo perdÃ­a color y subrayado).
     static void AgregarRuns(XElement contenedor, List<string> estilosSpan, List<RunModelo> runs,
                             Dictionary<string, Estilo> estilos, string estiloParrafo,
                             string hipervinculo = null)
@@ -1352,7 +1387,7 @@ internal static class ExtractorFodt
                 {
                     // text:a: el correo de la orden de compra es un mailto. Aparte del
                     // estilo, se arrastra el destino para que el generador lo pinte como
-                    // hipervínculo.
+                    // hipervÃ­nculo.
                     var estiloSpan = (string)el.Attribute(TEXT + "style-name");
                     var cadena = string.IsNullOrEmpty(estiloSpan)
                         ? estilosSpan
@@ -1387,15 +1422,15 @@ internal static class ExtractorFodt
                 }
                 else if (el.Name == TEXT + "database-display")
                 {
-                    // Campos de combinación de los reportes: al convertir el .doc a .fodt
+                    // Campos de combinaciÃ³n de los reportes: al convertir el .doc a .fodt
                     // quedan como <text:database-display> con el valor YA calculado como
-                    // texto («Titulo», «Fecha», «Empresa»...). No se leían, así que en el
-                    // Auxiliar de Proveedores el título, la fecha y la empresa no salían y
-                    // el único renglón que quedaba ("Página: 1") subía de más.
-                    // Las marcas de región («TableStart:Balanza» / «TableEnd:Balanza»)
-                    // TAMBIÉN se pintan: LibreOffice las imprime tal cual en el documento
-                    // de plantilla. En los documentos ya combinados no aparecen —
-                    // ExecuteRegion consume las regiones —, así que no ensucian el PDF final.
+                    // texto (Â«TituloÂ», Â«FechaÂ», Â«EmpresaÂ»...). No se leÃ­an, asÃ­ que en el
+                    // Auxiliar de Proveedores el tÃ­tulo, la fecha y la empresa no salÃ­an y
+                    // el Ãºnico renglÃ³n que quedaba ("PÃ¡gina: 1") subÃ­a de mÃ¡s.
+                    // Las marcas de regiÃ³n (Â«TableStart:BalanzaÂ» / Â«TableEnd:BalanzaÂ»)
+                    // TAMBIÃ‰N se pintan: LibreOffice las imprime tal cual en el documento
+                    // de plantilla. En los documentos ya combinados no aparecen â€”
+                    // ExecuteRegion consume las regiones â€”, asÃ­ que no ensucian el PDF final.
                     var valor = Limpiar(el.Value);
 
                     if (valor.Length > 0)
@@ -1404,20 +1439,20 @@ internal static class ExtractorFodt
                 else if (el.Name == TEXT + "date" || el.Name == TEXT + "time")
                 {
                     // text:date / text:time: LibreOffice guarda el valor ya formateado como
-                    // contenido (el "12/11/2026 14:01 O11/p11" del pie de la bitácora).
-                    // No se leía, así que la línea salía vacía.
+                    // contenido (el "12/11/2026 14:01 O11/p11" del pie de la bitÃ¡cora).
+                    // No se leÃ­a, asÃ­ que la lÃ­nea salÃ­a vacÃ­a.
                     var valor = Limpiar(el.Value);
                     if (valor.Length > 0) runs.Add(Resolver(estilos, estilosSpan, valor, null, estiloParrafo));
                 }
                 else if (el.Name == TEXT + "page-number" || el.Name == TEXT + "page-count")
                 {
                     // text:page-number / text:page-count: LibreOffice deja el valor ya
-                    // calculado como texto del elemento (el "1" y el "1" de "Página 1/1").
-                    // No se leían, así que el campo salía vacío y sólo quedaba la "/".
+                    // calculado como texto del elemento (el "1" y el "1" de "PÃ¡gina 1/1").
+                    // No se leÃ­an, asÃ­ que el campo salÃ­a vacÃ­o y sÃ³lo quedaba la "/".
                     var valor = Limpiar(el.Value);
                     if (valor.Length > 0) runs.Add(Resolver(estilos, estilosSpan, valor, null, estiloParrafo));
                 }
-                // draw:* dentro de un párrafo: ya se tomó como capa; no se mezcla con el texto
+                // draw:* dentro de un pÃ¡rrafo: ya se tomÃ³ como capa; no se mezcla con el texto
             }
         }
     }
@@ -1441,7 +1476,7 @@ internal static class ExtractorFodt
             EnFlujo = ((string)el.Attribute(TEXT + "anchor-type")) == "as-char",
         };
 
-        // relleno de la caja (draw:fill-color del estilo gráfico): la barra de color que va
+        // relleno de la caja (draw:fill-color del estilo grÃ¡fico): la barra de color que va
         // antes de "ORDEN DE COMPRA" es un custom-shape sin texto ni imagen.
         var nombreEstiloGrafico = (string)el.Attribute(DRAW + "style-name");
 
@@ -1456,7 +1491,7 @@ internal static class ExtractorFodt
             capa.HorizontalPos = estiloGrafico.HorizontalPos;
         }
 
-        // Sólo cuenta lo que está DENTRO de la caja: el frame puede vivir en la celda de
+        // SÃ³lo cuenta lo que estÃ¡ DENTRO de la caja: el frame puede vivir en la celda de
         // otra tabla (la liquidaciones mete el bloque de firmas en la tabla de fichas) y
         // esa tabla de fuera no es suya.
         bool DentroDeTablaDeLaCapa(XElement nodo) =>
@@ -1467,8 +1502,8 @@ internal static class ExtractorFodt
             if (DentroDeTablaDeLaCapa(p)) continue;   // los pinta la tabla, no sueltos
             var parrafoCapa = LeerParrafo(p, estilos);
 
-            // Los draw:line dentro de una caja con posición fija (Pagaré, formatos de
-            // solicitud) no se dibujan: la caja tiene alto fijo y agregar el renglón
+            // Los draw:line dentro de una caja con posiciÃ³n fija (PagarÃ©, formatos de
+            // solicitud) no se dibujan: la caja tiene alto fijo y agregar el renglÃ³n
             // revienta el acomodo ("conflicting size constraints").
             parrafoCapa.Lineas.Clear();
 
@@ -1481,7 +1516,7 @@ internal static class ExtractorFodt
             capa.Tablas.Add(LeerTabla(t, estilos));
         }
 
-        // alto aproximado del contenido: cada párrafo con su interlineado y márgenes
+        // alto aproximado del contenido: cada pÃ¡rrafo con su interlineado y mÃ¡rgenes
         foreach (var parrafoCapa in capa.Parrafos)
             capa.AltoContenidoPt += Math.Max(parrafoCapa.AltoLineaPt, 8) + parrafoCapa.MargenSupPt + parrafoCapa.MargenInfPt;
 
@@ -1490,7 +1525,7 @@ internal static class ExtractorFodt
 
         // imagen embebida: en un .fodt (plano) viene como
         //   <draw:image draw:mime-type="image/jpeg"><office:binary-data>BASE64</office:binary-data></draw:image>
-        // (también se admite el formato data:image/...;base64 en xlink:href)
+        // (tambiÃ©n se admite el formato data:image/...;base64 en xlink:href)
         var img = el.Descendants(DRAW + "image").FirstOrDefault();
 
         if (img != null)
@@ -1523,7 +1558,7 @@ internal static class ExtractorFodt
     {
         var modelo = new TablaModelo { Nombre = (string)tabla.Attribute(TABLE + "name") ?? "" };
 
-        // margen izquierdo propio de la tabla (normalmente negativo: se sale del área de texto)
+        // margen izquierdo propio de la tabla (normalmente negativo: se sale del Ã¡rea de texto)
         var nombreEstiloTabla = (string)tabla.Attribute(TABLE + "style-name") ?? "";
         var estiloTabla = tabla.Document?.Descendants(STYLE + "style")
             .FirstOrDefault(e => (string)e.Attribute(STYLE + "name") == nombreEstiloTabla);
@@ -1541,8 +1576,8 @@ internal static class ExtractorFodt
         if (!string.IsNullOrWhiteSpace(anchoTabla))
             modelo.AnchoDeclaradoPt = APt(anchoTabla);
 
-        // table:align del estilo (o del propio elemento): las tablas más angostas que el
-        // área de texto pueden ir al centro (la de sueldo del contrato CCI).
+        // table:align del estilo (o del propio elemento): las tablas mÃ¡s angostas que el
+        // Ã¡rea de texto pueden ir al centro (la de sueldo del contrato CCI).
         modelo.AlineacionTabla = (string)estiloTabla?.Element(STYLE + "table-properties")?.Attribute(TABLE + "align")
                                  ?? (string)tabla.Attribute(TABLE + "align")
                                  ?? "";
@@ -1553,7 +1588,7 @@ internal static class ExtractorFodt
             var anchoCm = estilos.TryGetValue(nombre, out var e) ? e.ColumnWidthCm : null;
 
             // una columna puede declararse repetida (table:number-columns-repeated="2"):
-            // si se cuenta una sola, el contenido no tiene dónde repartirse
+            // si se cuenta una sola, el contenido no tiene dÃ³nde repartirse
             var repeticiones = int.TryParse((string)col.Attribute(TABLE + "number-columns-repeated"), out var rep) ? rep : 1;
 
             for (var k = 0; k < Math.Max(repeticiones, 1); k++)
@@ -1564,9 +1599,9 @@ internal static class ExtractorFodt
         {
             var mfila = new FilaModelo();
 
-            // alto mínimo declarado por el estilo de la fila (style:min-row-height): en la
-            // bitácora de pedidos la fila del producto pide 1.335cm y es lo que separa un
-            // grupo del siguiente. Sin esto las filas quedaban de una sola línea de texto.
+            // alto mÃ­nimo declarado por el estilo de la fila (style:min-row-height): en la
+            // bitÃ¡cora de pedidos la fila del producto pide 1.335cm y es lo que separa un
+            // grupo del siguiente. Sin esto las filas quedaban de una sola lÃ­nea de texto.
             var nombreEstiloFila = (string)fila.Attribute(TABLE + "style-name") ?? "";
 
             if (estilos.TryGetValue(nombreEstiloFila, out var estiloFila) && estiloFila.AltoMinimoFilaPt is double altoFila)
@@ -1605,23 +1640,23 @@ internal static class ExtractorFodt
                 }
 
                 // Las celdas pueden usar text:p o text:h. El comprobante de traslado
-                // pone los encabezados de la tabla como text:h; si sólo se leían text:p,
-                // "Clave del producto...", "Cantidad", "Importe", etc. desaparecían.
+                // pone los encabezados de la tabla como text:h; si sÃ³lo se leÃ­an text:p,
+                // "Clave del producto...", "Cantidad", "Importe", etc. desaparecÃ­an.
                 foreach (var p in celda.Elements().Where(x => x.Name == TEXT + "p" || x.Name == TEXT + "h"))
                     mcelda.Parrafos.Add(LeerParrafo(p, estilos, true));
 
                 // tablas anidadas dentro de la celda (la cabecera de columnas de estos
-                // reportes va así: si no se recorren, esa parte no aparece en el PDF)
+                // reportes va asÃ­: si no se recorren, esa parte no aparece en el PDF)
                 foreach (var anidada in celda.Elements(TABLE + "table"))
                     mcelda.TablasAnidadas.Add(LeerTabla(anidada, estilos));
 
                 mfila.Celdas.Add(mcelda);
             }
 
-            // Borde entre celdas vecinas: en LibreOffice la línea se pinta si CUALQUIERA
+            // Borde entre celdas vecinas: en LibreOffice la lÃ­nea se pinta si CUALQUIERA
             // de las dos la declara, y la pinta la de la derecha (su fondo se dibuja
-            // después y taparía la del vecino). El "Debito" del auxiliar de proveedores
-            // declara border-left="none" y se quedaba sin línea.
+            // despuÃ©s y taparÃ­a la del vecino). El "Debito" del auxiliar de proveedores
+            // declara border-left="none" y se quedaba sin lÃ­nea.
             for (var i = 1; i < mfila.Celdas.Count; i++)
             {
                 var celdaIzq = mfila.Celdas[i - 1];
@@ -1633,6 +1668,26 @@ internal static class ExtractorFodt
                 celdaDer.ColorBordeIzq ??= celdaIzq.ColorBordeDer;
 
                 if (celdaDer.GrosorBordePt <= 0) celdaDer.GrosorBordePt = celdaIzq.GrosorBordePt;
+            }
+
+            // En el certificado de dividendos, la imagen de fondo aporta el marco
+            // redondeado de esta tabla. La celda de "Nacionalidad" queda encima del
+            // tramo superior central del marco y lo tapa en QuestPDF; LibreOffice lo
+            // conserva visible. Repintamos ese tramo desde la celda, sin modificar el
+            // FODT ni añadir bordes al resto de las celdas.
+            if (modelo.Nombre == "Tabla1")
+            {
+                var celdaNacionalidad = mfila.Celdas.FirstOrDefault(c =>
+                    c.Parrafos.SelectMany(p => p.Runs)
+                        .Any(r => r.Texto?.Contains("Nacionalidad", StringComparison.Ordinal) == true));
+
+                if (celdaNacionalidad != null)
+                {
+                    celdaNacionalidad.BordeSup = true;
+                    celdaNacionalidad.ColorBordeSup = "#666666";
+                    if (celdaNacionalidad.GrosorBordePt <= 0.05)
+                        celdaNacionalidad.GrosorBordePt = 0.5;
+                }
             }
 
             modelo.Filas.Add(mfila);
@@ -1658,10 +1713,10 @@ internal static class ExtractorFodt
 
     static double ACm(string v) => APt(v) / CM_PT;
 
-    // Los .doc convertidos traen viñetas en el área de uso privado (Symbol/Wingdings):
-    // U+F0B7 es la "•" del Symbol. Si se pasan tal cual, QuestPDF aborta el documento
+    // Los .doc convertidos traen viÃ±etas en el Ã¡rea de uso privado (Symbol/Wingdings):
+    // U+F0B7 es la "â€¢" del Symbol. Si se pasan tal cual, QuestPDF aborta el documento
     // entero ("1 glyph(s) that are not available"). Se traducen las conocidas y se
-    // descartan las demás: una viñeta invisible es mejor que no generar el PDF.
+    // descartan las demÃ¡s: una viÃ±eta invisible es mejor que no generar el PDF.
     static string LimpiarGlifos(string texto)
     {
         if (string.IsNullOrEmpty(texto)) return texto;
@@ -1674,9 +1729,9 @@ internal static class ExtractorFodt
         {
             switch (c)
             {
-                case '\uF0B7': sb.Append('•'); break;   // Symbol: viñeta
-                case '\uF0A7': sb.Append('§'); break;   // Symbol: parágrafo
-                case '\uF0D8': sb.Append('→'); break;   // Symbol: flecha
+                case '\uF0B7': sb.Append((char)0x2022); break;   // Symbol: viñeta
+                case '\uF0A7': sb.Append((char)0x00A7); break;   // Symbol: parágrafo
+                case '\uF0D8': sb.Append((char)0x2192); break;   // Symbol: flecha
                 default:
                     if (c < '\uE000' || c > '\uF8FF') sb.Append(c);
                     break;
@@ -1687,3 +1742,5 @@ internal static class ExtractorFodt
     }
     static string Limpiar(string s) => s.Replace("\r", " ").Replace("\n", " ");
 }
+
+
