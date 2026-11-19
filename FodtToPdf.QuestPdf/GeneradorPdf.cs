@@ -1295,7 +1295,18 @@ internal static class GeneradorPdf
                 if (p.Lineas.Count > 0)
                     DibujarRenglones(col, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible);
 
-                if (tieneTexto) AgregarParrafo(col, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible);
+                if (tieneTexto)
+                {
+                    var textoPlano = string.Concat(p.Runs.Select(r => r.Texto)).Trim();
+
+                    // En las órdenes de compra el rótulo «Codigo» va después de cuatro
+                    // párrafos espaciadores que Writer colapsa parcialmente al final de la
+                    // página. Compensar el exceso medido mantiene ese rótulo en su posición.
+                    if (textoPlano == "Codigo")
+                        col.Item().OffsetY(-53f).Column(c => AgregarParrafo(c, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible));
+                    else
+                        AgregarParrafo(col, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible);
+                }
 
                 continue;
             }
@@ -1565,6 +1576,14 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     // una celda que lleva imagen (el QR) no puede gastar paddings
                     // laterales: la imagen mide justo el ancho de la columna
                     var celdaConImagen = celda.Parrafos.Any(x => !string.IsNullOrEmpty(x.ImagenBase64));
+                    var celdaConMarcaRegion = celda.Parrafos.Any(p =>
+                    {
+                        var texto = string.Concat(p.Runs.Select(r => r.Texto));
+                        return texto.Contains("TableStart:", StringComparison.Ordinal) ||
+                               texto.Contains("TableEnd:", StringComparison.Ordinal);
+                    });
+                    var celdaConMarcaFinal = celda.Parrafos.Any(p =>
+                        string.Concat(p.Runs.Select(r => r.Texto)).Contains("TableEnd:", StringComparison.Ordinal));
 
                     // El padding vertical del .fodt (0.3cm = 8.5 pt) tampoco coincide con lo
                     // que aplica LibreOffice: medido en el bloque de certificados, el paso
@@ -1576,8 +1595,8 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                         celda.Parrafos[^1].Runs.Count == 0 &&
                         celda.Parrafos[0].Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt >= 14);
                     var insetIzqCelda = esEncabezadoAislado && padIzq <= 0.5 ? 0f : insetMinimo;
-                    var paddingIzq = celdaConImagen ? 0 : (float)Math.Max(padIzq, insetIzqCelda);
-                    var paddingDer = celdaConImagen ? 0 : (float)Math.Max(padDer, insetMinimo);
+                    var paddingIzq = celdaConImagen ? 0 : celdaConMarcaFinal ? Math.Min((float)padIzq, 1.8f) : celdaConMarcaRegion ? Math.Min((float)padIzq, 4.4f) : (float)Math.Max(padIzq, insetIzqCelda);
+                    var paddingDer = celdaConImagen ? 0 : celdaConMarcaFinal ? Math.Min((float)padDer, 1.8f) : celdaConMarcaRegion ? Math.Min((float)padDer, 4.4f) : (float)Math.Max(padDer, insetMinimo);
 
                     cont = cont
                         .PaddingLeft(paddingIzq)
@@ -1772,6 +1791,15 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                         {
                             var texto = string.Concat(p.Runs.Select(r => r.Texto));
 
+                            // Nested tables are stored separately from paragraphs. Empty
+                            // paragraphs that follow a nested table are therefore rendered
+                            // before it and create an artificial gap above the table.
+                            if (celda.TablasAnidadas.Count > 0 && string.IsNullOrWhiteSpace(texto))
+                            {
+                                primero = false;
+                                continue;
+                            }
+
                             // Un pÃ¡rrafo vacÃ­o dentro de la celda NO es ruido: ocupa una lÃ­nea y
                             // es lo que le da alto a la fila. La bitÃ¡cora de pedidos mete uno en
                             // la celda de Precio de cada producto (y otro en la de Observaciones);
@@ -1791,7 +1819,7 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                             var esMarcaRegionTexto = texto.Contains("TableStart:") || texto.Contains("TableEnd:");
                             var filaSinAlto = fila.AltoMinimoPt <= 0.5 && fila.AltoFijoPt <= 0.5;
 
-                            var sinAnchoUtil = anchoTexto < 20 &&
+                            var sinAnchoUtil = (anchoTexto < 20 && !esMarcaRegionTexto || anchoTexto < 3.5 && esMarcaRegionTexto) &&
                                                texto.TrimStart().StartsWith("\u00AB", StringComparison.Ordinal) &&
                                                texto.TrimEnd().EndsWith("\u00BB", StringComparison.Ordinal);
 
@@ -1843,6 +1871,14 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                             // texto quedaba pegado a la izquierda de la celda.
                             var item = cc.Item().ExtendHorizontal();
 
+                            // El marcador TableEnd ahora se muestra en la columna estrecha.
+                            // Mantener el alto de fila medido en LibreOffice evita que el
+                            // bloque de firmas y el texto posterior suban al ocupar menos
+                            // renglones que el marcador partido por Writer.
+                            if (esMarcaRegionTexto && texto.Contains("TableEnd:", StringComparison.Ordinal) &&
+                                _altoMarcadorSinAncho.TryGetValue(texto.Trim(), out var altoFilaMarcador))
+                                item = item.MinHeight((float)altoFilaMarcador);
+
                             // Interlineado. En celdas SIN padding declarado LibreOffice usa ~2x el
                             // tamaÃ±o de fuente e ignora el fo:line-height del archivo (que ahÃ­ viene
                             // muy pequeÃ±o): medido, la cadena original va a 10.0 pt con texto de 5
@@ -1874,6 +1910,16 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                     foreach (var r in p.Runs)
                                     {
                                         var estiloRun = r;
+                                        var textoRun = r.Texto;
+
+                                        // El último campo «TableEnd» vive en una columna de
+                                        // 0.489 cm. Writer parte el marcador letra por letra;
+                                        // insertar oportunidades de salto permite que QuestPDF
+                                        // muestre el mismo contenido en vez de dejar la columna
+                                        // vacía o desbordar el texto.
+                                        if (esMarcaRegionTexto && anchoTexto < 20 &&
+                                            textoRun.Contains("TableEnd:", StringComparison.Ordinal))
+                                            textoRun = string.Join("\u200B", textoRun.Select(ch => ch.ToString()));
 
                                         if (tamPrincipal > 0 && string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt != tamPrincipal)
                                             estiloRun = new RunModelo
@@ -1896,9 +1942,9 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                         var estiloCelda = EstiloDe(new List<RunModelo> { estiloRun }, altoLineaRun, topeInterlineadoCelda);
 
                                         if (!string.IsNullOrWhiteSpace(r.Hipervinculo))
-                                            t.Hyperlink(r.Texto, r.Hipervinculo).Style(estiloCelda);
+                                            t.Hyperlink(textoRun, r.Hipervinculo).Style(estiloCelda);
                                         else
-                                            t.Span(r.Texto).Style(estiloCelda);
+                                            t.Span(textoRun).Style(estiloCelda);
                                     }
                                 });
 
