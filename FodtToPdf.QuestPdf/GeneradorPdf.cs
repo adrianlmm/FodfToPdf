@@ -26,7 +26,7 @@ internal static class GeneradorPdf
     // dibujarTablasAnidadas: en los REPORTES (orden de compra) las tablas dentro de celdas
     // son el bloque de cabecera y hay que dibujarlas; en las FACTURAS hay tablas anidadas
     // que LibreOffice no muestra y pintarlas cambia el aspecto ya validado.
-    public static QuestPDF.Fluent.Document ADocumento(ModeloPlantilla m, bool dibujarTablasAnidadas = false)
+    public static QuestPDF.Fluent.Document ADocumento(ModeloPlantilla m, bool dibujarTablasAnidadas = true)
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
@@ -35,12 +35,23 @@ internal static class GeneradorPdf
         // reportes ya validados (liquidaciones 108035 -> 116262 px de diferencia contra
         // LibreOffice) y en los contratos quedÃ³ igual, asÃ­ que se deja como estaba.
         _desplazamientoGlobal = m.DesplazamientoIzqPt;
+        _margenIzqPagina = m.Pagina.MargenIzqPt;
+        _altoUtilPagina = Math.Max(m.Pagina.AltoPt - m.Pagina.MargenSupPt - m.Pagina.MargenInfPt, 100);
+        _justificarConEncogimiento = m.JustificarConEncogimiento;
         var margenDerBase = Math.Max(m.Pagina.MargenDerPt + m.DesplazamientoIzqPt, 0);
         var inicioFlujo = m.Pagina.MargenIzqPt + m.DesplazamientoIzqPt;
         var anchoBaseFlujo = m.Pagina.AnchoPt - inicioFlujo - margenDerBase;
         var anchoFisicoDisponible = Math.Max(m.Pagina.AnchoPt - inicioFlujo - 4, 0);
+        // Expande el margen derecho del flujo cuando alguna tabla con margen izquierdo
+        // negativo excede el ancho útil de página (p.ej. -0.191 cm en ComprobanteTraslado
+        // o -1.8 cm en reportes). Los párrafos de texto restauran el margen derecho real
+        // mediante _compensacionDerFlujo para no alterar sus saltos de línea.
+        const double umbralTablaAnchaPt = 4.0;
         var anchoTablaConMargenNegativo = m.Flujo
-            .Where(b => b.Tipo == "tabla" && b.Tabla != null && b.Tabla.MargenIzqPt < -0.5)
+            .Where(b => b.Tipo == "tabla" && b.Tabla != null &&
+                        (b.Tabla.MargenIzqPt <= -umbralTablaAnchaPt ||
+                         (b.Tabla.AlineacionTabla == "center" &&
+                          (b.Tabla.AnchoDeclaradoPt > 0 ? b.Tabla.AnchoDeclaradoPt : b.Tabla.ColumnasPt.Sum()) > anchoBaseFlujo + 0.5)))
             .Select(b => b.Tabla.AnchoDeclaradoPt > 0 ? b.Tabla.AnchoDeclaradoPt : b.Tabla.ColumnasPt.Sum())
             .DefaultIfEmpty(anchoBaseFlujo)
             .Max();
@@ -48,6 +59,7 @@ internal static class GeneradorPdf
             Math.Max(anchoTablaConMargenNegativo - anchoBaseFlujo, 0),
             Math.Max(anchoFisicoDisponible - anchoBaseFlujo, 0));
         _margenDerechoFlujo = Math.Max(margenDerBase - expansionParaTabla, 0);
+        _compensacionDerFlujo = Math.Max(m.Pagina.MargenDerPt - _margenDerechoFlujo, 0);
 
 
         // se anclan al flujo ANTES de armar los lookups de abajo: AsÃ­ se sabe quÃ©
@@ -79,6 +91,31 @@ internal static class GeneradorPdf
                 _lineasPorBloque[bloqueLinea] = listaLineas = new List<CapaModelo>();
 
             listaLineas.Add(capaLinea);
+        }
+
+        // Marcos flotantes anclados a un párrafo del flujo (text:anchor-type="char"/"paragraph"
+        // con style:vertical-rel="paragraph"/"char"): sus svg:x/svg:y son relativos al párrafo
+        // ancla, no a la hoja (ODF 1.3 §20.398 / LibreOffice SwToCntntAnchoredObjectPosition).
+        // Si se pintan en la capa absoluta de página, caen arriba de la hoja (p.ej. Marco1 del
+        // QR en el formato de dividendos tapando el borde superior de "Nacionalidad").
+        _marcosFlotantesPorBloque = new Dictionary<BloqueModelo, List<CapaModelo>>();
+
+        foreach (var capaFlotante in m.Capas.Where(x =>
+                     !x.EnFlujo && !x.AnclaEnTabla &&
+                     !x.Ancla.Contains("calibrada") &&
+                     (x.Ancla == "char" || x.Ancla == "paragraph") &&
+                     x.BloqueAncla > 0 && x.BloqueAncla < m.Flujo.Count &&
+                     (x.VerticalRel == "paragraph" || x.VerticalRel == "paragraph-content" || x.VerticalRel == "char") &&
+                     x.YPt >= 0))
+        {
+            if (_lineasPorBloque.Values.Any(l => l.Contains(capaFlotante))) continue;
+
+            var bloqueFlotante = m.Flujo[capaFlotante.BloqueAncla];
+
+            if (!_marcosFlotantesPorBloque.TryGetValue(bloqueFlotante, out var listaFlotantes))
+                _marcosFlotantesPorBloque[bloqueFlotante] = listaFlotantes = new List<CapaModelo>();
+
+            listaFlotantes.Add(capaFlotante);
         }
 
         _capasPorBloque = new Dictionary<BloqueModelo, List<CapaModelo>>();
@@ -113,12 +150,7 @@ internal static class GeneradorPdf
             if (cortes.Count > 0) _cortesPropios = cortes;
         }
 
-        // Los documentos con texto en el encabezado del master-page (la bitÃ¡cora de
-        // pedidos: tÃ­tulo, ruta y fecha arriba; fecha de impresiÃ³n abajo) son de varias
-        // hojas y necesitan ese mobiliario en TODAS. Se pinta con Background, que QuestPDF
-        // repite por pÃ¡gina y no altera ni el origen de coordenadas de las capas ni el
-        // Ã¡rea del flujo (el cuerpo ya estÃ¡ desplazado por MargenSupPt/MargenInfPt).
-        var mobiliario = m.Encabezado.Count > 0;
+        var segmentos = SegmentosPorPaginaMaestra(m);
 
         // QuestPDF 2026 ya no usa las fuentes del sistema por defecto: sin esto,
         // Arial/Calibri lanzan DocumentDrawingException. Para el prototipo usamos
@@ -134,262 +166,366 @@ internal static class GeneradorPdf
 
         return Document.Create(doc =>
         {
-            doc.Page(pagina =>
+            for (var idxSeg = 0; idxSeg < segmentos.Count; idxSeg++)
             {
-                pagina.Size(new PageSize((float)m.Pagina.AnchoPt, (float)m.Pagina.AltoPt));
-                pagina.Margin(0);
-                pagina.DefaultTextStyle(t => t.FontSize(9).FontFamily("Arial"));
+                var (maestra, bloquesSeg) = segmentos[idxSeg];
+                var pg = maestra.Pagina;
+                var esPrimerSegmento = idxSeg == 0;
+                var mobiliarioSeg = maestra.Encabezado.Count > 0;
 
-                // El pie se declara como Footer de pÃ¡gina, no como una capa mÃ¡s del
-                // contenido: QuestPDF reserva su alto en TODAS las hojas. Antes era una
-                // capa AlignBottom y una tabla con muchas partidas podÃ­a dibujarse encima
-                // de la "Referencia" del footer.
-                if (!mobiliario && m.Pie.Count > 0)
+                // Ajusta las variables de página activas para este segmento (ControlDeViudas y
+                // DibujarMarcosFlotantes capturan estos valores al componer los elementos).
+                _margenIzqPagina = pg.MargenIzqPt;
+                _altoUtilPagina = Math.Max(pg.AltoPt - pg.MargenSupPt - pg.MargenInfPt, 100);
+                var izqFlujo = pg.MargenIzqPt + m.DesplazamientoIzqPt;
+                var margenDerSeg = Math.Max(pg.MargenDerPt + m.DesplazamientoIzqPt, 0);
+                var anchoBaseSeg = pg.AnchoPt - izqFlujo - margenDerSeg;
+                var anchoFisicoSeg = Math.Max(pg.AnchoPt - izqFlujo - 4, 0);
+                var anchoTablaNegSeg = bloquesSeg
+                    .Where(b => b.Tipo == "tabla" && b.Tabla != null &&
+                                (b.Tabla.MargenIzqPt <= -umbralTablaAnchaPt ||
+                                 (b.Tabla.AlineacionTabla == "center" &&
+                                  (b.Tabla.AnchoDeclaradoPt > 0 ? b.Tabla.AnchoDeclaradoPt : b.Tabla.ColumnasPt.Sum()) > anchoBaseSeg + 0.5)))
+                    .Select(b => b.Tabla.AnchoDeclaradoPt > 0 ? b.Tabla.AnchoDeclaradoPt : b.Tabla.ColumnasPt.Sum())
+                    .DefaultIfEmpty(anchoBaseSeg)
+                    .Max();
+                var expSeg = Math.Min(
+                    Math.Max(anchoTablaNegSeg - anchoBaseSeg, 0),
+                    Math.Max(anchoFisicoSeg - anchoBaseSeg, 0));
+                var derFlujo = Math.Max(margenDerSeg - expSeg, 0);
+                _margenDerechoFlujo = derFlujo;
+                _compensacionDerFlujo = Math.Max(pg.MargenDerPt - derFlujo, 0);
+
+                doc.Page(pagina =>
                 {
-                    pagina.Footer()
-                        .PaddingLeft((float)m.Pagina.MargenIzqPt)
-                        .PaddingRight((float)m.Pagina.MargenDerPt)
-                        .PaddingBottom((float)Math.Max(m.Pagina.MargenInfBasePt, 0))
-                        .Column(c =>
-                        {
-                            foreach (var p in m.Pie) AgregarParrafo(c, p);
-                        });
-                }
+                    pagina.Size(new PageSize((float)pg.AnchoPt, (float)pg.AltoPt));
+                    pagina.Margin(0);
+                    pagina.DefaultTextStyle(t => t.FontSize(9).FontFamily("Arial"));
 
-                // Todos los fondos (marcas de agua, números de página y mobiliario)
-                // deben compartir UNA sola llamada a Page.Background(): QuestPDF sólo
-                // permite definir esa capa una vez por página.
-                var hayFondo = m.MarcasAgua.Count > 0 ||
-                               m.MarcasAguaTexto.Count > 0 ||
-                               m.NumerosPagina.Count > 0 ||
-                               mobiliario;
-
-                if (hayFondo)
-                {
-                    pagina.Background().Layers(capasFondo =>
+                    // El pie se declara como Footer de pÃ¡gina, no como una capa mÃ¡s del
+                    // contenido: QuestPDF reserva su alto en TODAS las hojas. Antes era una
+                    // capa AlignBottom y una tabla con muchas partidas podÃ­a dibujarse encima
+                    // de la "Referencia" del footer.
+                    if (!mobiliarioSeg && maestra.Pie.Count > 0)
                     {
-                        var primera = true;
-
-                        IContainer Siguiente()
-                        {
-                            var capa = primera ? capasFondo.PrimaryLayer() : capasFondo.Layer();
-                            primera = false;
-                            return capa;
-                        }
-
-                        if (m.MarcasAgua.Count > 0)
-                        {
-                            foreach (var marca in m.MarcasAgua)
+                        pagina.Footer()
+                            .PaddingLeft((float)pg.MargenIzqPt)
+                            .PaddingRight((float)pg.MargenDerPt)
+                            .PaddingBottom((float)Math.Max(pg.MargenInfBasePt, 0))
+                            .Column(c =>
                             {
-                                if (string.IsNullOrWhiteSpace(marca.ImagenBase64)) continue;
-                                var bytes = Convert.FromBase64String(marca.ImagenBase64);
-
-                                if (string.Equals(marca.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase))
-                                    bytes = AtenuarMarcaAgua(bytes);
-
-                                var baseIzq = string.Equals(marca.HorizontalRel, "page-content", StringComparison.OrdinalIgnoreCase) ||
-                                              string.Equals(marca.HorizontalRel, "paragraph", StringComparison.OrdinalIgnoreCase) ||
-                                              string.Equals(marca.HorizontalRel, "paragraph-content", StringComparison.OrdinalIgnoreCase);
-                                var izq = baseIzq ? m.Pagina.MargenIzqPt : 0;
-
-                                var baseSup = string.Equals(marca.VerticalRel, "page-content", StringComparison.OrdinalIgnoreCase);
-                                var sup = baseSup ? m.Pagina.MargenSupPt : 0;
-                                var anchoArea = m.Pagina.AnchoPt - m.Pagina.MargenIzqPt - m.Pagina.MargenDerPt;
-                                var altoArea = m.Pagina.AltoPt - m.Pagina.MargenSupPt - m.Pagina.MargenInfPt;
-
-                                double x = string.Equals(marca.HorizontalPos, "center", StringComparison.OrdinalIgnoreCase)
-                                    ? izq + (anchoArea - marca.AnchoPt) / 2
-                                    : izq + marca.XPt;
-                                double y = string.Equals(marca.VerticalPos, "middle", StringComparison.OrdinalIgnoreCase)
-                                    ? sup + (altoArea - marca.AltoPt) / 2
-                                    : sup + marca.YPt;
-
-                                y = Math.Max(y, 0);
-
-                                Siguiente().Element(cont => cont
-                                    .PaddingLeft((float)x)
-                                    .PaddingTop((float)y)
-                                    .Width((float)marca.AnchoPt)
-                                    .Height((float)marca.AltoPt)
-                                    .Image(bytes));
-                            }
-                        }
-
-                        if (m.MarcasAguaTexto.Count > 0)
-                        {
-                            foreach (var marca in m.MarcasAguaTexto)
-                            {
-                                var anchoCaja = (float)marca.AnchoPt;
-                                var altoCaja = (float)marca.AltoPt;
-                                var imagen = MarcaAguaTextoPng(marca, anchoCaja, altoCaja);
-
-                                Siguiente().Element(cont => cont
-                                    .PaddingLeft((float)marca.XPt)
-                                    .PaddingTop((float)marca.YPt)
-                                    .Width(anchoCaja)
-                                    .Height(altoCaja)
-                                    .Image(imagen));
-                            }
-                        }
-
-                        foreach (var numeroPagina in m.NumerosPagina)
-                        {
-                            var parrafoNumero = numeroPagina.Parrafos.FirstOrDefault();
-                            var estiloNumero = EstiloDe(parrafoNumero?.Runs ?? new List<RunModelo>(),
-                                                        parrafoNumero?.AltoLineaPt ?? 0)
-                                .FontColor(Colors.White);
-                            var altoNumero = numeroPagina.AltoPt > 0 ? numeroPagina.AltoPt : 14.4;
-
-                            Siguiente().Element(cont => cont
-                                .PaddingLeft((float)numeroPagina.XPt)
-                                .PaddingTop((float)numeroPagina.YPt)
-                                .Width((float)Math.Max(numeroPagina.AnchoPt, 1))
-                                .Height((float)altoNumero)
-                                .Background(ColorDe(numeroPagina.ColorRelleno ?? "#4f81bd"))
-                                .PaddingLeft(7.26f)
-                                .PaddingTop(0.06f)
-                                .DefaultTextStyle(estiloNumero)
-                                .Text(t => t.CurrentPageNumber()));
-                        }
-
-                        if (mobiliario)
-                        {
-                            var capaMobiliario = Siguiente();
-
-                            capaMobiliario.Column(c =>
-                            {
-                                c.Item()
-                                 .PaddingTop((float)Math.Max(m.Pagina.MargenSupBasePt - 0.5, 0))
-                                 .PaddingRight((float)m.Pagina.MargenDerPt)
-                                 .Column(cc =>
-                                 {
-                                     foreach (var p in m.Encabezado)
-                                         AgregarParrafo(cc, p, m.Pagina.MargenIzqPt + p.MargenIzqPt);
-                                 });
-
-                                if (m.Pie.Count > 0)
-                                    c.Item().ExtendVertical().AlignBottom()
-                                     .PaddingRight((float)m.Pagina.MargenDerPt)
-                                     .PaddingBottom((float)Math.Max(PieAbajo(m.Pagina), 0))
-                                     .Column(cc =>
-                                     {
-                                         foreach (var p in m.Pie)
-                                             AgregarParrafo(cc, p, m.Pagina.MargenIzqPt + p.MargenIzqPt);
-                                     });
+                                foreach (var p in maestra.Pie) AgregarParrafo(c, p);
                             });
-                        }
-                    });
-                }
-
-                pagina.Content().Layers(capas =>
-                {
-                    // una capa POR CADA caja con posiciÃ³n absoluta: los layers de QuestPDF
-                    // son independientes, asÃ­ una imagen alta (el logo) no empuja a las demÃ¡s
-                    foreach (var capa in m.Capas)
-                    {
-                        // las ancladas as-char se dibujan dentro del flujo: su posiciÃ³n
-                        // depende del texto de arriba, no de una coordenada fija
-                        // las ancladas dentro de una tabla se dibujan en el flujo, tras su tabla
-                        if (capa.EnFlujo || capa.AnclaEnTabla) continue;
-                        if (_lineasPorBloque.Values.Any(l => l.Contains(capa))) continue;
-
-                        var actual = capa;
-                        capas.Layer().Element(cont => DibujarCapa(cont, actual));
                     }
 
-                    // y el flujo del documento, respetando las columnas de cada section.
-                    // Si las tablas piden margen negativo (reportes), el flujo entero se
-                    // desplaza a la izquierda y usa el ancho de la pÃ¡gina, como LibreOffice.
-                    var izqFlujo = m.Pagina.MargenIzqPt + m.DesplazamientoIzqPt;
-                    // Con tablas de margen negativo el flujo ya estÃ¡ corrido a la izquierda:
-                    // el ancho Ãºtil es hasta el borde de la hoja menos ese desplazamiento.
-                    // Antes se dejaban 20 pt fijos a la derecha y las tablas (la de "Fichas
-                    // de depÃ³sito" de la liquidaciones) quedaban 27 pt mÃ¡s cortas que en
-                    // LibreOffice, que las deja llegar al borde.
-                    // El desplazamiento mueve el Ã¡rea de texto a la IZQUIERDA (las tablas de
-                    // los reportes arrancan antes del margen): se corre el borde izquierdo y
-                    // se devuelve lo mismo al derecho para conservar el ANCHO. Antes el margen
-                    // derecho se ponÃ­a en 0 y el Ã¡rea quedaba mÃ¡s ancha que la de LibreOffice:
-                    // los contratos cortaban menos renglones y salÃ­an en menos pÃ¡ginas.
-                    var derFlujo = _margenDerechoFlujo;
+                    // Todos los fondos (marcas de agua, números de página y mobiliario)
+                    // deben compartir UNA sola llamada a Page.Background(): QuestPDF sólo
+                    // permite definir esa capa una vez por página.
+                    var hayFondo = maestra.MarcasAgua.Count > 0 ||
+                                   maestra.MarcasAguaTexto.Count > 0 ||
+                                   maestra.NumerosPagina.Count > 0 ||
+                                   mobiliarioSeg;
 
-                    capas.PrimaryLayer()
-                         .PaddingLeft((float)izqFlujo)
-                         .PaddingRight((float)derFlujo)
-                         .PaddingTop((float)m.Pagina.MargenSupPt)
-                         .PaddingBottom((float)(!mobiliario && m.Pie.Count > 0 ? 0 : m.Pagina.MargenInfPt))
-                         .Column(col =>
-                         {
-                             var anchoUtil = m.Pagina.AnchoPt - izqFlujo - derFlujo;
+                    if (hayFondo)
+                    {
+                        pagina.Background().Layers(capasFondo =>
+                        {
+                            var primera = true;
 
-                             foreach (var grupo in PorSeccion(m))
-                             {
-                                 var sec = grupo.Key >= 0 && grupo.Key < m.Secciones.Count ? m.Secciones[grupo.Key] : null;
+                            IContainer Siguiente()
+                            {
+                                var capa = primera ? capasFondo.PrimaryLayer() : capasFondo.Layer();
+                                primera = false;
+                                return capa;
+                            }
 
-                                 if (sec == null || sec.Columnas <= 1 || sec.RelAnchos.Count < 2)
-                                 {
-                                     col.Item().Column(c => AgregarFlujo(c, grupo.Value, anchoUtil));
-                                     continue;
-                                 }
+                            if (maestra.MarcasAgua.Count > 0)
+                            {
+                                foreach (var marca in maestra.MarcasAgua)
+                                {
+                                    if (string.IsNullOrWhiteSpace(marca.ImagenBase64)) continue;
+                                    var bytes = Convert.FromBase64String(marca.ImagenBase64);
 
-                                 // secciÃ³n con varias columnas: se reparten los bloques
-                                 // por alto estimado y cada columna toma su ancho relativo
-                                 var total = sec.RelAnchos.Sum();
-                                 var reparto = Repartir(grupo.Value, sec.Columnas);
+                                    if (string.Equals(marca.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase))
+                                        bytes = AtenuarMarcaAgua(bytes);
 
-                                 if (Environment.GetEnvironmentVariable("FODT_DIAG") == "1")
-                                 {
-                                     for (var d = 0; d < reparto.Count; d++)
+                                    var baseIzq = string.Equals(marca.HorizontalRel, "page-content", StringComparison.OrdinalIgnoreCase) ||
+                                                  string.Equals(marca.HorizontalRel, "paragraph", StringComparison.OrdinalIgnoreCase) ||
+                                                  string.Equals(marca.HorizontalRel, "paragraph-content", StringComparison.OrdinalIgnoreCase);
+                                    var izq = baseIzq ? pg.MargenIzqPt : 0;
+
+                                    var baseSup = string.Equals(marca.VerticalRel, "page-content", StringComparison.OrdinalIgnoreCase);
+                                    var sup = baseSup ? pg.MargenSupPt : 0;
+                                    var anchoArea = pg.AnchoPt - pg.MargenIzqPt - pg.MargenDerPt;
+                                    var altoArea = pg.AltoPt - pg.MargenSupPt - pg.MargenInfPt;
+
+                                    double x = string.Equals(marca.HorizontalPos, "center", StringComparison.OrdinalIgnoreCase)
+                                        ? izq + (anchoArea - marca.AnchoPt) / 2
+                                        : izq + marca.XPt;
+                                    double y = string.Equals(marca.VerticalPos, "middle", StringComparison.OrdinalIgnoreCase)
+                                        ? sup + (altoArea - marca.AltoPt) / 2
+                                        : sup + marca.YPt;
+
+                                    y = Math.Max(y, 0);
+
+                                    Siguiente().Element(cont => cont
+                                        .PaddingLeft((float)x)
+                                        .PaddingTop((float)y)
+                                        .Width((float)marca.AnchoPt)
+                                        .Height((float)marca.AltoPt)
+                                        .Image(bytes));
+                                }
+                            }
+
+                            if (maestra.MarcasAguaTexto.Count > 0)
+                            {
+                                foreach (var marca in maestra.MarcasAguaTexto)
+                                {
+                                    var anchoCaja = (float)marca.AnchoPt;
+                                    var altoCaja = (float)marca.AltoPt;
+                                    var imagen = MarcaAguaTextoPng(marca, anchoCaja, altoCaja);
+
+                                    Siguiente().Element(cont => cont
+                                        .PaddingLeft((float)marca.XPt)
+                                        .PaddingTop((float)marca.YPt)
+                                        .Width(anchoCaja)
+                                        .Height(altoCaja)
+                                        .Image(imagen));
+                                }
+                            }
+
+                            foreach (var numeroPagina in maestra.NumerosPagina)
+                            {
+                                var parrafoNumero = numeroPagina.Parrafos.FirstOrDefault();
+                                var estiloBase = EstiloDe(parrafoNumero?.Runs ?? new List<RunModelo>(),
+                                                          parrafoNumero?.AltoLineaPt ?? 0);
+                                var altoNumero = numeroPagina.AltoPt > 0 ? numeroPagina.AltoPt : 14.4;
+
+                                if (numeroPagina.EnPie)
+                                {
+                                    // Número de página en style:footer (p.ej. Marco2 en Converted2 del CCI)
+                                    var yPie = Math.Max(pg.AltoPt - pg.MargenInfBasePt - Math.Max(pg.AltoPiePt, 27.6) + numeroPagina.YPt, 0);
+                                    var alineadoDer = string.Equals(numeroPagina.HorizontalPos, "right", StringComparison.OrdinalIgnoreCase);
+                                    var conFondo = !string.IsNullOrEmpty(numeroPagina.ColorRelleno);
+                                    var estiloPie = conFondo ? estiloBase.FontColor(Colors.White) : estiloBase;
+
+                                    Siguiente().Element(cont =>
+                                    {
+                                        IContainer caja = cont.PaddingTop((float)yPie);
+                                        if (alineadoDer)
+                                        {
+                                            caja = caja.PaddingLeft((float)pg.MargenIzqPt)
+                                                       .PaddingRight((float)pg.MargenDerPt)
+                                                       .AlignRight();
+                                        }
+                                        else
+                                        {
+                                            caja = caja.PaddingLeft((float)numeroPagina.XPt);
+                                        }
+
+                                        if (conFondo)
+                                            caja = caja.Background(ColorDe(numeroPagina.ColorRelleno));
+
+                                        caja.DefaultTextStyle(estiloPie)
+                                            .Text(t => t.CurrentPageNumber());
+                                    });
+                                }
+                                else
+                                {
+                                    var estiloNumero = estiloBase.FontColor(Colors.White);
+
+                                    Siguiente().Element(cont => cont
+                                        .PaddingLeft((float)numeroPagina.XPt)
+                                        .PaddingTop((float)numeroPagina.YPt)
+                                        .Width((float)Math.Max(numeroPagina.AnchoPt, 1))
+                                        .Height((float)altoNumero)
+                                        .Background(ColorDe(numeroPagina.ColorRelleno ?? "#4f81bd"))
+                                        .PaddingLeft(7.26f)
+                                        .PaddingTop(0.06f)
+                                        .DefaultTextStyle(estiloNumero)
+                                        .Text(t => t.CurrentPageNumber()));
+                                }
+                            }
+
+                            if (mobiliarioSeg)
+                            {
+                                var capaMobiliario = Siguiente();
+
+                                capaMobiliario.Column(c =>
+                                {
+                                    c.Item()
+                                     .PaddingTop((float)Math.Max(pg.MargenSupBasePt - 0.5, 0))
+                                     .PaddingRight((float)pg.MargenDerPt)
+                                     .Column(cc =>
                                      {
-                                         var muestra = string.Join(" | ", reparto[d]
-                                             .Where(b => b.Tipo == "texto" && b.Parrafo != null)
-                                             .Take(3)
-                                             .Select(b => string.Concat(b.Parrafo.Runs.Select(r => r.Texto)).Trim()));
+                                         foreach (var p in maestra.Encabezado)
+                                             AgregarParrafo(cc, p, pg.MargenIzqPt + p.MargenIzqPt);
+                                     });
 
-                                         Console.Error.WriteLine($"DIAG col{d}: {reparto[d].Count} bloques, rotulos={EsColumnaDeRotulos(reparto[d])} :: {muestra}");
-                                     }
-                                 }
-
-                                 col.Item().Row(row =>
-                                 {
-                                     for (var i = 0; i < sec.Columnas; i++)
-                                     {
-                                         var bloques = i < reparto.Count ? reparto[i] : new List<BloqueModelo>();
-                                         var peso = (float)(total <= 0 ? 1 : sec.RelAnchos[Math.Min(i, sec.RelAnchos.Count - 1)] / total);
-                                         var anchoColumna = anchoUtil * peso;
-
-                                         // Si esta columna son RÃ“TULOS (lÃ­neas que acaban en ":") y
-                                         // la siguiente son sus VALORES, se pintan emparejados:
-                                         // asÃ­ cada rÃ³tulo queda en la misma lÃ­nea que su valor,
-                                         // que es lo que hace LibreOffice con las 3 columnas.
-                                         var siguiente = i + 1 < reparto.Count ? reparto[i + 1] : null;
-
-                                         if (i > 0 && siguiente != null && EsColumnaDeRotulos(bloques))
+                                    if (maestra.Pie.Count > 0)
+                                        c.Item().ExtendVertical().AlignBottom()
+                                         .PaddingRight((float)pg.MargenDerPt)
+                                         .PaddingBottom((float)Math.Max(PieAbajo(pg), 0))
+                                         .Column(cc =>
                                          {
-                                             var pesoValor = (float)(total <= 0 ? 1 : sec.RelAnchos[Math.Min(i + 1, sec.RelAnchos.Count - 1)] / total);
+                                             foreach (var p in maestra.Pie)
+                                                 AgregarParrafo(cc, p, pg.MargenIzqPt + p.MargenIzqPt);
+                                         });
+                                });
+                            }
+                        });
+                    }
 
-                                             row.RelativeItem(Math.Max(peso + pesoValor, 0.01f))
-                                                .Column(c => EmparejarRotulosValores(c, bloques, siguiente, peso, pesoValor));
-                                             i++;   // los valores ya se han pintado
-                                             continue;
-                                         }
+                    pagina.Content().Layers(capas =>
+                    {
+                        // una capa POR CADA caja con posiciÃ³n absoluta: los layers de QuestPDF
+                        // son independientes, asÃ­ una imagen alta (el logo) no empuja a las demÃ¡s
+                        if (esPrimerSegmento)
+                        {
+                            foreach (var capa in m.Capas)
+                            {
+                                // las ancladas as-char se dibujan dentro del flujo: su posiciÃ³n
+                                // depende del texto de arriba, no de una coordenada fija
+                                // las ancladas dentro de una tabla se dibujan en el flujo, tras su tabla
+                                if (capa.EnFlujo || capa.AnclaEnTabla) continue;
+                                if (_lineasPorBloque.Values.Any(l => l.Contains(capa))) continue;
+                                if (_marcosFlotantesPorBloque.Values.Any(l => l.Contains(capa))) continue;
 
-                                         row.RelativeItem(Math.Max(peso, 0.01f)).Column(c => AgregarFlujo(c, bloques, anchoColumna));
+                                var actual = capa;
+                                capas.Layer().Element(cont => DibujarCapa(cont, actual));
+                            }
+                        }
+
+                        capas.PrimaryLayer()
+                             .PaddingLeft((float)izqFlujo)
+                             .PaddingRight((float)derFlujo)
+                             .PaddingTop((float)pg.MargenSupPt)
+                             .PaddingBottom((float)(!mobiliarioSeg && maestra.Pie.Count > 0 ? 0 : pg.MargenInfPt))
+                             .Column(col =>
+                             {
+                                 var anchoUtil = pg.AnchoPt - izqFlujo - derFlujo;
+
+                                 foreach (var grupo in PorSeccion(bloquesSeg))
+                                 {
+                                     var sec = grupo.Key >= 0 && grupo.Key < m.Secciones.Count ? m.Secciones[grupo.Key] : null;
+
+                                     if (sec == null || sec.Columnas <= 1 || sec.RelAnchos.Count < 2)
+                                     {
+                                         col.Item().Column(c => AgregarFlujo(c, grupo.Value, anchoUtil));
+                                         continue;
                                      }
-                                 });
-                             }
-                         });
+
+                                     // secciÃ³n con varias columnas: se reparten los bloques
+                                     // por alto estimado y cada columna toma su ancho relativo
+                                     var total = sec.RelAnchos.Sum();
+                                     var reparto = Repartir(grupo.Value, sec.Columnas);
+
+                                     if (Environment.GetEnvironmentVariable("FODT_DIAG") == "1")
+                                     {
+                                         for (var d = 0; d < reparto.Count; d++)
+                                         {
+                                             var muestra = string.Join(" | ", reparto[d]
+                                                 .Where(b => b.Tipo == "texto" && b.Parrafo != null)
+                                                 .Take(3)
+                                                 .Select(b => string.Concat(b.Parrafo.Runs.Select(r => r.Texto)).Trim()));
+
+                                             Console.Error.WriteLine($"DIAG col{d}: {reparto[d].Count} bloques, rotulos={EsColumnaDeRotulos(reparto[d])} :: {muestra}");
+                                         }
+                                     }
+
+                                     col.Item().Row(row =>
+                                     {
+                                         for (var i = 0; i < sec.Columnas; i++)
+                                         {
+                                             var bloques = i < reparto.Count ? reparto[i] : new List<BloqueModelo>();
+                                             var peso = (float)(total <= 0 ? 1 : sec.RelAnchos[Math.Min(i, sec.RelAnchos.Count - 1)] / total);
+                                             var startCol = i < sec.MargenIzqColPt.Count ? sec.MargenIzqColPt[i] : 0;
+                                             var endCol = i < sec.MargenDerColPt.Count ? sec.MargenDerColPt[i] : 0;
+                                             var anchoColumna = Math.Max(anchoUtil * peso - startCol - endCol, 10);
+
+                                             // Si esta columna son RÃ“TULOS (lÃ­neas que acaban en ":") y
+                                             // la siguiente son sus VALORES, se pintan emparejados:
+                                             // asÃ­ cada rÃ³tulo queda en la misma lÃ­nea que su valor,
+                                             // que es lo que hace LibreOffice con las 3 columnas.
+                                             var siguiente = i + 1 < reparto.Count ? reparto[i + 1] : null;
+
+                                             if (i > 0 && siguiente != null && EsColumnaDeRotulos(bloques))
+                                             {
+                                                 var pesoValor = (float)(total <= 0 ? 1 : sec.RelAnchos[Math.Min(i + 1, sec.RelAnchos.Count - 1)] / total);
+                                                 var startValor = i + 1 < sec.MargenIzqColPt.Count ? sec.MargenIzqColPt[i + 1] : 0;
+                                                 var endValor = i + 1 < sec.MargenDerColPt.Count ? sec.MargenDerColPt[i + 1] : 0;
+
+                                                 row.RelativeItem(Math.Max(peso + pesoValor, 0.01f))
+                                                    .Column(c => EmparejarRotulosValores(c, bloques, siguiente, peso, pesoValor, startCol, endCol, startValor, endValor));
+                                                 i++;   // los valores ya se han pintado
+                                                 continue;
+                                             }
+
+                                             row.RelativeItem(Math.Max(peso, 0.01f))
+                                                .PaddingLeft((float)Math.Max(startCol, 0))
+                                                .PaddingRight((float)Math.Max(endCol, 0))
+                                                .Column(c => AgregarFlujo(c, bloques, anchoColumna));
+                                         }
+                                     });
+                                 }
+                             });
+                    });
                 });
-            });
+            }
         });
     }
 
+    // Parte el flujo en segmentos cada vez que un párrafo cambia de style:master-page-name
+    // (ODF 1.3 §16.2: implica salto de página y cambio de page-layout, encabezado y pie).
+    static List<(PaginaMaestraModelo Maestra, List<BloqueModelo> Bloques)> SegmentosPorPaginaMaestra(ModeloPlantilla m)
+    {
+        var inicial = !string.IsNullOrEmpty(m.PaginaMaestraInicial) &&
+                      m.PaginasMaestras.TryGetValue(m.PaginaMaestraInicial, out var pmIni)
+            ? pmIni
+            : new PaginaMaestraModelo
+            {
+                Nombre = "Standard",
+                Pagina = m.Pagina,
+                Encabezado = m.Encabezado,
+                Pie = m.Pie,
+                MarcasAgua = m.MarcasAgua,
+                NumerosPagina = m.NumerosPagina,
+                MarcasAguaTexto = m.MarcasAguaTexto,
+            };
+
+        var salida = new List<(PaginaMaestraModelo Maestra, List<BloqueModelo> Bloques)>();
+        var actualMaestra = inicial;
+        var actualBloques = new List<BloqueModelo>();
+
+        foreach (var bloque in m.Flujo)
+        {
+            var nombreMaestra = bloque.Parrafo?.PaginaMaestra;
+            if (!string.IsNullOrEmpty(nombreMaestra) &&
+                m.PaginasMaestras.TryGetValue(nombreMaestra, out var nuevaMaestra))
+            {
+                if (actualBloques.Count > 0)
+                {
+                    salida.Add((actualMaestra, actualBloques));
+                    actualBloques = new List<BloqueModelo>();
+                }
+                actualMaestra = nuevaMaestra;
+            }
+
+            actualBloques.Add(bloque);
+        }
+
+        if (actualBloques.Count > 0 || salida.Count == 0)
+            salida.Add((actualMaestra, actualBloques));
+
+        return salida;
+    }
+
     // agrupa el flujo por secciÃ³n conservando el orden de apariciÃ³n
-    static List<KeyValuePair<int, List<BloqueModelo>>> PorSeccion(ModeloPlantilla m)
+    static List<KeyValuePair<int, List<BloqueModelo>>> PorSeccion(List<BloqueModelo> flujo)
     {
         var salida = new List<KeyValuePair<int, List<BloqueModelo>>>();
 
-        foreach (var bloque in m.Flujo)
+        foreach (var bloque in flujo)
         {
             if (salida.Count == 0 || salida[^1].Key != bloque.Seccion)
                 salida.Add(new KeyValuePair<int, List<BloqueModelo>>(bloque.Seccion, new List<BloqueModelo>()));
@@ -419,7 +555,9 @@ internal static class GeneradorPdf
     // columnas 2 y 3 de la factura). Sin esto, los rÃ³tulos quedan en una columna y los
     // valores en otra, y cada valor cae una o dos lÃ­neas por debajo de su rÃ³tulo.
     static void EmparejarRotulosValores(ColumnDescriptor col, List<BloqueModelo> rotulos,
-                                        List<BloqueModelo> valores, float pesoRotulo, float pesoValor)
+                                        List<BloqueModelo> valores, float pesoRotulo, float pesoValor,
+                                        double startRotuloPt = 0, double endRotuloPt = 0,
+                                        double startValorPt = 0, double endValorPt = 0)
     {
         var etiquetas = rotulos.Where(b => b.Tipo == "texto" && b.Parrafo != null).ToList();
         var datos = valores.Where(b => b.Tipo == "texto" && b.Parrafo != null).ToList();
@@ -435,9 +573,11 @@ internal static class GeneradorPdf
         datos = datos.Where(b => !EsFolio(b)).ToList();
 
         // El bloque no arranca en el borde del Ã¡rea: los espaciadores iniciales del .fodt
-        // lo bajan hasta su sitio. Al emparejar hay que reponerlos o todo sube a la parte
-        // de arriba de la pÃ¡gina (que es lo que pasÃ³ al emparejar sin esto).
-        var sangria = Math.Max(AltoInicial(rotulos), AltoInicial(valores));
+        // lo bajan hasta su sitio. Como la cabecera (folio) se pinta antes de la sangría
+        // dentro de esta columna combinada, su alto se descuenta de los espaciadores de
+        // rótulos (que empiezan desde el tope de la sección, sin cabecera).
+        var altoCabecera = cabecera.Sum(AltoEstimado);
+        var sangria = Math.Max(Math.Max(AltoInicial(rotulos) - altoCabecera, 0), AltoInicial(valores));
         // El FOLIO va PRIMERO, pegado al borde superior de la secciÃ³n (en LibreOffice estÃ¡
         // en y=761, arriba del todo), y la sangrÃ­a se aplica DESPUÃ‰S: si se aplica antes,
         // el folio baja y se planta encima del UUID.
@@ -462,14 +602,20 @@ internal static class GeneradorPdf
 
             col.Item().Row(r =>
             {
-                r.RelativeItem(Math.Max(pesoRotulo / suma, 0.01f)).Column(c => AgregarParrafo(c, etiqueta.Parrafo));
-                r.RelativeItem(Math.Max(pesoValor / suma, 0.01f)).Column(c => AgregarParrafo(c, valor.Parrafo));
+                r.RelativeItem(Math.Max(pesoRotulo / suma, 0.01f))
+                 .PaddingLeft((float)Math.Max(startRotuloPt, 0))
+                 .PaddingRight((float)Math.Max(endRotuloPt, 0))
+                 .Column(c => AgregarParrafo(c, etiqueta.Parrafo));
+                r.RelativeItem(Math.Max(pesoValor / suma, 0.01f))
+                 .PaddingLeft((float)Math.Max(startValorPt, 0))
+                 .PaddingRight((float)Math.Max(endValorPt, 0))
+                 .Column(c => AgregarParrafo(c, valor.Parrafo));
             });
         }
 
         // lo que sobre (mÃ¡s rÃ³tulos o mÃ¡s valores) se pinta debajo, sin emparejar
-        foreach (var e in etiquetas.Skip(pares)) col.Item().Column(c => AgregarParrafo(c, e.Parrafo));
-        foreach (var d in datos.Skip(pares)) col.Item().Column(c => AgregarParrafo(c, d.Parrafo));
+        foreach (var e in etiquetas.Skip(pares)) col.Item().PaddingLeft((float)Math.Max(startRotuloPt, 0)).Column(c => AgregarParrafo(c, e.Parrafo));
+        foreach (var d in datos.Skip(pares)) col.Item().PaddingLeft((float)Math.Max(startValorPt, 0)).Column(c => AgregarParrafo(c, d.Parrafo));
     }
 
     // Alto de los espaciadores iniciales de una columna: sirve para igualar el arranque
@@ -497,7 +643,7 @@ internal static class GeneradorPdf
             if (bloque.Parrafo != null && bloque.Parrafo.Lineas.Count > 0)
                 DibujarRenglones(col, bloque.Parrafo, bloque.Parrafo.MargenIzqPt - _desplazamientoGlobal, anchoDisponible);
 
-            col.Item().Height((float)Math.Max(bloque.AltoPt, 0.5));
+            col.Item().Height((float)Math.Max(bloque.AltoPt, 0.05));
         }
         else AgregarTabla(col.Item(), bloque.Tabla, anchoDisponible);
     }
@@ -729,41 +875,35 @@ internal static class GeneradorPdf
     // lo que sobre, para no mover el resto del flujo.
     static void AgregarLineasFlujo(ColumnDescriptor col, List<CapaModelo> capas, double altoBloque)
     {
-        var resto = altoBloque;
-
-        foreach (var capa in capas)
+        // El párrafo ancla conserva exactamente su alto declarado (altoBloque): si la imagen
+        // flotante lleva svg:y mayor que el fo:line-height del párrafo (p.ej. P7 0.035cm con
+        // svg:y=0.102cm en Carta Porte), en Writer desborda sin empujar los bloques siguientes.
+        col.Item().Layers(capasDibujo =>
         {
-            var y = Math.Max(capa.YPt, 0);
+            capasDibujo.PrimaryLayer().Height((float)Math.Max(altoBloque, 0.5));
 
-            if (y > 0.3) { col.Item().Height((float)y); resto -= y; }
-
-            try
+            foreach (var capa in capas)
             {
-                var bytes = Convert.FromBase64String(capa.ImagenBase64);
-                var alto = (float)Math.Max(capa.AltoPt, 0.6);
-                var ancho = (float)Math.Max(capa.AnchoPt, 1);
-                var x = (float)Math.Max(capa.XPt, 0);
-
-                // la lÃ­nea mide 222 pt y su columna menos: en LibreOffice desborda hacia la
-                // siguiente columna. Se pinta en una capa aparte para que el desborde no
-                // cuente como tamaÃ±o y QuestPDF no aborte por "conflicting size constraints".
-                col.Item().Layers(capasDibujo =>
+                try
                 {
-                    capasDibujo.PrimaryLayer().Height(alto);
+                    var bytes = Convert.FromBase64String(capa.ImagenBase64);
+                    var alto = (float)Math.Max(capa.AltoPt, 0.6);
+                    var ancho = (float)Math.Max(capa.AnchoPt, 1);
+                    var x = (float)Math.Max(capa.XPt, 0);
+                    var y = (float)Math.Max(capa.YPt, 0);
+
                     capasDibujo.Layer()
+                        .Unconstrained()
                         .PaddingLeft(x)
+                        .PaddingTop(y)
                         .Width(ancho)
                         .Height(alto)
                         .Image(bytes)
                         .FitUnproportionally();
-                });
-
-                resto -= capa.AltoPt;
+                }
+                catch { /* imagen ilegible: se ignora */ }
             }
-            catch { /* imagen ilegible: se ignora */ }
-        }
-
-        if (resto > 0.5) col.Item().Height((float)resto);
+        });
     }
 
     // Marca de agua de TEXTO (WordArt del encabezado) a PNG del tamaÃ±o exacto de la forma.
@@ -885,20 +1025,26 @@ internal static class GeneradorPdf
                 catch { /* imagen ilegible: se sigue con el texto */ }
             }
 
-            // custom-shape que sÃ³lo es una barra de color (la de antes de "ORDEN DE COMPRA"):
-            // no trae texto ni imagen, asÃ­ que se dibuja como caja rellena de su tamaÃ±o.
-            if (!string.IsNullOrEmpty(capa.ColorRelleno) &&
+            // custom-shape que sÃ³lo es una barra de color (la de antes de "ORDEN DE COMPRA")
+            // o marco vacío con relleno/borde: no trae texto ni imagen, así que se dibuja como caja.
+            if ((!string.IsNullOrEmpty(capa.ColorRelleno) || capa.BordeCaja) &&
                 capa.AnchoPt > 0 && capa.AltoPt > 0 &&
                 capa.Tablas.Count == 0 &&
                 !capa.Parrafos.Any(p => p.Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto))))
             {
                 if (capa.YPt > 0.5) col.Item().Height((float)capa.YPt);
 
-                col.Item()
-                   .PaddingLeft((float)capa.XPt)
+                IContainer caja = col.Item()
+                   .PaddingLeft((float)Math.Max(capa.XPt, 0))
                    .Width((float)capa.AnchoPt)
-                   .Height((float)capa.AltoPt)
-                   .Background(ColorDe(capa.ColorRelleno));
+                   .Height((float)capa.AltoPt);
+
+                if (!string.IsNullOrEmpty(capa.ColorRelleno))
+                    caja = caja.Background(ColorDe(capa.ColorRelleno));
+
+                if (capa.BordeCaja)
+                    caja.Border((float)Math.Max(capa.GrosorBordePt, 0.5))
+                        .BorderColor(ColorDe(capa.ColorBorde ?? "#000000"));
                 return;
             }
 
@@ -1003,32 +1149,43 @@ internal static class GeneradorPdf
     // llevan texto, asÃ­ que se dibujan aparte del bloque de texto.
     static void DibujarRenglones(ColumnDescriptor col, ParrafoModelo p, double sangriaPt, double anchoDisponible = 0)
     {
-        foreach (var linea in p.Lineas)
+        var validas = p.Lineas.Where(l => l.AnchoPt > 0.5).ToList();
+        if (validas.Count == 0) return;
+
+        // Se dibujan en capas superpuestas (PrimaryLayer alto 0) para que varias
+        // <draw:line> del mismo párrafo (p.ej. firmas lado a lado PATRON / TRABAJADOR)
+        // compartan la misma referencia vertical YPt sin empujarse hacia abajo entre sí.
+        col.Item().Layers(capasLin =>
         {
-            if (linea.AnchoPt <= 0.5) continue;
+            capasLin.PrimaryLayer().Height(0);
 
-            var izquierda = Math.Max(linea.XPt - _desplazamientoGlobal + Math.Max(sangriaPt, 0), 0);
-
-            // El renglÃ³n puede ser mÃ¡s ancho que el Ã¡rea de texto (el PagarÃ© se sale del
-            // margen derecho); se recorta para que QuestPDF no aborte el documento.
-            var ancho = linea.AnchoPt;
-
-            if (anchoDisponible > 0)
+            foreach (var linea in validas)
             {
-                var restante = anchoDisponible - izquierda;
+                var izquierda = Math.Max(linea.XPt - _desplazamientoGlobal + Math.Max(sangriaPt, 0), 0);
+                var ancho = linea.AnchoPt;
 
-                if (restante < 1) continue;
+                if (anchoDisponible > 0)
+                {
+                    var restante = anchoDisponible - izquierda;
+                    if (restante < 1) continue;
+                    ancho = Math.Min(ancho, restante);
+                }
 
-                ancho = Math.Min(ancho, restante);
+                var x = (float)izquierda;
+                var y = (float)Math.Max(linea.YPt, 0);
+                var w = (float)ancho;
+                var h = (float)Math.Max(linea.GrosorPt, 0.6);
+                var color = ColorDe(linea.Color);
+
+                capasLin.Layer()
+                    .Unconstrained()
+                    .PaddingLeft(x)
+                    .PaddingTop(y)
+                    .Width(w)
+                    .Height(h)
+                    .Background(color);
             }
-
-            col.Item()
-               .PaddingLeft((float)izquierda)
-               .PaddingTop((float)Math.Max(linea.YPt, 0))
-               .Width((float)ancho)
-               .Height((float)Math.Max(linea.GrosorPt, 0.6))
-               .Background(ColorDe(linea.Color));
-        }
+        });
     }
     // Â¿El pÃ¡rrafo ocupa 3 renglones o menos? Se mide con Skia (mismo motor que los
     // tabuladores) contra el ancho disponible del flujo.
@@ -1051,7 +1208,8 @@ internal static class GeneradorPdf
         return lineas <= 3;
     }
 
-    static void AgregarParrafo(ColumnDescriptor col, ParrafoModelo p, double sangriaPt = 0, double anchoPt = 0)
+    static void AgregarParrafo(ColumnDescriptor col, ParrafoModelo p, double sangriaPt = 0, double anchoPt = 0,
+                               double margenDerExtraPt = 0)
     {
         if (p.Runs.Count == 0)
         {
@@ -1061,6 +1219,12 @@ internal static class GeneradorPdf
             col.Item().Height((float)Math.Max(altoVacio, 0.1));
             return;
         }
+
+        // Si el flujo expandió su margen derecho para alojar una tabla ancha con margen negativo,
+        // los párrafos fuera de tabla deben restaurar el margen derecho real de la página.
+        var paddingDer = margenDerExtraPt > 0.5
+            ? Math.Max(margenDerExtraPt + p.MargenDerPt, 0)
+            : Math.Max(p.MargenDerPt, 0);
 
         // Inciso de lista ("A) PRIMERA: â€¦"): el marcador va en una columna fija y el
         // texto ocupa el resto. AsÃ­ el hueco despuÃ©s del inciso y la alineaciÃ³n de los
@@ -1073,37 +1237,67 @@ internal static class GeneradorPdf
 
             var itemLista = col.Item();
 
-            // Mantener las mismas reglas de viudas y huÃ©rfanas que los pÃ¡rrafos sin
-            // sangrÃ­a: esta rama representa incisos de lista como Â«E) QUINTAÂ».
-            // LibreOffice puede iniciar un elemento numerado cuando queda espacio
-            // para dos renglones, aunque no alcance para el alto nominal completo.
-            // EnsureSpace aquí mueve el elemento entero a la página siguiente y
-            // adelanta el salto respecto a Writer en listas largas.
-            var anchoCuerpo = anchoPt > 10
-                ? Math.Max(anchoPt - Math.Max(p.MargenIncisoPt, 0) - p.SangriaColgantePt, 10)
+            // Compensar el desplazamiento global del flujo (tablas con fo:margin-left negativo)
+            // sin duplicar p.MargenIzqPt, que ya está incluido en p.MargenIncisoPt.
+            var desplazamientoFlujo = Math.Max(sangriaPt - p.MargenIzqPt, 0);
+            var paddingIzqLista = Math.Max(p.MargenIncisoPt, 0) + desplazamientoFlujo;
+
+            var anchoCuerpoLista = anchoPt > 10
+                ? Math.Max(anchoPt - paddingIzqLista - p.SangriaColgantePt - paddingDer, 10)
                 : anchoPt;
-            if (EsParrafoCorto(p, anchoCuerpo)) itemLista = itemLista.ShowEntire();
+            var encogerLista = DebeEncogerEspacios(p, anchoCuerpoLista);
 
-            itemLista.PaddingLeft((float)Math.Max(p.MargenIncisoPt, 0)).Row(fila =>
+            void PintarLista(IContainer cont)
             {
-                fila.ConstantItem((float)p.SangriaColgantePt)
-                    .Text(t => t.Span(marca.Texto.Trim()).Style(EstiloDe(new List<RunModelo> { marca }, p.AltoLineaPt)));
-
-                fila.RelativeItem().Text(t =>
+                cont.Row(fila =>
                 {
-                    AlinearTexto(t, p.Alineacion);
+                    fila.ConstantItem((float)p.SangriaColgantePt)
+                        .Text(t => t.Span(marca.Texto.Trim()).Style(EstiloDe(new List<RunModelo> { marca }, p.AltoLineaPt)));
 
-                    foreach (var r in cuerpo)
+                    fila.RelativeItem().Text(t =>
                     {
-                        var estiloCuerpo = EstiloDe(new List<RunModelo> { r }, p.AltoLineaPt);
+                        AlinearTexto(t, p.Alineacion);
 
-                        if (!string.IsNullOrWhiteSpace(r.Hipervinculo))
-                            t.Hyperlink(r.Texto, r.Hipervinculo).Style(estiloCuerpo);
-                        else
-                            t.Span(r.Texto).Style(estiloCuerpo);
-                    }
+                        foreach (var r in cuerpo)
+                        {
+                            var estiloCuerpo = EstiloDe(new List<RunModelo> { r }, p.AltoLineaPt);
+                            if (encogerLista) estiloCuerpo = estiloCuerpo.WordSpacing(FactorEncogimientoJustificado);
+
+                            if (r.CampoDinamico == "page-number")
+                                t.CurrentPageNumber().Style(estiloCuerpo);
+                            else if (r.CampoDinamico == "page-count")
+                                t.TotalPages().Style(estiloCuerpo);
+                            else if (!string.IsNullOrWhiteSpace(r.Hipervinculo))
+                                t.Hyperlink(r.Texto, r.Hipervinculo).Style(estiloCuerpo);
+                            else
+                                t.Span(r.Texto).Style(estiloCuerpo);
+                        }
+                    });
                 });
-            });
+            }
+
+            if (p.Viudas >= 2 || p.Huerfanas >= 2)
+            {
+                var altoLineaReal = AltoLineaRenderizada(p);
+                var contLista = itemLista.PaddingLeft((float)paddingIzqLista);
+                if (paddingDer > 0.5) contLista = contLista.PaddingRight((float)paddingDer);
+                contLista.Decoration(dec =>
+                {
+                    dec.Content().ExtendHorizontal().Element(PintarLista);
+                    dec.After().Dynamic(new ControlDeViudas(PintarLista, altoLineaReal, p.Huerfanas, p.Viudas, _altoUtilPagina));
+                });
+            }
+            else
+            {
+                var anchoCuerpo = anchoPt > 10
+                    ? Math.Max(anchoPt - paddingIzqLista - p.SangriaColgantePt - paddingDer, 10)
+                    : anchoPt;
+                if (EsParrafoCorto(p, anchoCuerpo)) itemLista = itemLista.ShowEntire();
+
+                var contLista = itemLista.PaddingLeft((float)paddingIzqLista);
+                if (paddingDer > 0.5) contLista = contLista.PaddingRight((float)paddingDer);
+                contLista.Element(PintarLista);
+            }
 
             return;
         }
@@ -1114,13 +1308,19 @@ internal static class GeneradorPdf
         // los cortes de renglÃ³n, no el de pÃ¡gina: se deja sin soporte.
         var item = col.Item();
 
-        // Viudas/huÃ©rfanas (LibreOffice exige dos renglones a cada lado del corte):
-        //  - EnsureSpace: no empezar el pÃ¡rrafo si no caben dos renglones (huÃ©rfana);
-        //    si no alcanza, el pÃ¡rrafo completo pasa a la pÃ¡gina siguiente.
-        //  - ShowEntire: un pÃ¡rrafo de â‰¤3 renglones no se parte (viuda).
-        var altoLineaParrafo = p.AltoLineaPt > 0 ? p.AltoLineaPt : 12.5;
-        item = item.EnsureSpace((float)(2 * altoLineaParrafo));
-        if (EsParrafoCorto(p, anchoPt)) item = item.ShowEntire();
+        var usarControlViudas = (p.Viudas >= 2 || p.Huerfanas >= 2)
+            && !p.BordeParrafo && !p.BordeInferiorParrafo && string.IsNullOrEmpty(p.ColorFondoParrafo);
+
+        if (!usarControlViudas)
+        {
+            // Viudas/huÃ©rfanas (LibreOffice exige dos renglones a cada lado del corte):
+            //  - EnsureSpace: no empezar el pÃ¡rrafo si no caben dos renglones (huÃ©rfana);
+            //    si no alcanza, el pÃ¡rrafo completo pasa a la pÃ¡gina siguiente.
+            //  - ShowEntire: un pÃ¡rrafo de â‰¤3 renglones no se parte (viuda).
+            var altoLineaParrafo = p.AltoLineaPt > 0 ? p.AltoLineaPt : 12.5;
+            item = item.EnsureSpace((float)(2 * altoLineaParrafo));
+            if (EsParrafoCorto(p, anchoPt)) item = item.ShowEntire();
+        }
 
         // En una primera línea centrada, ODF aplica text-indent al ancho efectivo de
         // la línea; eso desplaza su centro la mitad de la sangría. Usar sólo el margen
@@ -1129,19 +1329,13 @@ internal static class GeneradorPdf
         item = item.ExtendHorizontal()
                    .PaddingLeft((float)(Math.Max(sangriaPt, 0) + sangriaCentrada));
 
+        if (paddingDer > 0.5)
+            item = item.PaddingRight((float)paddingDer);
+
         // caja del pÃ¡rrafo: el encabezado del contrato CCI va con borde y relleno gris.
         // QuestPDF no tiene borde "double": se dibuja sÃ³lido del mismo grosor y color.
         if (p.BordeParrafo || p.BordeInferiorParrafo || !string.IsNullOrEmpty(p.ColorFondoParrafo))
         {
-            item = item
-                .PaddingTop((float)p.PaddingSupParrafoPt)
-                .PaddingBottom((float)p.PaddingInfParrafoPt)
-                .PaddingLeft((float)p.PaddingIzqParrafoPt)
-                .PaddingRight((float)p.PaddingDerParrafoPt);
-
-            if (!string.IsNullOrEmpty(p.ColorFondoParrafo))
-                item = item.Background(ColorDe(p.ColorFondoParrafo));
-
             if (p.BordeParrafo)
                 item = item
                     .Border((float)Math.Max(p.GrosorBordeParrafoPt, 0.5))
@@ -1150,24 +1344,280 @@ internal static class GeneradorPdf
                 item = item
                     .BorderBottom((float)Math.Max(p.GrosorBordeParrafoPt, 0.5))
                     .BorderColor(ColorDe(p.ColorBordeParrafo ?? "#000000"));
+
+            if (!string.IsNullOrEmpty(p.ColorFondoParrafo))
+                item = item.Background(ColorDe(p.ColorFondoParrafo));
+
+            item = item
+                .PaddingTop((float)p.PaddingSupParrafoPt)
+                .PaddingBottom((float)p.PaddingInfParrafoPt)
+                .PaddingLeft((float)p.PaddingIzqParrafoPt)
+                .PaddingRight((float)p.PaddingDerParrafoPt);
         }
 
-        item.Text(t =>
+        var anchoTextoParrafo = anchoPt > 10
+            ? Math.Max(anchoPt - Math.Max(sangriaPt, 0) - sangriaCentrada - paddingDer, 0)
+            : 0;
+        var runsPintar = PartirTokensLargos(p.Runs, anchoTextoParrafo);
+        var encogerEspacios = DebeEncogerEspacios(p, anchoTextoParrafo);
+        var tieneSuperConBase = runsPintar.Any(r => string.IsNullOrEmpty(r.Posicion) && !string.IsNullOrWhiteSpace(r.Texto))
+                             && runsPintar.Any(r => r.Posicion == "super" && !string.IsNullOrWhiteSpace(r.Texto));
+        var tamPrincipalFlujo = runsPintar
+            .Where(x => !string.IsNullOrWhiteSpace(x.Texto) && x.TamanoPt > 0)
+            .Select(x => x.TamanoPt)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        void PintarTexto(IContainer cont)
         {
-            AlinearTexto(t, p.Alineacion);
-
-            foreach (var r in p.Runs)
+            cont.Text(t =>
             {
-                var estilo = EstiloDe(new List<RunModelo> { r }, p.AltoLineaPt);
+                AlinearTexto(t, p.Alineacion);
+                if (p.SangriaPt > 0.5 && p.Alineacion != "center")
+                    t.ParagraphFirstLineIndentation((float)p.SangriaPt);
 
-                // text:a del .fodt (el correo de la orden de compra): si trae destino, se
-                // emite como hipervÃ­nculo para que salga subrayado y clicable.
-                if (!string.IsNullOrWhiteSpace(r.Hipervinculo))
-                    t.Hyperlink(r.Texto, r.Hipervinculo).Style(estilo);
-                else
-                    t.Span(r.Texto).Style(estilo);
+                foreach (var r in runsPintar)
+                {
+                    var estiloRun = r;
+                    if (tamPrincipalFlujo > 0 && string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt != tamPrincipalFlujo)
+                        estiloRun = new RunModelo
+                        {
+                            Texto = r.Texto,
+                            Slot = r.Slot,
+                            Fuente = r.Fuente,
+                            TamanoPt = tamPrincipalFlujo,
+                            Negrita = r.Negrita,
+                            Cursiva = r.Cursiva,
+                            Subrayado = r.Subrayado,
+                            Color = r.Color,
+                            EscalaPosicion = r.EscalaPosicion,
+                            Posicion = r.Posicion,
+                            Hipervinculo = r.Hipervinculo,
+                            CampoDinamico = r.CampoDinamico,
+                        };
+
+                    var estilo = EstiloDe(new List<RunModelo> { estiloRun }, p.AltoLineaPt, aplicarSuper: tieneSuperConBase);
+                    if (encogerEspacios) estilo = estilo.WordSpacing(FactorEncogimientoJustificado);
+
+                    // text:page-number / text:page-count: números de página dinámicos
+                    if (r.CampoDinamico == "page-number")
+                        t.CurrentPageNumber().Style(estilo);
+                    else if (r.CampoDinamico == "page-count")
+                        t.TotalPages().Style(estilo);
+                    // text:a del .fodt (el correo de la orden de compra): si trae destino, se
+                    // emite como hipervÃ­nculo para que salga subrayado y clicable.
+                    else if (!string.IsNullOrWhiteSpace(r.Hipervinculo))
+                        t.Hyperlink(r.Texto, r.Hipervinculo).Style(estilo);
+                    else
+                        t.Span(r.Texto).Style(estilo);
+                }
+            });
+        }
+
+        if (usarControlViudas)
+        {
+            var altoLineaReal = AltoLineaRenderizada(p);
+            item.Decoration(dec =>
+            {
+                dec.Content().ExtendHorizontal().Element(PintarTexto);
+                dec.After().Dynamic(new ControlDeViudas(PintarTexto, altoLineaReal, p.Huerfanas, p.Viudas, _altoUtilPagina));
+            });
+        }
+        else if (tieneSuperConBase && p.AltoLineaPt > 0)
+        {
+            // Skia SkParagraph calcula el ascenso de .Superscript() con la métrica sin
+            // escalar del run más el desplazamiento superior, inflando la caja de línea
+            // hacia arriba (~3.7 pt en P24 de Carta Porte) aunque los glifos reducidos al
+            // 58% caben dentro del fo:line-height declarado. En Writer el fo:line-height
+            // fijo no crece por superíndices: recortamos ese ascenso fantasma si el
+            // párrafo cabe en una sola línea.
+            var tamBase = runsPintar
+                .Where(r => string.IsNullOrEmpty(r.Posicion) && !string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt > 0)
+                .Select(r => r.TamanoPt)
+                .DefaultIfEmpty(10).Max();
+            var tamSuperOrig = runsPintar
+                .Where(r => r.Posicion == "super" && !string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt > 0)
+                .Select(r => r.TamanoPt / EscalaSuperQuestPdf)
+                .DefaultIfEmpty(0).Max();
+            var excesoSuper = Math.Max(0.90 * tamSuperOrig + 0.35 * tamSuperOrig - 0.90 * tamBase, 0);
+            var anchoEstimado = runsPintar.Sum(r =>
+                string.IsNullOrEmpty(r.Texto) ? 0
+                    : PaginarPropio.Medir(r.Texto, NormalizarFuente(r.Fuente), r.TamanoPt > 0 ? r.TamanoPt : tamBase, r.Negrita));
+            var cabeEnUnaLinea = anchoTextoParrafo <= 0 || anchoEstimado <= anchoTextoParrafo + 4;
+
+            if (excesoSuper > 0.5 && cabeEnUnaLinea)
+            {
+                var altoLineaFijo = Math.Max(p.AltoLineaPt, tamBase * 1.05);
+                item.Layers(capas =>
+                {
+                    capas.PrimaryLayer().Height((float)altoLineaFijo);
+                    capas.Layer().Unconstrained().OffsetY((float)(-excesoSuper)).Element(PintarTexto);
+                });
             }
-        });
+            else
+            {
+                item.Element(PintarTexto);
+            }
+        }
+        else
+        {
+            item.Element(PintarTexto);
+        }
+    }
+
+    // LibreOffice Writer (SwTextGuess::Guess + UAX #14 LB21) trata una secuencia de
+    // guiones (p.ej. "extraordinario.------...") como un token indivisible: si excede el
+    // ancho útil de la línea, primero salta en el espacio previo (justificando la línea
+    // anterior) y luego corta el token al margen derecho. Skia SkParagraph, en cambio,
+    // empieza tokens mayores al ancho de línea en la misma línea y los parte ahí mismo.
+    // Insertar un U+200B justo antes del ancho útil hace que cada segmento quepa en una
+    // línea completa y Skia reproduzca exactamente el salto y justificado de LibreOffice.
+    static string PartirMarcaPorAncho(string texto, double anchoMaxPt, string fuente, double tamanoPt, bool negrita)
+    {
+        if (string.IsNullOrEmpty(texto)) return texto;
+
+        var lineas = new List<string>();
+        var actual = "";
+
+        foreach (var ch in texto)
+        {
+            var candidato = actual + ch;
+            if (actual.Length > 0 && PaginarPropio.Medir(candidato, fuente, tamanoPt, negrita) > anchoMaxPt)
+            {
+                lineas.Add(actual);
+                actual = ch.ToString();
+            }
+            else
+            {
+                actual = candidato;
+            }
+        }
+
+        if (actual.Length > 0) lineas.Add(actual);
+        return string.Join("\n", lineas);
+    }
+
+    static List<RunModelo> PartirTokensLargos(List<RunModelo> runs, double anchoLinea)
+    {
+        if (anchoLinea <= 20 || !runs.Any(r => r.Texto != null && r.Texto.Contains("----", StringComparison.Ordinal)))
+            return runs;
+
+        var limite = anchoLinea - 2.0;
+        var salida = new List<RunModelo>(runs.Count);
+
+        foreach (var r in runs)
+        {
+            if (string.IsNullOrEmpty(r.Texto) || !r.Texto.Contains("----", StringComparison.Ordinal))
+            {
+                salida.Add(r);
+                continue;
+            }
+
+            var fuente = NormalizarFuente(r.Fuente);
+            var tam = r.TamanoPt > 0 ? r.TamanoPt : 9;
+            var sb = new System.Text.StringBuilder(r.Texto.Length + 8);
+            var i = 0;
+
+            while (i < r.Texto.Length)
+            {
+                if (char.IsWhiteSpace(r.Texto[i]))
+                {
+                    sb.Append(r.Texto[i++]);
+                    continue;
+                }
+
+                var inicio = i;
+                while (i < r.Texto.Length && !char.IsWhiteSpace(r.Texto[i])) i++;
+                var token = r.Texto.Substring(inicio, i - inicio);
+
+                if (!token.Contains("----", StringComparison.Ordinal))
+                {
+                    sb.Append(token);
+                    continue;
+                }
+
+                double anchoToken;
+                try { anchoToken = PaginarPropio.Medir(token, fuente, tam, r.Negrita); }
+                catch { sb.Append(token); continue; }
+
+                if (anchoToken <= limite)
+                {
+                    sb.Append(token);
+                    continue;
+                }
+
+                var resto = token;
+                while (resto.Length > 1)
+                {
+                    double wResto;
+                    try { wResto = PaginarPropio.Medir(resto, fuente, tam, r.Negrita); }
+                    catch { break; }
+
+                    if (wResto <= limite) break;
+
+                    // Búsqueda binaria del prefijo más largo que cabe en 'limite'
+                    int lo = 1, hi = resto.Length - 1, corte = 1;
+                    while (lo <= hi)
+                    {
+                        var mid = (lo + hi) / 2;
+                        var wMid = PaginarPropio.Medir(resto[..mid], fuente, tam, r.Negrita);
+                        if (wMid <= limite) { corte = mid; lo = mid + 1; }
+                        else hi = mid - 1;
+                    }
+
+                    sb.Append(resto, 0, corte);
+                    sb.Append('\u200B');
+                    resto = resto[corte..];
+                }
+
+                sb.Append(resto);
+            }
+
+            salida.Add(new RunModelo
+            {
+                Texto = sb.ToString(),
+                Fuente = r.Fuente,
+                TamanoPt = r.TamanoPt,
+                Negrita = r.Negrita,
+                Cursiva = r.Cursiva,
+                Subrayado = r.Subrayado,
+                Color = r.Color,
+                Slot = r.Slot,
+                EscalaPosicion = r.EscalaPosicion,
+                Posicion = r.Posicion,
+                Hipervinculo = r.Hipervinculo,
+                CampoDinamico = r.CampoDinamico,
+            });
+        }
+
+        return salida;
+    }
+
+    // LibreOffice Writer (SwTextPortion::Format, DocumentSettingId::JUSTIFY_LINES_WITH_SHRINKING)
+    // permite encoger el ancho de los espacios hasta 75 % en líneas justificadas de documentos
+    // compatibles con Word (-25 % de un espacio Arial ≈ 0.278 em => -0.07 em).
+    // Sólo aplica a párrafos justificados multilínea (sin corridas de espacios usadas como columnas).
+    const float FactorEncogimientoJustificado = -0.07f;
+
+    static bool DebeEncogerEspacios(ParrafoModelo p, double anchoTexto)
+    {
+        if (!_justificarConEncogimiento || p.Alineacion != "justify" || anchoTexto <= 20)
+            return false;
+
+        var texto = string.Concat(p.Runs.Select(r => r.Texto));
+        if (string.IsNullOrWhiteSpace(texto) || texto.Contains("   ", StringComparison.Ordinal))
+            return false;
+
+        var ancho = p.SangriaPt > 0.5 ? p.SangriaPt : 0.0;
+        foreach (var r in p.Runs)
+        {
+            if (string.IsNullOrEmpty(r.Texto)) continue;
+            var tam = r.TamanoPt > 0 ? r.TamanoPt : (p.TamanoBasePt > 0 ? p.TamanoBasePt : 10);
+            try { ancho += PaginarPropio.Medir(r.Texto, NormalizarFuente(r.Fuente), tam, r.Negrita); }
+            catch { return false; }
+            if (ancho > anchoTexto) return true;
+        }
+        return false;
     }
 
     // La alineaciÃ³n horizontal del texto se aplica en el descriptor del bloque
@@ -1209,12 +1659,17 @@ internal static class GeneradorPdf
 
         var inf = anterior.Parrafo?.MargenInfPt ?? 0;
 
-        var colapsa = anterior.Parrafo != null && actual.Parrafo != null &&
-                      anterior.Parrafo.Contextual && actual.Parrafo.Contextual &&
-                      anterior.Seccion == actual.Seccion &&
-                      anterior.Parrafo.EstiloComun == actual.Parrafo.EstiloComun;
+        // LibreOffice (sw/source/core/layout/flowfrm.cxx, tdf#125893 y tdf#134463):
+        // cada párrafo ignora su propio margen hacia el vecino del mismo estilo común
+        // cuando ÉL declara style:contextual-spacing="true", aunque el vecino no lo haga.
+        var mismoEstilo = anterior.Parrafo != null && actual.Parrafo != null &&
+                          anterior.Seccion == actual.Seccion &&
+                          anterior.Parrafo.EstiloComun == actual.Parrafo.EstiloComun;
 
-        return colapsa ? 0 : sup + inf;
+        if (mismoEstilo && anterior.Parrafo.Contextual) inf = 0;
+        if (mismoEstilo && actual.Parrafo.Contextual) sup = 0;
+
+        return sup + inf;
     }
 
     // Altura a la que se ancla el texto del pie, medida desde el borde inferior de la hoja.
@@ -1286,6 +1741,12 @@ internal static class GeneradorPdf
                 col.Item().Height((float)reservaMarco);
             }
 
+            if (_marcosFlotantesPorBloque.TryGetValue(bloque, out var marcosFlotantes))
+            {
+                if (pendiente > 0.5) { col.Item().Height((float)pendiente); pendiente = 0; }
+                DibujarMarcosFlotantes(col, marcosFlotantes);
+            }
+
             if (bloque.Tipo == "texto" && bloque.Parrafo != null)
             {
                 var p = bloque.Parrafo;
@@ -1310,15 +1771,7 @@ internal static class GeneradorPdf
 
                 if (tieneTexto)
                 {
-                    var textoPlano = string.Concat(p.Runs.Select(r => r.Texto)).Trim();
-
-                    // En las órdenes de compra el rótulo «Codigo» va después de cuatro
-                    // párrafos espaciadores que Writer colapsa parcialmente al final de la
-                    // página. Compensar el exceso medido mantiene ese rótulo en su posición.
-                    if (textoPlano == "Codigo")
-                        col.Item().OffsetY(-53f).Column(c => AgregarParrafo(c, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible));
-                    else
-                        AgregarParrafo(col, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible);
+                    AgregarParrafo(col, p, p.MargenIzqPt - _desplazamientoGlobal, anchoDisponible, _compensacionDerFlujo);
                 }
 
                 continue;
@@ -1359,7 +1812,103 @@ internal static class GeneradorPdf
     // desplazamiento global del flujo (el margen negativo mayor del documento); cada tabla
     // se recoloca con la diferencia entre el suyo y Ã©ste, para que cada una caiga donde toca
     static double _desplazamientoGlobal;
+    static double _margenIzqPagina;
+    static double _altoUtilPagina;
     static double _margenDerechoFlujo;
+    static double _compensacionDerFlujo;
+    static bool _justificarConEncogimiento;
+
+    static double AltoLineaRenderizada(ParrafoModelo p)
+    {
+        var tam = p.Runs
+            .Where(x => !string.IsNullOrWhiteSpace(x.Texto) && x.TamanoPt > 0)
+            .Select(x => x.TamanoPt)
+            .DefaultIfEmpty(0)
+            .Max();
+        if (tam <= 0) tam = p.TamanoBasePt > 0 ? p.TamanoBasePt : 10;
+        if (p.AltoLineaPt > 0)
+            return Math.Max(p.AltoLineaPt, tam * 1.15) / AltoNaturalFuente;
+        return tam * 1.15;
+    }
+
+    // Implementa fo:orphans / fo:widows (ODF 1.3 §20.214 / §20.230) sobre el TextBlock de
+    // QuestPDF usando Decoration.After(): si el corte natural deja menos de 'widows' líneas
+    // en la página siguiente, reserva espacio abajo en esta página para empujar las líneas
+    // necesarias; si caben menos de 'orphans' líneas, pasa el párrafo completo a la siguiente.
+    sealed class ControlDeViudas : IDynamicComponent
+    {
+        readonly Action<IContainer> _renderizar;
+        readonly double _altoLineaNominal;
+        readonly int _huerfanas;
+        readonly int _viudas;
+        readonly double _altoPagina;
+
+        public ControlDeViudas(Action<IContainer> renderizar, double altoLineaNominal, int huerfanas, int viudas, double altoPagina)
+        {
+            _renderizar = renderizar;
+            _altoLineaNominal = Math.Max(altoLineaNominal, 6);
+            _huerfanas = Math.Max(huerfanas, 0);
+            _viudas = Math.Max(viudas, 0);
+            _altoPagina = altoPagina;
+        }
+
+        public DynamicComponentComposeResult Compose(QuestPDF.Elements.DynamicContext context)
+        {
+            var disponibleH = context.AvailableSize.Height;
+            var disponibleW = context.AvailableSize.Width;
+
+            if (disponibleW <= 1 || disponibleH <= 1)
+                return SinReserva(context);
+
+            var medido = context.CreateElement(c => c.Width(disponibleW).Element(_renderizar));
+            var altoTotal = medido.Size.Height;
+
+            if (altoTotal <= disponibleH + 0.1f)
+                return SinReserva(context);
+
+            var totalLineas = Math.Max(1, (int)Math.Round(altoTotal / _altoLineaNominal));
+            var altoPorLinea = altoTotal / totalLineas;
+            var caben = (int)Math.Floor((disponibleH + 0.05f) / altoPorLinea);
+
+            if (caben >= totalLineas)
+                return SinReserva(context);
+
+            var necesitaMoverTodo = caben < _huerfanas || totalLineas < _huerfanas + _viudas;
+
+            if (necesitaMoverTodo)
+            {
+                if (disponibleH < _altoPagina - 1 && altoTotal <= _altoPagina + 0.5f)
+                    return ConReserva(context, disponibleH);
+
+                return SinReserva(context);
+            }
+
+            var sobrantes = totalLineas - caben;
+
+            if (sobrantes < _viudas)
+            {
+                var dibujar = totalLineas - _viudas;
+                if (dibujar < _huerfanas)
+                {
+                    if (disponibleH < _altoPagina - 1 && altoTotal <= _altoPagina + 0.5f)
+                        return ConReserva(context, disponibleH);
+                    return SinReserva(context);
+                }
+
+                var espacioPermitido = (dibujar + 0.5f) * altoPorLinea;
+                var reserva = Math.Max(0f, disponibleH - espacioPermitido);
+                return ConReserva(context, reserva);
+            }
+
+            return SinReserva(context);
+        }
+
+        static DynamicComponentComposeResult SinReserva(QuestPDF.Elements.DynamicContext context) =>
+            new() { HasMoreContent = false, Content = context.CreateElement(c => c.Height(0)) };
+
+        static DynamicComponentComposeResult ConReserva(QuestPDF.Elements.DynamicContext context, float alto) =>
+            new() { HasMoreContent = false, Content = context.CreateElement(c => c.Height(alto)) };
+    }
     // capas ancladas a un pÃ¡rrafo dentro de una tabla, por bloque del flujo
     static Dictionary<BloqueModelo, List<CapaModelo>> _capasPorBloque = new();
 
@@ -1368,7 +1917,123 @@ internal static class GeneradorPdf
     // En el .fodt van ancladas "char" a un pÃ¡rrafo vacÃ­o; con coordenadas absolutas
     // salÃ­an al principio de la hoja en vez de junto a su bloque.
     static Dictionary<BloqueModelo, List<CapaModelo>> _lineasPorBloque = new();
+    static Dictionary<BloqueModelo, List<CapaModelo>> _marcosFlotantesPorBloque = new();
     static Dictionary<BloqueModelo, double> _capasQueReservan = new();
+
+    // Dibuja marcos flotantes (style:vertical-rel="paragraph"/"char") en la posición del
+    // párrafo ancla sin consumir alto del flujo (PrimaryLayer de alto 0 + Unconstrained).
+    static void DibujarMarcosFlotantes(ColumnDescriptor col, List<CapaModelo> marcos)
+    {
+        col.Item().Layers(capasFlot =>
+        {
+            capasFlot.PrimaryLayer().Height(0);
+
+            foreach (var marco in marcos)
+            {
+                var capa = marco;
+                var xBase = string.Equals(capa.HorizontalRel, "page", StringComparison.OrdinalIgnoreCase)
+                    ? capa.XPt - _margenIzqPagina - _desplazamientoGlobal
+                    : capa.XPt - _desplazamientoGlobal;
+                var x = (float)Math.Max(xBase, 0);
+                var y = (float)Math.Max(capa.YPt, 0);
+                var ancho = (float)Math.Max(capa.AnchoPt, 1);
+                var esLineaHorizontal = !string.IsNullOrEmpty(capa.ColorTrazo) && capa.AltoPt < 2 && capa.AnchoPt > 2;
+                var alto = esLineaHorizontal
+                    ? (float)Math.Max(capa.GrosorTrazoPt, 0.6)
+                    : (float)Math.Max(capa.AltoPt, 1);
+
+                capasFlot.Layer()
+                    .Unconstrained()
+                    .PaddingLeft(x)
+                    .PaddingTop(y)
+                    .Width(ancho)
+                    .Height(alto)
+                    .Element(cont =>
+                    {
+                        if (esLineaHorizontal)
+                        {
+                            cont.Background(ColorDe(capa.ColorTrazo));
+                            return;
+                        }
+
+                        IContainer caja = cont;
+
+                        if (!string.IsNullOrEmpty(capa.ColorRelleno))
+                            caja = caja.Background(ColorDe(capa.ColorRelleno));
+
+                        if (capa.BordeCaja)
+                            caja = caja.Border((float)Math.Max(capa.GrosorBordePt, 0.5))
+                                       .BorderColor(ColorDe(capa.ColorBorde ?? "#000000"));
+
+                        if (!string.IsNullOrEmpty(capa.ImagenBase64))
+                        {
+                            try
+                            {
+                                var bytes = Convert.FromBase64String(capa.ImagenBase64);
+                                caja.Image(bytes).FitArea();
+                                return;
+                            }
+                            catch { /* imagen ilegible */ }
+                        }
+
+                        var textos = capa.Parrafos
+                            .Where(p => p.Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto)))
+                            .ToList();
+
+                        if (textos.Count > 0)
+                        {
+                            caja.Column(c =>
+                            {
+                                foreach (var p in textos)
+                                    AgregarParrafo(c, p);
+                            });
+                        }
+                    });
+            }
+        });
+    }
+
+    static void DibujarMarcoEnCelda(IContainer cont, CapaModelo capa)
+    {
+        IContainer caja = cont;
+
+        if (!string.IsNullOrEmpty(capa.ColorRelleno))
+            caja = caja.Background(ColorDe(capa.ColorRelleno));
+
+        if (capa.BordeCaja)
+            caja = caja.Border((float)Math.Max(capa.GrosorBordePt, 0.5))
+                       .BorderColor(ColorDe(capa.ColorBorde ?? "#000000"));
+
+        if (capa.PaddingIzqPt > 0.5) caja = caja.PaddingLeft((float)capa.PaddingIzqPt);
+        if (capa.PaddingDerPt > 0.5) caja = caja.PaddingRight((float)capa.PaddingDerPt);
+        if (capa.PaddingSupPt > 0.5) caja = caja.PaddingTop((float)capa.PaddingSupPt);
+        if (capa.PaddingInfPt > 0.5) caja = caja.PaddingBottom((float)capa.PaddingInfPt);
+
+        if (!string.IsNullOrEmpty(capa.ImagenBase64))
+        {
+            try
+            {
+                var bytes = Convert.FromBase64String(capa.ImagenBase64);
+                caja.Image(bytes).FitArea();
+                return;
+            }
+            catch { /* imagen ilegible */ }
+        }
+
+        var textos = capa.Parrafos
+            .Where(p => p.Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto)))
+            .ToList();
+
+        if (textos.Count > 0)
+        {
+            var anchoInterior = Math.Max(capa.AnchoPt - capa.PaddingIzqPt - capa.PaddingDerPt, 1);
+            caja.Column(c =>
+            {
+                foreach (var p in textos)
+                    AgregarParrafo(c, p, 0, anchoInterior);
+            });
+        }
+    }
 
     // plan de cortes de pÃ¡gina calculado con nuestra propia mediciÃ³n (PaginarPropio).
     // VacÃ­o = se deja que QuestPDF pagine como antes.
@@ -1386,7 +2051,7 @@ internal static class GeneradorPdf
 
     // alto natural de la fuente respecto al tamaÃ±o de letra: QuestPDF aplica LineHeight
     // sobre ese alto, no sobre el tamaÃ±o, asÃ­ que el factor del .fodt se divide por Ã©l.
-    static readonly double AltoNaturalFuente = 1.03;
+    internal const double AltoNaturalFuente = 1.03;
 
     // Caja de lÃ­nea de un texto dentro de una celda, medida contra LibreOffice: 1,22 em
     // (8 pt al 100 % -> 9,75 pt; 10 pt al 100 % -> 12,15; 11 pt al 115 % -> 15,5). LO
@@ -1408,7 +2073,11 @@ internal static class GeneradorPdf
     // tamaÃ±o sale del estilo (TamanoBasePt), porque no tiene runs.
     static double AltoLineaCelda(ParrafoModelo p, CeldaModelo celda)
     {
-        var tam = p.Runs.Where(x => !string.IsNullOrWhiteSpace(x.Texto)).Select(x => x.TamanoPt).FirstOrDefault(x => x > 0);
+        var tam = p.Runs
+            .Where(x => !string.IsNullOrWhiteSpace(x.Texto) && x.TamanoPt > 0)
+            .Select(x => x.TamanoPt)
+            .DefaultIfEmpty(0)
+            .Max();
         if (tam <= 0) tam = p.TamanoBasePt;   // pÃ¡rrafo vacÃ­o: el tamaÃ±o sale del estilo
         if (tam <= 0) tam = 9;
 
@@ -1429,26 +2098,37 @@ internal static class GeneradorPdf
         // EstiloDe convierte el alto pedido en factor dividiÃ©ndolo por AltoNaturalFuente
         // (1,05), asÃ­ que hay que pedir 1,22 x 1,05 para que el PDF salga a 1,22 em.
         var pct = tam > 0 ? p.AltoLineaPt / tam : 1.0;
+        var fuenteCelda = p.Runs
+            .Where(x => !string.IsNullOrWhiteSpace(x.Texto) && !string.IsNullOrEmpty(x.Fuente))
+            .Select(x => x.Fuente)
+            .FirstOrDefault() ?? "";
+        var esCalibri = fuenteCelda.StartsWith("Calibri", StringComparison.OrdinalIgnoreCase) ||
+                        fuenteCelda.StartsWith("Carlito", StringComparison.OrdinalIgnoreCase);
+        var altoNaturalNoCalibri = fuenteCelda.StartsWith("Trebuchet", StringComparison.OrdinalIgnoreCase)
+            ? 1.161
+            : 1.15;
 
-        var natural = pct <= 1.02 && tam <= 8.5
-            ? tam * AltoNaturalFuenteCelda * AltoNaturalFuente
-            : tam * 1.15;
+        // Calibri/Carlito tienen altura natural ~1.22 em (Trebuchet MS ~1.161 em, Arial/Times ~1.15 em).
+        // En celdas con fo:line-height en porcentaje (100%, 107%, etc.), ExtractorFodt
+        // guarda tam * pct; multiplicarlo por el alto natural * AltoNaturalFuente
+        // reproduce exactamente el alto de fila de LibreOffice (p.ej. 10pt al 100% -> 12.2pt,
+        // 10pt al 107% -> 13.05pt, 8pt al 100% -> 9.76pt en ComprobanteTraslado).
+        double natural;
+        if (esCalibri && pct > 0.5 && pct <= 1.20)
+            natural = tam * AltoNaturalFuenteCelda * pct * AltoNaturalFuente;
+        else if (esCalibri && pct > 1.20 && pct <= 1.35)
+            natural = p.AltoLineaPt;
+        else if (!esCalibri && p.AltoLineaPct > 0.5 && p.AltoLineaPct <= 1.35)
+            natural = tam * altoNaturalNoCalibri * p.AltoLineaPct * AltoNaturalFuente;
+        else
+            natural = tam * altoNaturalNoCalibri * AltoNaturalFuente;
 
-return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
+        return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt * AltoNaturalFuente : natural;
     }
 
     static void AgregarTabla(IContainer contenedor, TablaModelo tabla, double anchoDisponible = 0,
                              bool compensarMargen = true)
     {
-        var contenidoTabla = string.Join(" ", tabla.Filas.SelectMany(f => f.Celdas)
-            .SelectMany(c => c.Parrafos).Select(p => string.Concat(p.Runs.Select(r => r.Texto))));
-        var esTablaFirmas = contenidoTabla.Contains("Creo", StringComparison.OrdinalIgnoreCase) &&
-                            contenidoTabla.Contains("Autorizo", StringComparison.OrdinalIgnoreCase) &&
-                            contenidoTabla.Contains("Recibio", StringComparison.OrdinalIgnoreCase);
-
-        // En la orden de compra inválida, la tabla de firmas empieza 4.4 pt antes que
-        // en Writer aunque los párrafos vacíos previos ya estén incluidos en el flujo.
-        if (esTablaFirmas) contenedor = contenedor.PaddingTop(4.4f);
 
         // Cada tabla tiene su propio margen negativo. El flujo ya estÃ¡ desplazado por el
         // mayor; aquÃ­ se compensa la diferencia (una tabla con -5.4 no debe irse a -49.7).
@@ -1465,21 +2145,55 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
             contenedor = contenedor.PaddingLeft((float)extra);
             if (anchoDisponible > 0) anchoDisponible = Math.Max(anchoDisponible - extra, 50);
         }
+        else if (extra < -0.5)
+        {
+            // Margen izquierdo negativo pequeño (p.ej. -0.191 cm en Word/Writer) que no
+            // desplazó el flujo global: se alinea la tabla a su coordenada real.
+            contenedor = contenedor.OffsetX((float)extra);
+        }
+
+        var anchoTabla = tabla.AnchoDeclaradoPt > 0 ? tabla.AnchoDeclaradoPt : tabla.ColumnasPt.Sum();
 
         // tabla mÃ¡s angosta que el Ã¡rea de texto y declarada al centro (la de sueldo del
-        // contrato CCI): se centra igual que LibreOffice.
-        if (tabla.AlineacionTabla == "center" && anchoDisponible > 1 && tabla.AnchoTotalPt > 1)
+        // contrato CCI): se centra igual que LibreOffice. Si es más ancha que el área de
+        // texto (p.ej. Tabla3 19.297cm / Tabla4 19.214cm en PlantillaIntereses), sobresale
+        // equitativamente hacia ambos márgenes con OffsetX negativo.
+        if (tabla.AlineacionTabla == "center" && anchoDisponible > 1 && anchoTabla > 1)
         {
-            var libre = anchoDisponible - tabla.AnchoTotalPt;
+            var anchoCentro = compensarMargen ? Math.Max(anchoDisponible - _compensacionDerFlujo, 1) : anchoDisponible;
+            var anchoEfectivo = Math.Min(anchoTabla, anchoDisponible);
+            var libre = anchoCentro - anchoEfectivo;
 
             if (libre > 1)
             {
                 contenedor = contenedor.PaddingLeft((float)(libre / 2));
-                anchoDisponible = tabla.AnchoTotalPt;
+                anchoDisponible = anchoEfectivo;
+            }
+            else if (libre < -0.5)
+            {
+                contenedor = contenedor.OffsetX((float)(libre / 2));
             }
         }
 
-        var anchoTabla = tabla.AnchoDeclaradoPt > 0 ? tabla.AnchoDeclaradoPt : tabla.ColumnasPt.Sum();
+        // BorderAlignmentMiddle centra el trazo sobre la arista de cada celda (grosor/2
+        // hacia afuera). En Writer (collapsing border model) la mitad exterior de los bordes
+        // superior e inferior de la tabla ocupa espacio en el flujo; reservarla evita que las
+        // tablas consecutivas suban ~0.5 pt por cada tabla.
+        if (compensarMargen && tabla.Filas.Count > 0)
+        {
+            var bordeExtSup = tabla.Filas[0].Celdas
+                .Where(c => c.BordeSup)
+                .Select(c => c.GrosorBordePt > 0 ? c.GrosorBordePt : 0.7)
+                .DefaultIfEmpty(0).Max() / 2;
+            var bordeExtInf = tabla.Filas
+                .SelectMany((f, i) => f.Celdas
+                    .Where(c => c.BordeInf && i + Math.Max(c.SpanFilas, 1) >= tabla.Filas.Count)
+                    .Select(c => c.GrosorBordePt > 0 ? c.GrosorBordePt : 0.7))
+                .DefaultIfEmpty(0).Max() / 2;
+            if (bordeExtSup > 0) contenedor = contenedor.PaddingTop((float)bordeExtSup);
+            if (bordeExtInf > 0) contenedor = contenedor.PaddingBottom((float)bordeExtInf);
+        }
+
         contenedor.Table(t =>
         {
             // Dos modos:
@@ -1548,6 +2262,13 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     // bordes y paddings SOLO los que declara el .fodt: antes se ponÃ­a
                     // un borde gris a todas las celdas y las tablas crecÃ­an de mÃ¡s.
                     IContainer cont = celdaTabla;
+
+                    // Evita partir a la mitad una celda corta entre páginas (p.ej. el recuadro
+                    // "Manifiesto..." de SC_PMoral dejando 1 línea en la página 1 y 3 en la 2).
+                    var textoCeldaLen = celda.Parrafos.Sum(p => p.Runs.Sum(r => r.Texto?.Length ?? 0));
+                    if (celda.SpanFilas == 1 && celda.TablasAnidadas.Count == 0 &&
+                        celda.Parrafos.Count <= 6 && textoCeldaLen <= 800)
+                        cont = cont.ShowEntire();
                     // grosor declarado en el .fodt (0.5pt en la liquidaciones); 0.7 si no lo dice
                     var grosor = celda.GrosorBordePt > 0.05 ? (float)celda.GrosorBordePt : 0.7f;
 
@@ -1558,19 +2279,19 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                         cont = cont.Background(ColorDe(celda.ColorFondo));
 
                     // Color de borde tal como lo declara el .fodt (fo:border / fo:border-*).
-                    // Estaba fijo en negro: la liquidaciones usa #aeaaaa y salÃ­a con lÃ­neas
-                    // negras, mucho mÃ¡s marcadas que en LibreOffice.
-                    if (celda.BordeSup) cont = cont.BorderTop(grosor).BorderColor(ColorDe(celda.ColorBordeSup));
-                    if (celda.BordeInf) cont = cont.BorderBottom(grosor).BorderColor(ColorDe(celda.ColorBordeInf));
-                    if (celda.BordeIzq) cont = cont.BorderLeft(grosor).BorderColor(ColorDe(celda.ColorBordeIzq));
-                    if (celda.BordeDer) cont = cont.BorderRight(grosor).BorderColor(ColorDe(celda.ColorBordeDer));
+                    // BorderAlignmentMiddle centra el trazo sobre la arista (table:border-model="collapsing"
+                    // de ODF), evitando bordes dobles entre celdas vecinas y conservando el alto visual exacto.
+                    if (celda.BordeSup) cont = cont.BorderTop(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeSup));
+                    if (celda.BordeInf) cont = cont.BorderBottom(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeInf));
+                    if (celda.BordeIzq) cont = cont.BorderLeft(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeIzq));
+                    if (celda.BordeDer) cont = cont.BorderRight(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeDer));
 
                     // El aire NO viene del padding de la celda (0.019cm = 0.5 pt): viene de
                     // los mÃ¡rgenes del pÃ¡rrafo (fo:margin-left/right). Sin ellos el texto
                     // izquierdo/derecho queda pegado al borde de la tabla. Se toma el MAYOR
                     // de los pÃ¡rrafos de la celda: la lÃ­nea que da el aire puede no ser la
                     // primera (p.ej. la "Cadena Original..." junto al QR).
-                    var margenIzqMax = celda.Parrafos.Count == 0 ? 0 : celda.Parrafos.Max(p => p.MargenIzqPt);
+                    var margenIzqMax = celda.Parrafos.Count == 0 ? 0 : celda.Parrafos.Max(p => Math.Max(p.MargenIzqPt + Math.Min(p.SangriaPt, 0), 0));
                     var margenDerMax = celda.Parrafos.Count == 0 ? 0 : celda.Parrafos.Max(p => p.MargenDerPt);
 
                     var padIzq = celda.PaddingIzqPt + margenIzqMax;
@@ -1595,27 +2316,139 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                         return texto.Contains("TableStart:", StringComparison.Ordinal) ||
                                texto.Contains("TableEnd:", StringComparison.Ordinal);
                     });
-                    var celdaConMarcaFinal = celda.Parrafos.Any(p =>
-                        string.Concat(p.Runs.Select(r => r.Texto)).Contains("TableEnd:", StringComparison.Ordinal));
 
                     // El padding vertical del .fodt (0.3cm = 8.5 pt) tampoco coincide con lo
                     // que aplica LibreOffice: medido en el bloque de certificados, el paso
                     // entre lÃ­neas real es 11.3 pt = lÃ­nea 7.2 + ~4 de padding. Por encima de
                     // 4 pt las lÃ­neas se separan de mÃ¡s.
-                    const float paddingVerticalMaximo = 4f;
+                    const float paddingVerticalMaximo = 6f;
 
                     var esEncabezadoAislado = celda.VerticalAlign == "bottom" && celda.Parrafos.Count >= 2 &&
                         celda.Parrafos[^1].Runs.Count == 0 &&
                         celda.Parrafos[0].Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt >= 14);
-                    var insetIzqCelda = esEncabezadoAislado && padIzq <= 0.5 ? 0f : insetMinimo;
-                    var paddingIzq = celdaConImagen ? 0 : celdaConMarcaFinal ? Math.Min((float)padIzq, 1.8f) : celdaConMarcaRegion ? Math.Min((float)padIzq, 4.4f) : (float)Math.Max(padIzq, insetIzqCelda);
-                    var paddingDer = celdaConImagen ? 0 : celdaConMarcaFinal ? Math.Min((float)padDer, 1.8f) : celdaConMarcaRegion ? Math.Min((float)padDer, 4.4f) : (float)Math.Max(padDer, insetMinimo);
+                    var sinBordeNiPadIzq = !celda.BordeIzq && padIzq <= 0.05;
+                    var sinBordeNiPadDer = !celda.BordeDer && padDer <= 0.05;
+                    var insetIzqCelda = (esEncabezadoAislado && padIzq <= 0.5) || sinBordeNiPadIzq ? 0f : insetMinimo;
+                    var insetDerCelda = sinBordeNiPadDer ? 0f : insetMinimo;
+                    var tamMarcaRegion = celdaConMarcaRegion
+                        ? celda.Parrafos
+                            .SelectMany(p => p.Runs)
+                            .Where(r => !string.IsNullOrWhiteSpace(r.Texto))
+                            .Select(r => r.TamanoPt > 0 ? r.TamanoPt : 9)
+                            .DefaultIfEmpty(9)
+                            .Max()
+                        : 0;
+                    var anchoMinGlifoMarca = tamMarcaRegion * 0.9;
+                    var padIzqBase = (float)Math.Max(padIzq, insetIzqCelda);
+                    var padDerBase = (float)Math.Max(padDer, insetDerCelda);
+                    var anchoTextoReal = anchoCelda - padIzqBase - padDerBase;
+                    var necesitaReducirPaddingMarca = celdaConMarcaRegion &&
+                        anchoTextoReal < anchoMinGlifoMarca + 0.3;
+
+                    float paddingIzq, paddingDer;
+                    if (celdaConImagen)
+                    {
+                        paddingIzq = 0;
+                        paddingDer = 0;
+                    }
+                    else if (necesitaReducirPaddingMarca)
+                    {
+                        var anchoSeguro = (float)(anchoMinGlifoMarca + 0.5);
+                        paddingIzq = Math.Min(padIzqBase, Math.Max((float)anchoCelda - anchoSeguro, 0f));
+                        paddingDer = Math.Min(padDerBase, Math.Max((float)anchoCelda - paddingIzq - anchoSeguro, 0f));
+                    }
+                    else
+                    {
+                        paddingIzq = padIzqBase;
+                        paddingDer = padDerBase;
+                    }
+
+                    // En QuestPDF el borde se dibuja dentro de la caja sin restar espacio al
+                    // contenido; en Writer (bordes colapsados) cada borde reserva medio grosor
+                    // fuera del padding (tanto en vertical como en horizontal).
+                    var grosorIzq = celda.GrosorBordeIzqPt > 0.05 ? (float)celda.GrosorBordeIzqPt : grosor;
+                    var grosorDer = celda.GrosorBordeDerPt > 0.05 ? (float)celda.GrosorBordeDerPt : grosor;
+                    var aireBordeIzq = !celdaConImagen && !necesitaReducirPaddingMarca && celda.BordeIzq &&
+                                       grosorIzq > 0.55f && celda.PaddingIzqPt > 0.5 && anchoCelda > paddingIzq + paddingDer + 10
+                        ? grosorIzq / 2f : 0f;
+                    var aireBordeDer = !celdaConImagen && !necesitaReducirPaddingMarca && celda.BordeDer &&
+                                       grosorDer > 0.55f && celda.PaddingDerPt > 0.5 && anchoCelda > paddingIzq + paddingDer + 10
+                        ? grosorDer / 2f : 0f;
+                    var aireBordeSup = !celdaConImagen && celda.BordeSup && celda.GrosorBordePt > 0.05 && fila.AltoFijoPt <= 0.5
+                        ? grosor / 2f : 0f;
+                    var aireBordeInf = !celdaConImagen && celda.BordeInf && celda.GrosorBordePt > 0.05 && fila.AltoFijoPt <= 0.5
+                        ? grosor / 2f : 0f;
+
+                    paddingIzq += aireBordeIzq;
+                    paddingDer += aireBordeDer;
+
+                    // LibreOffice redondea paddings/anchos en twips (p.ej. 0.191cm = 108 twips =
+                    // 5.40pt vs 5.414pt) y aplica kerning del TTF, mientras Skia suma avances sin
+                    // kerning. Cuando un texto de una sola línea rebasa el ancho útil por menos de
+                    // ~0.6 pt (p.ej. "Excelente(«R35»)" en EntrevistaSalida: 87.30 vs 87.27 pt),
+                    // ceder esa fracción mínima del padding lateral evita partir el último glifo.
+                    if (!celdaConImagen && !necesitaReducirPaddingMarca && celda.Parrafos.Count == 1 &&
+                        anchoCelda > paddingIzq + paddingDer + 10)
+                    {
+                        var pUnico = celda.Parrafos[0];
+                        var anchoUtilPrev = anchoCelda - paddingIzq - paddingDer;
+                        var runsConTexto = pUnico.Runs.Where(r => !string.IsNullOrEmpty(r.Texto)).ToList();
+                        if (runsConTexto.Count > 0)
+                        {
+                            var anchoSinKern = runsConTexto.Sum(r =>
+                                PaginarPropio.Medir(r.Texto, NormalizarFuente(r.Fuente),
+                                    r.TamanoPt > 0 ? r.TamanoPt : 10, r.Negrita, kerning: false));
+                            var mismoEstilo = runsConTexto.All(r =>
+                                string.Equals(r.Fuente, runsConTexto[0].Fuente, StringComparison.OrdinalIgnoreCase) &&
+                                Math.Abs(r.TamanoPt - runsConTexto[0].TamanoPt) < 0.05 &&
+                                r.Negrita == runsConTexto[0].Negrita);
+                            var anchoConKern = mismoEstilo
+                                ? PaginarPropio.Medir(string.Concat(runsConTexto.Select(r => r.Texto)),
+                                    NormalizarFuente(runsConTexto[0].Fuente),
+                                    runsConTexto[0].TamanoPt > 0 ? runsConTexto[0].TamanoPt : 10,
+                                    runsConTexto[0].Negrita, kerning: true)
+                                : runsConTexto.Sum(r =>
+                                    PaginarPropio.Medir(r.Texto, NormalizarFuente(r.Fuente),
+                                        r.TamanoPt > 0 ? r.TamanoPt : 10, r.Negrita, kerning: true));
+
+                            if (anchoSinKern > anchoUtilPrev - 0.2 && anchoConKern <= anchoUtilPrev + 0.08)
+                            {
+                                var falta = (float)Math.Min(Math.Max(anchoSinKern - anchoUtilPrev + 0.35, 0.35), 1.0);
+                                if (pUnico.Alineacion == "center")
+                                {
+                                    var porLado = Math.Min(falta / 2f, Math.Min(paddingIzq, paddingDer));
+                                    paddingIzq -= porLado;
+                                    paddingDer -= porLado;
+                                }
+                                else
+                                {
+                                    var recorte = Math.Min(falta, paddingDer);
+                                    paddingDer -= recorte;
+                                }
+                            }
+                        }
+                    }
+
+                    // En el modelo de bordes colapsados de Writer, cuando celdas de una misma
+                    // fila comparten borde superior con distinto padding-top (p.ej. Tabla2/3 en
+                    // InformacionEmpleado: 0.132 cm en A2/B2 vs 0.026 cm en C2/D2), Writer
+                    // aplica el mayor padding superior de la fila para alinear todas las celdas.
+                    var padSupDeclarado = Math.Min((float)celda.PaddingSupPt, paddingVerticalMaximo);
+                    var padSupFilaMax = !celdaConImagen && celda.BordeSup && celda.SpanFilas == 1 && fila.Celdas.Count > 1
+                        ? fila.Celdas
+                            .Where(c => c.BordeSup && c.SpanFilas == 1)
+                            .Select(c => Math.Min((float)c.PaddingSupPt, paddingVerticalMaximo))
+                            .DefaultIfEmpty(padSupDeclarado)
+                            .Max()
+                        : padSupDeclarado;
+                    var padSupCelda = Math.Max(padSupDeclarado, padSupFilaMax) + aireBordeSup;
+                    var padInfCelda = Math.Min((float)celda.PaddingInfPt, paddingVerticalMaximo) + aireBordeInf;
 
                     cont = cont
                         .PaddingLeft(paddingIzq)
                         .PaddingRight(paddingDer)
-                        .PaddingTop(Math.Min((float)celda.PaddingSupPt, paddingVerticalMaximo))
-                        .PaddingBottom(Math.Min((float)celda.PaddingInfPt, paddingVerticalMaximo));
+                        .PaddingTop(padSupCelda)
+                        .PaddingBottom(padInfCelda);
 
                     // Una columna residual (la factura trae una de 1.5 pt) no tiene ancho Ãºtil:
                     // ahÃ­ no se puede meter ningÃºn elemento de alto fijo ni pedir alto mÃ­nimo,
@@ -1633,12 +2466,44 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     var altoFila = fila.AltoFijoPt > 0.5
                         ? Math.Max(fila.AltoFijoPt, fila.AltoMinimoPt)
                         : fila.AltoMinimoPt;
-                    var extensionSubindice = fila.Celdas.SelectMany(c => c.Parrafos)
-                        .SelectMany(p => p.Runs)
-                        .Where(r => r.Posicion == "sub" && r.TamanoPt > 0)
-                        .Select(r => r.TamanoPt * 100 / r.EscalaPosicion.GetValueOrDefault(58) * 0.15)
-                        .DefaultIfEmpty(0).Max();
-                    if (altoFila > 0.5) altoFila += extensionSubindice;
+                    // style:row-height (AltoFijoPt) fija el alto EXACTO de la fila en Writer y
+                    // no crece por subíndices (p.ej. CartaPorte.Fila = 0.30 cm = 8.50 pt); sólo
+                    // style:min-row-height se expande para acomodar el descenso del subíndice.
+                    var extensionSubindice = 0.0;
+                    if (fila.AltoFijoPt <= 0.5)
+                    {
+                        var altoConSub = fila.Celdas
+                            .Where(c => c.Parrafos.SelectMany(p => p.Runs).Any(r => r.Posicion == "sub" && r.TamanoPt > 0))
+                            .Select(c => c.Parrafos.Sum(p =>
+                            {
+                                var sub = p.Runs.Where(r => r.Posicion == "sub" && r.TamanoPt > 0).ToList();
+                                if (sub.Count > 0)
+                                    return sub.Max(r => r.TamanoPt * 100 / r.EscalaPosicion.GetValueOrDefault(58)) * 1.15;
+                                return p.AltoLineaPt > 0 ? p.AltoLineaPt : (p.TamanoBasePt > 0 ? p.TamanoBasePt : 10) * 1.15;
+                            }))
+                            .DefaultIfEmpty(0).Max();
+                        if (altoConSub > altoFila + 0.5)
+                        {
+                            extensionSubindice = altoConSub - altoFila;
+                            altoFila = altoConSub;
+                        }
+                    }
+
+                    var runSubindice = celda.Parrafos.SelectMany(p => p.Runs)
+                        .FirstOrDefault(r => r.Posicion == "sub" && !string.IsNullOrWhiteSpace(r.Texto));
+                    var runSuperindice = runSubindice == null
+                        ? celda.Parrafos.SelectMany(p => p.Runs)
+                            .FirstOrDefault(r => r.Posicion == "super" && !string.IsNullOrWhiteSpace(r.Texto))
+                        : null;
+
+                    // ODF 1.3 §20.340: style:row-height fija el alto EXACTO de la fila en Writer
+                    // y recorta verticalmente el contenido que desborda (p.ej. marcadores de
+                    // región largos en PlantillaDepositos.fodt). Se aplica cuando la celda no
+                    // abarca varias filas ni usa desplazamientos de sub/superíndice.
+                    var esAltoFijoRecortado = fila.AltoFijoPt > 0.5 && celda.SpanFilas == 1 &&
+                        anchoTexto > 0.5 && celda.TablasAnidadas.Count == 0 &&
+                        !celdaConImagen && celda.MarcosFlotantes.Count == 0 &&
+                        runSubindice == null && runSuperindice == null;
 
                     // style:min-row-height / style:row-height de la fila. Estaba calculado
                     // pero NO se aplicaba en ninguna parte: en el comprobante de traslado
@@ -1647,13 +2512,16 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     // rÃ³tulo, nosotros 9,14). Se pide como alto MÃNIMO: el texto que no cabe
                     // sigue estirando la fila. En las columnas residuales no se pide
                     // (QuestPDF aborta el documento entero si el ancho es 0).
-                    if (altoFila > 0.5 && anchoTexto > 0.5)
+                    if (!esAltoFijoRecortado && altoFila > 0.5 && anchoTexto > 0.5)
                         cont = cont.MinHeight((float)altoFila);
 
 
                     if (celda.Parrafos.Count == 0)
                     {
-                        cont.Text("");
+                        if (esAltoFijoRecortado)
+                            cont.Height((float)Math.Max(altoFila - padSupCelda - padInfCelda, 0.5)).Text("");
+                        else
+                            cont.Text("");
                         continue;
                     }
 
@@ -1665,8 +2533,8 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     // arriba), asÃ­ que se deja el comportamiento de siempre.
                     // Los encabezados text:h de una celda (Comprobante de traslado) los
                     // centra LibreOffice verticalmente, aunque la celda declare top.
-                    if (celda.VerticalAlign == "middle" ||
-                        (celda.VerticalAlign == "top" && celda.Parrafos.Any(p => p.EsTitulo)))
+                    var alinearMedioCelda = celda.VerticalAlign == "middle";
+                    if (!esAltoFijoRecortado && alinearMedioCelda)
                         cont = cont.AlignMiddle();
 
                     // "bottom" sÃ³lo en bloques de TRES o mÃ¡s filas: la solicitud de traslado
@@ -1681,24 +2549,51 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     // alto completo ni el fondo), y en bloques de 3+ filas queda al FONDO
                     // (Â«Favor de referenciarâ€¦Â» de la solicitud). Antes se ignoraba y los textos
                     // salÃ­an pegados arriba.
-                    if (celda.VerticalAlign == "bottom")
-                        cont = (celda.SpanFilas >= 3 || fila.Celdas.Count == 1)
-                            ? cont.AlignBottom()
-                            : cont.AlignMiddle();
+                    var alinearFondoCelda = false;
+                    if (celda.VerticalAlign == "bottom" && !tabla.SolapadaPorFondo)
+                    {
+                        if (celda.SpanFilas >= 3 || fila.Celdas.Count == 1)
+                        {
+                            alinearFondoCelda = true;
+                            if (!esAltoFijoRecortado) cont = cont.AlignBottom();
+                        }
+                        else
+                        {
+                            alinearMedioCelda = true;
+                            if (!esAltoFijoRecortado) cont = cont.AlignMiddle();
+                        }
+                    }
 
                     // alineaciÃ³n de la celda (center / end / start) segÃºn su pÃ¡rrafo
-                    if (extensionSubindice > 0.5) cont = cont.OffsetY((float)(-extensionSubindice / 2));
-                    var runSubindice = celda.Parrafos.SelectMany(p => p.Runs)
-                        .FirstOrDefault(r => r.Posicion == "sub" && !string.IsNullOrWhiteSpace(r.Texto));
+                    if (extensionSubindice > 0.5 && alinearMedioCelda) cont = cont.OffsetY((float)(-extensionSubindice / 2));
                     if (runSubindice != null)
                     {
-                        // ODF define el descenso como 33% del tamaño original; el run conserva
-                        // sólo el tamaño visible (p.ej. 58%), por eso se reconstruye el original.
+                        // En filas con alto fijo (style:row-height) Writer aplica el descenso
+                        // automático de subíndice (~20% del tamaño original, DFLT_ESC_AUTO_SUB)
+                        // sin estirar la fila; en filas con min-row-height se usa 33% (compensado
+                        // con -extensionSubindice/2).
                         var escala = runSubindice.EscalaPosicion.GetValueOrDefault(58);
+                        var pctDescenso = fila.AltoFijoPt > 0.5 ? 20.0 : 33.0;
                         if (escala > 0)
-                            cont = cont.OffsetY((float)(runSubindice.TamanoPt * 33 / escala));
+                        {
+                            var tamOrigSub = runSubindice.TamanoPt * 100 / escala;
+                            var extraAscenso = fila.AltoFijoPt <= 0.5 && !alinearMedioCelda
+                                ? (tamOrigSub - runSubindice.TamanoPt) * 0.38
+                                : 0;
+                            cont = cont.OffsetY((float)(tamOrigSub * pctDescenso / 100 + extraAscenso));
+                        }
                     }
-                    else if (celda.VerticalAlign == "bottom" && celda.Parrafos.Count >= 2 &&
+                    else if (runSuperindice != null)
+                    {
+                        // Elevación automática de superíndice en Writer (~28% del tamaño
+                        // original, DFLT_ESC_AUTO_SUPER) sin alterar el alto de la fila
+                        // (p.ej. "Tipo Ubicación:" / "PermSCT:" en Carta Porte).
+                        var escala = runSuperindice.EscalaPosicion.GetValueOrDefault(58);
+                        if (escala > 0)
+                            cont = cont.OffsetY((float)(-runSuperindice.TamanoPt * 28 / escala));
+                    }
+                    else if (celda.VerticalAlign == "bottom" && !tabla.SolapadaPorFondo &&
+                             celda.Parrafos.Count >= 2 &&
                              celda.Parrafos[^1].Runs.Count == 0)
                     {
                         var primeroTexto = celda.Parrafos[0].Runs.FirstOrDefault(r => !string.IsNullOrWhiteSpace(r.Texto));
@@ -1790,7 +2685,9 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                     // tt.Span("\n"), y ese salto toma el estilo por defecto de la pÃ¡gina
                     // (Arial 9 -> 10.8 pt) que se SUMABA a la lÃ­nea de 6 pt: el paso salÃ­a
                     // 17.8 pt donde LibreOffice usa 11.3 (medido en el bloque de certificados).
-                    cont.Column(cc =>
+                    void PintarContenidoCelda(IContainer contenedorCelda)
+                    {
+                    contenedorCelda.Column(cc =>
                     {
                         var primero = true;
 
@@ -1832,7 +2729,7 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                             var esMarcaRegionTexto = texto.Contains("TableStart:") || texto.Contains("TableEnd:");
                             var filaSinAlto = fila.AltoMinimoPt <= 0.5 && fila.AltoFijoPt <= 0.5;
 
-                            var sinAnchoUtil = (anchoTexto < 20 && !esMarcaRegionTexto || anchoTexto < 3.5 && esMarcaRegionTexto) &&
+                            var sinAnchoUtil = (anchoTexto < 20 && !esMarcaRegionTexto || anchoTexto < Math.Max(anchoMinGlifoMarca, 2.5) && esMarcaRegionTexto) &&
                                                texto.TrimStart().StartsWith("\u00AB", StringComparison.Ordinal) &&
                                                texto.TrimEnd().EndsWith("\u00BB", StringComparison.Ordinal);
 
@@ -1862,7 +2759,7 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                 // en blanco de "Fichas de depÃ³sito" declara 0.353cm abajo y sin
                                 // ellos salÃ­a la mitad de alta que en LibreOffice
                                 var altoVacio = (p.AltoLineaPt > 0 ? p.AltoLineaPt : 10) + p.MargenSupPt + p.MargenInfPt;
-                                if (altoVacio > 0.5 && anchoTexto > 0.5 && fila.AltoFijoPt <= 0.5) cc.Item().Height((float)altoVacio);
+                                if (altoVacio > 0.5 && anchoTexto > 0.5 && (fila.AltoFijoPt <= 0.5 || esAltoFijoRecortado)) cc.Item().Height((float)altoVacio);
 
                                 if (ReferenceEquals(p, celda.Parrafos[^1])) ultimoVacio = true;
 
@@ -1874,7 +2771,12 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                             // padding es simplemente 2x el tamaÃ±o de fuente (sellos 11.3 con 6 pt,
                             // cadena original 10.0 con 5 pt). El "extra" que habÃ­a antes compensaba
                             // un interlineado mal calculado; ahora sumarÃ­a de mÃ¡s.
-                            var hueco = primero ? 0 : p.MargenSupPt;
+                            // Los encabezados text:h dentro de celda con vertical-align="top"
+                            // (p.ej. Heading_20_1 en Tabla2 de ComprobanteTraslado) sí respetan
+                            // su fo:margin-top en Writer, alineando todas las cabeceras arriba.
+                            var hueco = primero
+                                ? (p.EsTitulo && celda.VerticalAlign == "top" ? p.MargenSupPt : 0)
+                                : p.MargenSupPt;
                             if (hueco > 0.5) cc.Item().Height((float)hueco);
 
                             primero = false;
@@ -1883,6 +2785,16 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                             // no en el contenedor: en el contenedor no tenÃ­a efecto y el
                             // texto quedaba pegado a la izquierda de la celda.
                             var item = cc.Item().ExtendHorizontal();
+
+                            // Un párrafo centrado con márgenes laterales negativos asimétricos
+                            // dentro de celda (p.ej. firmas P24-P26/P37 en SC_PMoral) desplaza
+                            // su eje de centrado en (margin-left - margin-right) / 2.
+                            if (p.Alineacion == "center" && (p.MargenIzqPt < -1 || p.MargenDerPt < -1))
+                            {
+                                var desfaseCentro = (p.MargenIzqPt - p.MargenDerPt) / 2;
+                                if (Math.Abs(desfaseCentro) > 0.5)
+                                    item = item.OffsetX((float)desfaseCentro);
+                            }
 
                             // El marcador TableEnd ahora se muestra en la columna estrecha.
                             // Mantener el alto de fila medido en LibreOffice evita que el
@@ -1915,24 +2827,70 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                 .DefaultIfEmpty(0)
                                 .Max();
 
+                            // Cuando la celda declara un fo:line-height generoso (p.ej. 0.459 cm = 13 pt
+                            // para texto de 5.5 pt en DetalleMercancia / FigurasTransporte), Writer coloca
+                            // el interlineado extra arriba de la línea base (~88% arriba / ~12% abajo),
+                            // mientras Skia reparte 50/50 (half-leading). El desplazamiento alinea la línea
+                            // base con Writer sin cambiar el alto de la fila.
+                            var esInterlineadoGeneroso = tamPrincipal > 0 && p.AltoLineaPt > tamPrincipal * 1.15 * 1.3;
+                            if (esInterlineadoGeneroso &&
+                                (string.IsNullOrEmpty(celda.VerticalAlign) || celda.VerticalAlign == "top") &&
+                                p.AltoLineaPt / tamPrincipal <= topeInterlineadoCelda)
+                            {
+                                var desfaseLeading = (p.AltoLineaPt - tamPrincipal * 1.15) * 0.38;
+                                if (desfaseLeading > 0.3)
+                                    item = item.OffsetY((float)desfaseLeading);
+                            }
+
                             item.DefaultTextStyle(EstiloDe(p.Runs, altoLinea, topeInterlineadoCelda))
                                 .Text(t =>
                                 {
                                     AlinearTexto(t, p.Alineacion);
 
+                                    var huboTextoAntes = false;
+                                    var huboEspacioAntes = false;
                                     foreach (var r in p.Runs)
                                     {
                                         var estiloRun = r;
                                         var textoRun = r.Texto;
 
-                                        // El último campo «TableEnd» vive en una columna de
-                                        // 0.489 cm. Writer parte el marcador letra por letra;
-                                        // insertar oportunidades de salto permite que QuestPDF
-                                        // muestre el mismo contenido en vez de dejar la columna
-                                        // vacía o desbordar el texto.
-                                        if (esMarcaRegionTexto && anchoTexto < 20 &&
-                                            textoRun.Contains("TableEnd:", StringComparison.Ordinal))
-                                            textoRun = string.Join("\u200B", textoRun.Select(ch => ch.ToString()));
+                                        // Los marcadores de región («TableStart»/«TableEnd») en
+                                        // columnas estrechas se parten carácter por carácter en
+                                        // Writer. Si el padding se redujo para evitar error de
+                                        // layout, se parte explícitamente al ancho real declarado
+                                        // en vez de dejar que QuestPDF llene la caja ensanchada.
+                                        var esRunMarca = textoRun.Contains("TableEnd:", StringComparison.Ordinal) ||
+                                                         textoRun.Contains("TableStart:", StringComparison.Ordinal);
+                                        if (esMarcaRegionTexto && anchoTexto < 20 && esRunMarca)
+                                        {
+                                            if (necesitaReducirPaddingMarca)
+                                                textoRun = PartirMarcaPorAncho(textoRun, Math.Max(anchoTextoReal, 0.5),
+                                                    string.IsNullOrEmpty(r.Fuente) ? "Arial" : r.Fuente,
+                                                    r.TamanoPt > 0 ? r.TamanoPt : 6, r.Negrita);
+                                            else
+                                                textoRun = string.Join("\u200B", textoRun.Select(ch => ch.ToString()));
+                                        }
+                                        else if (esMarcaRegionTexto && esRunMarca && huboTextoAntes && huboEspacioAntes && anchoTexto >= 20)
+                                        {
+                                            // En Writer un token largo («TableEnd:Facturas») que no cabe
+                                            // en la línea primero salta en el espacio previo; Skia lo
+                                            // empieza en la misma línea y lo parte a mitad.
+                                            var anchoMarca = PaginarPropio.Medir(textoRun,
+                                                string.IsNullOrEmpty(r.Fuente) ? "Arial" : NormalizarFuente(r.Fuente),
+                                                r.TamanoPt > 0 ? r.TamanoPt : 8, r.Negrita);
+                                            if (anchoMarca > anchoTexto)
+                                                textoRun = "\n" + textoRun;
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace(r.Texto))
+                                        {
+                                            huboTextoAntes = true;
+                                            huboEspacioAntes = char.IsWhiteSpace(r.Texto[^1]);
+                                        }
+                                        else if (!string.IsNullOrEmpty(r.Texto))
+                                        {
+                                            huboEspacioAntes = true;
+                                        }
 
                                         if (tamPrincipal > 0 && string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt != tamPrincipal)
                                             estiloRun = new RunModelo
@@ -1948,7 +2906,7 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                                 Hipervinculo = r.Hipervinculo,
                                             };
 
-                                        var altoLineaRun = p.AltoLineaPt;
+                                        var altoLineaRun = altoLinea;
                                         if (tamPrincipal > 0 && r.TamanoPt > 0 && r.TamanoPt < tamPrincipal && altoLineaRun > 0)
                                             altoLineaRun *= r.TamanoPt / tamPrincipal;
 
@@ -1961,12 +2919,12 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                     }
                                 });
 
-                            // Writer conserva el margen inferior entre los párrafos del
-                            // rótulo y la línea de firma. Las celdas normalmente omiten ese
-                            // margen por diferencias entre plantillas; aquí se iguala el
-                            // espacio medido en la orden de compra inválida.
-                            if (esTablaFirmas && texto.Trim() is "Creo" or "Autorizo" or "Recibio")
-                                cc.Item().Height(13.2f);
+                            // En LibreOffice Writer cada párrafo dentro de una celda respeta su
+                            // fo:margin-bottom respecto al siguiente párrafo (p.ej. P24 "Adicionalmente
+                            // recibí:" heredando 0.282cm de Standard antes de "208 VALES DESP.", o
+                            // P19 "Creo/Autorizo/Recibio" antes de la línea de firma).
+                            if (!ReferenceEquals(p, celda.Parrafos[^1]) && p.MargenInfPt > 0.5)
+                                cc.Item().Height((float)p.MargenInfPt);
                         }
 
                         // Margen inferior del Ãºltimo pÃ¡rrafo de la celda: LibreOffice lo
@@ -1978,9 +2936,7 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
 
                         if (ultimoParrafoCelda != null && !ultimoVacio && ultimoParrafoCelda.MargenInfPt > 0.5)
                         {
-                            var margenFinal = ultimoParrafoCelda.MargenInfPt;
-                            if (esTablaFirmas && indiceFila == 0) margenFinal += 2.5;
-                            cc.Item().Height((float)margenFinal);
+                            cc.Item().Height((float)ultimoParrafoCelda.MargenInfPt);
                         }
 
                         // Las tablas anidadas van DESPUÃ‰S de los pÃ¡rrafos de la celda: en el
@@ -2010,6 +2966,48 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
                                 cc.Item().Element(e => AgregarTabla(e, t2, anchoAnidada, compensarMargen: false));
                             }
                     });
+                    }
+
+                    if (esAltoFijoRecortado)
+                    {
+                        var altoCajaFija = (float)Math.Max(altoFila - padSupCelda - padInfCelda, 0.5);
+                        var anchoCajaFija = (float)anchoTexto;
+                        cont.Height(altoCajaFija).CornerRadius(0.01f).Layers(capasFijo =>
+                        {
+                            capasFijo.PrimaryLayer().ExtendHorizontal().Height(altoCajaFija);
+                            var capaCont = capasFijo.Layer()
+                                .Unconstrained()
+                                .Width(anchoCajaFija)
+                                .MinHeight(altoCajaFija);
+                            if (alinearMedioCelda) capaCont = capaCont.AlignMiddle();
+                            else if (alinearFondoCelda) capaCont = capaCont.AlignBottom();
+                            capaCont.Element(PintarContenidoCelda);
+                        });
+                    }
+                    else if (celda.MarcosFlotantes.Count > 0)
+                    {
+                        var marcosCelda = celda.MarcosFlotantes;
+                        cont.Layers(capasCelda =>
+                        {
+                            capasCelda.PrimaryLayer().Element(PintarContenidoCelda);
+
+                            foreach (var marco in marcosCelda)
+                            {
+                                var capa = marco;
+                                capasCelda.Layer()
+                                    .Unconstrained()
+                                    .OffsetX((float)capa.XPt)
+                                    .OffsetY((float)capa.YPt)
+                                    .Width((float)Math.Max(capa.AnchoPt, 1))
+                                    .Height((float)Math.Max(capa.AltoPt, 1))
+                                    .Element(caja => DibujarMarcoEnCelda(caja, capa));
+                            }
+                        });
+                    }
+                    else
+                    {
+                        PintarContenidoCelda(cont);
+                    }
                 }
 
                 indiceFila++;
@@ -2161,7 +3159,8 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
     // tamaÃ±o pedido. Es interno y no configurable: se compensa al fijar FontSize.
     const double EscalaSuperQuestPdf = 0.6;
 
-    static TextStyle EstiloDe(List<RunModelo> runs, double altoLineaPt = 0, double factorInterlineadoMaximo = 1.95)
+    static TextStyle EstiloDe(List<RunModelo> runs, double altoLineaPt = 0, double factorInterlineadoMaximo = 1.95,
+                              bool aplicarSuper = false)
     {
         // El estilo lo manda el run que TIENE TEXTO. Antes valÃ­a tambiÃ©n el primero que
         // sÃ³lo marcaba un bookmark, y como casi todos los datos van precedidos de
@@ -2181,10 +3180,11 @@ return p.AltoLineaPt > tam * 1.15 * 1.3 ? p.AltoLineaPt : natural;
         // sobre el FontSize que se le pasa, y con el tamaÃ±o "visible" el renglÃ³n crecÃ­a ~8 pt.
         // sÃ³lo si de verdad se va a aplicar Superscript (ver mÃ¡s abajo): los runs de puros
         // espacios no se levantan, y si se compensara el tamaÃ±o saldrÃ­an al 166 %
-        // Se dibuja al tamaÃ±o ya escalado (58 %) y SIN escapement: LibreOffice alinea estos
-        // textos con el resto del renglÃ³n y el levantamiento de Skia inflaba la caja de lÃ­nea
-        // (17,3 pt por renglÃ³n contra 13 de LO en los bloques Â«UbicaciÃ³nÂ»).
-        var llevaSuper = false;
+        // Se dibuja al tamaÃ±o ya escalado (58 %) y SIN escapement salvo cuando el pÃ¡rrafo
+        // mezcla texto en lÃ­nea base normal con superÃ­ndice (p.ej. "Complemento Carta Porte"
+        // con "VersiÃ³n: 2.0..."): asÃ­ no infla las celdas de sÃ³lo superÃ­ndice ("UbicaciÃ³n")
+        // pero sÃ­ eleva el superÃ­ndice respecto al texto base, igual que LibreOffice.
+        var llevaSuper = aplicarSuper && r.Posicion == "super" && !string.IsNullOrWhiteSpace(r.Texto);
 
         if (llevaSuper) tamano /= EscalaSuperQuestPdf;
 

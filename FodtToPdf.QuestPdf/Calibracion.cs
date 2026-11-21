@@ -64,6 +64,34 @@ internal static class Calibracion
 
             if (Deltas.TryGetValue(capa.Nombre, out var d))
             {
+                if (capa.Nombre == "Text Box 9" && capa.BloqueAncla > 0 && capa.BloqueAncla < m.Flujo.Count)
+                {
+                    // Suma los espaciadores de su columna desde el inicio de columna
+                    // (fo:break-before="column") hasta el párrafo ancla: así funciona tanto con
+                    // 2 renglones vacíos (PlantillaFactura) como con 3 (Carta Porte).
+                    var yColumna = 0.0;
+                    var seccionAncla = m.Flujo[capa.BloqueAncla].Seccion;
+                    for (var k = capa.BloqueAncla - 1; k >= 0; k--)
+                    {
+                        var b = m.Flujo[k];
+                        if (b.Seccion != seccionAncla) break;
+                        if (b.Tipo == "espacio") yColumna += b.AltoPt;
+                        if (b.Parrafo?.SaltoColumnaAntes == true) break;
+                    }
+
+                    var primerTam = capa.Parrafos
+                        .SelectMany(p => p.Runs)
+                        .Where(r => !string.IsNullOrWhiteSpace(r.Texto) && r.TamanoPt > 0)
+                        .Select(r => r.TamanoPt)
+                        .DefaultIfEmpty(8.0)
+                        .First();
+
+                    capa.XPt += d.dx;
+                    capa.YPt = m.Pagina.MargenSupPt + yColumna + capa.YPt + capa.PaddingSupPt + primerTam * 0.9;
+                    capa.Ancla = (capa.Ancla + " + calibrada").Trim();
+                    continue;
+                }
+
                 capa.XPt += d.dx;
                 capa.YPt -= d.dy;     // dy negativo = bajar la caja
                 capa.Ancla = (capa.Ancla + " + calibrada").Trim();

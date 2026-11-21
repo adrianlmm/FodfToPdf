@@ -14,9 +14,9 @@ public static class QuestPdfFodtRenderer
 {
     /// <summary>Renders a filled .fodt document to PDF.</summary>
     /// <param name="fodtBytes">The filled .fodt document.</param>
-    /// <param name="nestedTables">Draws tables nested inside table cells. Required for reports such as purchase orders; keep false for invoices.</param>
+    /// <param name="nestedTables">Draws tables nested inside table cells (enabled by default to match LibreOffice Writer).</param>
     /// <param name="ownPagination">Uses the internal pagination estimator. Disabled by default.</param>
-    public static byte[] Render(byte[] fodtBytes, bool nestedTables = false, bool ownPagination = false)
+    public static byte[] Render(byte[] fodtBytes, bool nestedTables = true, bool ownPagination = false)
     {
         if (fodtBytes == null || fodtBytes.Length == 0)
             throw new ArgumentException("El .fodt está vacío.", nameof(fodtBytes));
@@ -99,7 +99,7 @@ public static class QuestPdfFodtRenderer
     }
 
     /// <summary>Renders a .fodt file to PDF.</summary>
-    public static byte[] Render(string path, bool nestedTables = false, bool ownPagination = false)
+    public static byte[] Render(string path, bool nestedTables = true, bool ownPagination = false)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             throw new FileNotFoundException("The .fodt document was not found.", path);

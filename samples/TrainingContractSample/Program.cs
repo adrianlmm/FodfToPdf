@@ -1,11 +1,24 @@
 using System.Data;
 using FodtToPdf;
 
-// Fills the individual training contract template with fictitious data and
-// exports both PDF backends.
+// Generates two variants from the same contract template:
+//   1. The original template, without filling any fields.
+//   2. A filled contract with fictitious worker/company data.
 var samples = FindSamplesDirectory();
-var template = FodtTemplate.Load(Path.Combine(samples, "C_CapacitacionInicialPTractocamion.fodt"));
+var templatePath = Path.Combine(samples, "C_CapacitacionInicialPTractocamion.fodt");
+var templateBytes = File.ReadAllBytes(templatePath);
 
+// Template-only output
+var questTemplate = QuestPdfFodtRenderer.Render(templateBytes);
+var questTemplatePath = Path.Combine(samples, "training-contract-template-questpdf.pdf");
+File.WriteAllBytes(questTemplatePath, questTemplate);
+
+var libreOfficeTemplate = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var libreOfficeTemplatePath = Path.Combine(samples, "training-contract-template-libreoffice.pdf");
+File.WriteAllBytes(libreOfficeTemplatePath, libreOfficeTemplate);
+
+// Filled output
+var template = FodtTemplate.Load(templateBytes);
 var data = new DataTable("Contrato");
 foreach (var column in new[]
 {
@@ -49,23 +62,27 @@ data.Rows.Add(row);
 
 var replaced = template.ExecuteMailMerge(data.Rows[0]);
 if (replaced == 0)
-    throw new InvalidOperationException("The contract template did not contain any replaceable fields.");
+    throw new InvalidOperationException("The contract template did not contain replaceable fields.");
 
+var filled = template.ToBytes();
 var filledPath = Path.Combine(samples, "training-contract-sample-filled.fodt");
-File.WriteAllBytes(filledPath, template.ToBytes());
+File.WriteAllBytes(filledPath, filled);
 
-var questPdf = QuestPdfFodtRenderer.Render(File.ReadAllBytes(filledPath));
-var questPdfPath = Path.Combine(samples, "training-contract-sample-questpdf.pdf");
-File.WriteAllBytes(questPdfPath, questPdf);
+var questFilled = QuestPdfFodtRenderer.Render(filled);
+var questFilledPath = Path.Combine(samples, "training-contract-sample-questpdf.pdf");
+File.WriteAllBytes(questFilledPath, questFilled);
 
-var libreOfficePdf = QuestPdfFodtRenderer.RenderWithLibreOffice(File.ReadAllBytes(filledPath));
-var libreOfficePdfPath = Path.Combine(samples, "training-contract-sample-libreoffice.pdf");
-File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
+var libreOfficeFilled = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
+var libreOfficeFilledPath = Path.Combine(samples, "training-contract-sample-libreoffice.pdf");
+File.WriteAllBytes(libreOfficeFilledPath, libreOfficeFilled);
 
+Console.WriteLine($"Source template: {templatePath}");
+Console.WriteLine($"Template QuestPDF:    {questTemplatePath} ({questTemplate.Length} bytes)");
+Console.WriteLine($"Template LibreOffice: {libreOfficeTemplatePath} ({libreOfficeTemplate.Length} bytes)");
 Console.WriteLine($"Fields replaced: {replaced}");
 Console.WriteLine($"Filled template: {filledPath}");
-Console.WriteLine($"QuestPDF PDF:    {questPdfPath} ({questPdf.Length} bytes)");
-Console.WriteLine($"LibreOffice PDF: {libreOfficePdfPath} ({libreOfficePdf.Length} bytes)");
+Console.WriteLine($"Filled QuestPDF:    {questFilledPath} ({questFilled.Length} bytes)");
+Console.WriteLine($"Filled LibreOffice: {libreOfficeFilledPath} ({libreOfficeFilled.Length} bytes)");
 
 static string FindSamplesDirectory()
 {

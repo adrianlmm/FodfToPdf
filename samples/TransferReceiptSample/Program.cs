@@ -4,7 +4,20 @@ using FodtToPdf;
 // Fills the CFDI transfer receipt template with header bookmarks and a
 // repeating concept region, then exports both PDF backends.
 var samples = FindSamplesDirectory();
-var template = FodtTemplate.Load(Path.Combine(samples, "ComprobanteTraslado.fodt"));
+var templatePath = Path.Combine(samples, "ComprobanteTraslado.fodt");
+var templateBytes = File.ReadAllBytes(templatePath);
+
+// Template-only PDFs
+var templateQuest = QuestPdfFodtRenderer.Render(templateBytes);
+var templateQuestPath = Path.Combine(samples, "transfer-receipt-template-questpdf.pdf");
+File.WriteAllBytes(templateQuestPath, templateQuest);
+
+var templateLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var templateLibreOfficePath = Path.Combine(samples, "transfer-receipt-template-libreoffice.pdf");
+File.WriteAllBytes(templateLibreOfficePath, templateLibreOffice);
+
+// Filled PDFs
+var template = FodtTemplate.Load(templateBytes);
 
 var values = new Dictionary<string, string>
 {
@@ -64,6 +77,8 @@ var libreOfficePdf = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficePdfPath = Path.Combine(samples, "transfer-receipt-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
 
+Console.WriteLine($"Template QuestPDF:    {templateQuestPath} ({templateQuest.Length} bytes)");
+Console.WriteLine($"Template LibreOffice: {templateLibreOfficePath} ({templateLibreOffice.Length} bytes)");
 Console.WriteLine($"Bookmarks replaced: {replaced}");
 Console.WriteLine($"Concept rows:       {regionRows}");
 Console.WriteLine($"Filled template:    {filledPath}");

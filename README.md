@@ -15,16 +15,26 @@ The animation shows the original invoice template and the generated result.
 | `samples/InvoiceSample` | Fills `invoice-template.fodt` with sample invoice data and writes both QuestPDF and LibreOffice PDFs. |
 | `samples/DailySalesReportSample` | Fills `daily-sales-report.fodt` with sample daily-sales data and writes both PDF variants. |
 | `samples/RegionalSalesReportSample` | Builds a grouped master/detail report with 12 regions, cloning a detail template and appending it to the master document. |
-| `samples/TrainingContractSample` | Fills the individual training contract template `C_CapacitacionInicialPTractocamion.fodt` with sample worker, company, date, salary, and witness data, then exports both PDF variants. |
+| `samples/TrainingContractSample` | Generates both the raw individual training contract template `C_CapacitacionInicialPTractocamion.fodt` and a version filled with sample worker data, each in both PDF variants. |
 | `samples/DividendCertificateSample` | Fills the Mexican dividend withholding certificate template `formatoDividendos.fodt` using its bookmarks and exports both PDF variants. |
 | `samples/CancellationReceiptSample` | Fills the CFDI cancellation acknowledgement template `AcuseCancelacion.fodt` using its bookmarks and exports both PDF variants. |
-| `samples/PurchaseOrderSample` | Fills the purchase order template `OrdenDeCompra.fodt` with a header and a repeating detail region, then exports both PDF variants. |
-| `samples/InvalidPurchaseOrderSample` | Fills the invalid purchase order template `OrdenDeCompraInvalida.fodt`, including its `COPIA NO VALIDA` watermark, and exports both PDF variants. |
+| `samples/PurchaseOrderSample` | Generates the purchase order template `OrdenDeCompra.fodt` both untouched and filled with a header and repeating detail region, in both PDF variants. |
+| `samples/InvalidPurchaseOrderSample` | Generates the invalid purchase order template `OrdenDeCompraInvalida.fodt`, both untouched and filled, in both PDF variants. |
 | `samples/PhysicalSignatureSample` | Fills the physical-signature sheet template `Formato_FirmasPFisica.fodt` with six signer names and exports both PDF variants. |
 | `samples/NestedTableSample` | Renders `nested_table.fodt` with `nestedTables: true` to demonstrate a table nested inside a table cell. |
 | `samples/SupplierPaymentSample` | Fills the supplier-payment master template `PagosFacturasProveedorMaestro.fodt` with header data and exports both PDF variants. |
-| `samples/TransferReceiptSample` | Fills the CFDI transfer receipt template `ComprobanteTraslado.fodt` with header bookmarks and a repeating concept region, then exports both PDF variants. |
-| `samples/ExitInterviewSample` | Fills the employee exit-interview template `EntrevistaSalida.fodt` with 67 database-display fields and exports both PDF variants. |
+| `samples/SupplierInvoicesSample` | Fills the supplier-invoice report template `FacturasProveedor.fodt` with header bookmarks and a repeating invoice region, then exports both PDF variants. |
+| `samples/CCIAlimentosSample` | Generates the CCI contract template `CCI_Alimentos Soles S.A. de C.V._CF.fodt` both untouched and with literal placeholders replaced by sample data, in both PDF variants. |
+| `samples/ThirdPartyComparisonSample` | Generates the third-party comparison template `ComparativoTerceros.fodt` both untouched and filled with sample comparison rows, in both PDF variants. |
+| `samples/BusinessCreditApplicationSample` | Generates the SC_PMoral business credit application both untouched and filled with sample values for all database-display fields, in both PDF variants. |
+| `samples/CartaPorteSample` | Generates the carta porte request template `PlantillaSolicitudEntregaCartaPorte_V3-3.fodt` both untouched and filled with header bookmarks and three detail regions, in both PDF variants. |
+| `samples/DepositApplicationSample` | Generates the deposit application template `PlantillaDepositos.fodt` both untouched and filled with invoice/deposit rows, in both PDF variants. |
+| `samples/InterestCertificateSample` | Generates the interest withholding certificate template `PlantillaIntereses.fodt` both untouched and filled with sample withholding data, in both PDF variants. |
+| `samples/PayrollReceiptSample` | Generates the payroll CFDI receipt template `ComprobantesFiscales.fodt` both untouched and filled with sample payroll data, in both PDF variants. |
+| `samples/EmployeeInformationSample` | Generates the employee information form `InformacionEmpleado.fodt` both untouched and filled with sample personal, job, and skills data, in both PDF variants. |
+| `samples/CIT18Sample` | Generates the CIT18 contract template `CIT18.fodt` both untouched and filled with sample worker data, in both PDF variants. |
+| `samples/TransferReceiptSample` | Generates the CFDI transfer receipt template `ComprobanteTraslado.fodt` both untouched and filled with header bookmarks and a repeating concept region, in both PDF variants. |
+| `samples/ExitInterviewSample` | Generates the employee exit-interview template `EntrevistaSalida.fodt` both untouched and filled with 67 fictional answers, in both PDF variants. |
 | `samples/DaycareLetterSample` | Fills the IMSS daycare letter template `CartaGuarderia.fodt` using its bookmarks and exports both PDF variants. |
 
 ## Main features

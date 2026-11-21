@@ -40,6 +40,28 @@ internal class ModeloPlantilla
     public double DesplazamientoIzqPt { get; set; }
 
     public List<string> Bookmarks { get; set; } = new();
+
+    // Páginas maestras del documento (style:master-page). Si un párrafo cambia de
+    // style:master-page-name (p.ej. Converted1/Converted2 en CCI), inicia una nueva
+    // sección de página con sus propios márgenes, encabezado y pie.
+    public Dictionary<string, PaginaMaestraModelo> PaginasMaestras { get; set; } = new();
+    public string PaginaMaestraInicial { get; set; } = "";
+
+    // config:config-item "JustifyLinesWithShrinking" (<office:settings>): compatibilidad
+    // Word/LibreOffice Writer (SwTextPortion::Format, nMinimum = 75 %) que permite encoger
+    // espacios entre palabras hasta 75 % en líneas justificadas para evitar saltos prematuros.
+    public bool JustificarConEncogimiento { get; set; }
+}
+
+internal class PaginaMaestraModelo
+{
+    public string Nombre { get; set; } = "";
+    public PaginaModelo Pagina { get; set; } = new();
+    public List<ParrafoModelo> Encabezado { get; set; } = new();
+    public List<ParrafoModelo> Pie { get; set; } = new();
+    public List<CapaModelo> MarcasAgua { get; set; } = new();
+    public List<CapaModelo> NumerosPagina { get; set; } = new();
+    public List<MarcaAguaTextoModelo> MarcasAguaTexto { get; set; } = new();
 }
 
 // Una text:section puede tener varias columnas (la del encabezado de la factura tiene 3).
@@ -50,6 +72,8 @@ internal class SeccionModelo
     public int Columnas { get; set; } = 1;
     public List<double> RelAnchos { get; set; } = new();   // style:rel-width de cada columna
     public List<double> SeparacionPt { get; set; } = new(); // fo:column-gap entre columnas
+    public List<double> MargenIzqColPt { get; set; } = new(); // fo:start-indent de cada <style:column>
+    public List<double> MargenDerColPt { get; set; } = new(); // fo:end-indent de cada <style:column>
 }
 
 internal class PaginaModelo
@@ -144,11 +168,16 @@ internal class ParrafoModelo
     // fo:break-before="page": el parrafo abre hoja (lo declara el estilo P61 del CCI)
     public bool SaltoPaginaAntes { get; set; }
 
+    // style:master-page-name del estilo del párrafo (ODF 1.3 §16.2): abre nueva página
+    // aplicando el page-layout, encabezado y pie de esa página maestra.
+    public string PaginaMaestra { get; set; }
+
     // fo:break-before="column": el parrafo abre la COLUMNA siguiente de la sección. Los
     // .fodt convertidos de Word lo usan para fijar el encabezado de la factura/solicitud
     // (cada columna empieza donde el autor puso el corte, no donde toque por altura).
     public bool SaltoColumnaAntes { get; set; }
     public double AltoLineaPt { get; set; }        // fo:line-height real del estilo (0 = usar tamaño*1.2)
+    public double AltoLineaPct { get; set; }       // fo:line-height porcentual declarado (p.ej. 1.15 para "115%", 0 si no aplica)
 
     // tamaño de fuente que declara el estilo del párrafo (0 si no declara). Sirve para
     // calcular el alto de un párrafo vacío dentro de una celda, que no tiene runs de
@@ -163,6 +192,10 @@ internal class ParrafoModelo
     // estilo "común" del párrafo para esa comparación: si text:style-name apunta a un
     // estilo automático se usa su style:parent-style-name, como dice §20.255.
     public string EstiloComun { get; set; } = "";
+
+    // fo:orphans / fo:widows del estilo de párrafo (ODF 1.3 §20.214 / §20.230)
+    public int Huerfanas { get; set; }
+    public int Viudas { get; set; }
     public double AltoObjetoPt { get; set; }       // draw:frame as-char/char dentro del párrafo: la línea crece a su alto
 
     // si el párrafo lleva una imagen anclada (as-char), se dibuja DENTRO del flujo:
@@ -200,6 +233,10 @@ internal class RunModelo
     // Sin esto se quedaba en texto plano y no salía como hipervínculo.
     public string Hipervinculo { get; set; }
 
+    // text:page-number / text:page-count: campos dinámicos evaluados por página
+    // ("page-number" | "page-count" | null).
+    public string CampoDinamico { get; set; }
+
     // (sin soporte de soft-page-break: ver la nota en GeneradorPdf.AgregarParrafo)
 }
 
@@ -235,6 +272,11 @@ internal class CapaModelo
     public string HorizontalPos { get; set; } = "";
     public bool EnFlujo { get; set; }             // ancla as-char: se dibuja dentro del flujo, no en capa absoluta
     public bool EsNumeroPaginaActual { get; set; }
+    public bool EnPie { get; set; }               // true si el número de página vive en style:footer
+
+    // Trazo de draw:custom-shape sin relleno (p.ej. línea de firma Freeform en CCI)
+    public string ColorTrazo { get; set; }
+    public double GrosorTrazoPt { get; set; }
 
     // índice del bloque del flujo cuyo párrafo la ancla (-1 si no está anclada a un
     // párrafo del flujo, p.ej. si vive dentro de una celda de tabla). Con anchor-type
@@ -267,6 +309,16 @@ internal class CapaModelo
     // color (la que va antes de "ORDEN DE COMPRA" en la orden de compra) no traen texto ni
     // imagen, así que sin esto no se dibuja nada.
     public string ColorRelleno { get; set; }
+
+    // style:wrap y fo:border del estilo gráfico (p.ej. el marco del QR en dividendos)
+    public string Wrap { get; set; } = "";
+    public bool BordeCaja { get; set; }
+    public string ColorBorde { get; set; }
+    public double GrosorBordePt { get; set; }
+    public double PaddingIzqPt { get; set; }
+    public double PaddingDerPt { get; set; }
+    public double PaddingSupPt { get; set; }
+    public double PaddingInfPt { get; set; }
 }
 
 internal class MarcaAguaTextoModelo
@@ -299,6 +351,11 @@ internal class TablaModelo
     // tabla hasta este valor. Antes se usaba sólo la suma de columnas.
     public double AnchoDeclaradoPt { get; set; }
 
+    // true cuando una capa flotante anclada tras la tabla se solapa hacia arriba (svg:y < 0,
+    // p.ej. el fondo gris Imagen1 del formato de dividendos). En LibreOffice Writer
+    // (SwCellFrame::Format), ese solapamiento anula style:vertical-align="bottom" y alinea arriba.
+    public bool SolapadaPorFondo { get; set; }
+
     public double AnchoTotalPt => AnchoDeclaradoPt > 0 ? AnchoDeclaradoPt : ColumnasPt.Sum();
 }
 
@@ -325,11 +382,16 @@ internal class CeldaModelo
     // columnas, por ejemplo). Si no se extraen, ese contenido queda fuera del PDF.
     public List<TablaModelo> TablasAnidadas { get; set; } = new();
 
+    // marcos flotantes anclados "char" dentro de la celda (p.ej. Marco1 en SC_PMoral)
+    public List<CapaModelo> MarcosFlotantes { get; set; } = new();
+
     // bordes tal como los declara el estilo de la celda (fo:border-*)
     public bool BordeIzq { get; set; }
     // style:vertical-align de la celda: top | middle | bottom ("" = no declarado)
     public string VerticalAlign { get; set; } = "";
     public double GrosorBordePt { get; set; }    // fo:border "0.5pt ...": grosor en puntos (0 = 0.7 por omisión)
+    public double GrosorBordeIzqPt { get; set; }
+    public double GrosorBordeDerPt { get; set; }
     public string ColorBordeIzq { get; set; }
     public bool BordeDer { get; set; }
     public string ColorBordeDer { get; set; }

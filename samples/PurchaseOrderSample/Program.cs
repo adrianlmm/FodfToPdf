@@ -4,7 +4,20 @@ using FodtToPdf;
 // Fills the purchase-order template with a purchase-order header and a
 // repeating detail region, then exports both PDF backends.
 var samples = FindSamplesDirectory();
-var template = FodtTemplate.Load(Path.Combine(samples, "OrdenDeCompra.fodt"));
+var templatePath = Path.Combine(samples, "OrdenDeCompra.fodt");
+var templateBytes = File.ReadAllBytes(templatePath);
+
+// Template-only PDFs
+var templateQuest = QuestPdfFodtRenderer.Render(templateBytes);
+var templateQuestPath = Path.Combine(samples, "purchase-order-template-questpdf.pdf");
+File.WriteAllBytes(templateQuestPath, templateQuest);
+
+var templateLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var templateLibreOfficePath = Path.Combine(samples, "purchase-order-template-libreoffice.pdf");
+File.WriteAllBytes(templateLibreOfficePath, templateLibreOffice);
+
+// Filled PDFs
+var template = FodtTemplate.Load(templateBytes);
 
 var header = new DataTable("OrdenDeCompra");
 foreach (var column in new[]
@@ -83,6 +96,8 @@ var libreOfficePdf = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficePdfPath = Path.Combine(samples, "purchase-order-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
 
+Console.WriteLine($"Template QuestPDF:    {templateQuestPath} ({templateQuest.Length} bytes)");
+Console.WriteLine($"Template LibreOffice: {templateLibreOfficePath} ({templateLibreOffice.Length} bytes)");
 Console.WriteLine($"Header fields replaced: {replaced}");
 Console.WriteLine($"Detail rows:           {regionRows}");
 Console.WriteLine($"Filled template:        {filledPath}");

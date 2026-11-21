@@ -37,7 +37,7 @@ public static class LibreOfficePdf
     /// Generates the PDF with QuestPDF when a generator has been registered; otherwise
     /// uses LibreOffice.
     /// </summary>
-    public static byte[] ConvertToPdf(byte[] fodtBytes, bool nestedTables = false)
+    public static byte[] ConvertToPdf(byte[] fodtBytes, bool nestedTables = true)
     {
         if (_generadorQuestPdf != null)
             return _generadorQuestPdf(fodtBytes, nestedTables);

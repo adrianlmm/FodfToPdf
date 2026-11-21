@@ -4,7 +4,20 @@ using FodtToPdf;
 // Fills the employee exit-interview template with fictional data and exports
 // both PDF backends. All content is stored in database-display fields.
 var samples = FindSamplesDirectory();
-var template = FodtTemplate.Load(Path.Combine(samples, "EntrevistaSalida.fodt"));
+var templatePath = Path.Combine(samples, "EntrevistaSalida.fodt");
+var templateBytes = File.ReadAllBytes(templatePath);
+
+// Template-only PDFs
+var templateQuest = QuestPdfFodtRenderer.Render(templateBytes);
+var templateQuestPath = Path.Combine(samples, "exit-interview-template-questpdf.pdf");
+File.WriteAllBytes(templateQuestPath, templateQuest);
+
+var templateLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var templateLibreOfficePath = Path.Combine(samples, "exit-interview-template-libreoffice.pdf");
+File.WriteAllBytes(templateLibreOfficePath, templateLibreOffice);
+
+// Filled PDFs
+var template = FodtTemplate.Load(templateBytes);
 
 var data = new DataTable("Entrevista");
 foreach (var column in new[]
@@ -85,6 +98,8 @@ var libreOfficePdfPath = Path.Combine(samples, "exit-interview-sample-libreoffic
 File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
 
 Console.WriteLine($"Fields replaced: {replaced}");
+Console.WriteLine($"Template QuestPDF:    {templateQuestPath} ({templateQuest.Length} bytes)");
+Console.WriteLine($"Template LibreOffice: {templateLibreOfficePath} ({templateLibreOffice.Length} bytes)");
 Console.WriteLine($"Filled template: {filledPath}");
 Console.WriteLine($"QuestPDF PDF:    {questPdfPath} ({questPdf.Length} bytes)");
 Console.WriteLine($"LibreOffice PDF: {libreOfficePdfPath} ({libreOfficePdf.Length} bytes)");
