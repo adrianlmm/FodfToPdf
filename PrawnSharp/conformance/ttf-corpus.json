@@ -1,0 +1,1037 @@
+{
+  "version": 1,
+  "generated": "2026-11-16",
+  "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+  "items": [
+    {
+      "id": "t001",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Contrato Individual de Trabajo que celebran por una parte «Empresa» en este acto representada por el LIC. JULIO ANTONIO LOMELI MACEDO a la cuál en lo sucesivo se le denominará “ EL PATRON” O “LA EMPRESA ” y por la otra parte el C. «Nombre» a quién en lo sucesivo se le denominará “ EL TRABAJADOR” (a) y quedará sujeto bajo las siguientes declaraciones y clausulas.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t002",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "PRIMERA : Declara el Lic. Julio A. Lomelí Macedo que la empresa que representa, «Empresa» . Es una persona moral registrada ante la Secretaría de Hacienda y Crédito Público con RFC AEF-031119-5L5 y se encuentra constituida legalmente, Manifiesta además que tiene su domicilio Calle Chihuahua No. 125 Norte Despacho. 3-B en esta Ciudad Obregón, Sonora. De igual forma manifiesta su representante , que su personalidad como tal está debidamente acreditada en poder otorgado mediante escritura pública No. 10,894 de fecha 17 de noviembre del año 2005, pasada en la fe del Licenciado Vicente Acuña García, titular de la notaría publica No. 27 con sede en esta Cd. Obregón, Sonora.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t003",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "SEGUNDA : Que la empresa que representa SE DEDICA FUNDAMENTALMENTE A: suministrar personal para la prestación de servicios profesionales mediante el asesoramiento, contratación de personal, capacitación y proveer personal calificado para toda clase de servicios personales independientes, en cualquiera de las ramas de la economía, oficios, trabajos o profesiones así como proporcionar orientación en actos relacionados con la materia jurídica, fiscal, laboral, contable, administrativa, financiera, de mercado, comercial, inmobiliaria o de cualquier otra",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t004",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "TERCERA : Llamarse «Nombre» ser de nacionalidad mexicana y que tiene al momento de la firma de este contrato «Edad» años de edad, estado civil «EdoCivil» identificándose con credencial del IFE # «Ife» , CURP: «Curp» , RFC: «Rfc» , sexo «Sexo» , y manifiesta tener su domicilio en «Direccion» .",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t005",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "CUARTA : Con fundamento en el artículo 25 fracción II y 35 de la Ley Federal del Trabajo, El trabajador declara que: se encuentra perfectamente enterado de que el presente contrato es POR CAPACITACION INICIAL , con el fin de que adquiera los conocimientos y habilidades necesarias para el desempeño de su puesto . Y que dicho contrato es por un término no mayor a 60 días ( 2 meses ) por los motivos que exponen en la clausula especial décima tercera de este mismo contrato , iniciando el «Dia1» de «Mes1» del «Año1» y terminando el «Dia2» de «Mes2» del «Año2» , ó antes si el trabajador no muestras las aptitudes y actitudes necesarias. Declara además que el PUESTO QUE OCUPARA ES DE : «Puesto» , consistiendo principalmente sus labores en el transporte de cerdos y alimentos a los lugares que la empresa designe , mismas que se encuentran descritas en las DESCRIPCION DE PUESTOS adjunta al presente contrato, y en general todas las actividades necesarias para el correcto desempeño de su puesto o cargo encomendado. Cumpliendo además en todo momento con las políticas de la empresa para el personal que se desempeña en el puesto de OPERADOR DE TRACTOCAMION mismas que se estipulan en el ANEXO UNO del presente contrato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t006",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "QUINTA : Al término de la capacitación inicial, de no acreditar competencia el trabajador, a juicio del patrón, se dará por terminada la relación de trabajo, sin responsabilidad para el mismo esto con fundamento en el artículo 39-B de la Ley Federal del Trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t007",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "SEXTA : El presente contrato da origen a la relación de trabajo contenida en el artículo 20 de la Ley Federal del Trabajo, y obliga a lo expresamente pactado, conforme a las disposiciones contenidas en el artículo 31 de la ley federal del trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t008",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Manifiesta además el trabajador que al momento de la firma de este contrato, no tiene ninguna demanda laboral en contra de ninguna empresa, así como ningún juicio penal.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t009",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "QUINTA : Declaran las partes respetar en todo momento las disposiciones legales laborales, siendo además su voluntad aceptar como condiciones del presente contrato de trabajo las condiciones de trabajo y las cláusulas que a continuación se describen:",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t010",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "CONDICIONES DE TRABAJO 1).- PUESTO para el que se contrata : OPERADOR DE TRACTOCAMION",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t011",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "2).- SALARIO : El salario que devengará el TRABAJADOR será de $ «Salario» por día, ( menos los impuestos que las leyes sobre la manteria determianan ) y soportando esta contratación y el tipo de la misma en la disposición contenida por el articulo 257 de la Ley Federal del Trabajo, bajo el entendido que la jornada la seleccionara el TRABAJADOR contratante y, en igual forma bajo el entendido de que no se genera tiempo extraordinario dada la naturaleza de las labores contratadas y conforme a criterios establecidos por Nuestros Tribunales Federales; y sobre todo porque en este salario el tiempo extraordinario se encuentra cubierto tomando en consideración que respecto de este tipo de actividades el TRABAJADOR que las desempeñe en calidad de operador auto transporte resulta improcedente el pago de tiempo extraordinario, según criterio firme derivado de contradicción de tesis establecido por nuestros tribunales federales y en virtud de que las labores contratadas y que desempeñará el trabajador, por sus características especiales de ejecución no encuadran dentro de las normas comunes aplicables a una relación de trabajo normal de acuerdo con los artículos 257, 259 y demás relativos de la Ley Federal de Trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t012",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "4).- DIA DE DESCANSO SEMANAL.: El día «diaDescanso» . Más sin embargo la EMPRESA declara que cada centro de trabajo tiene Necesidades y condiciones particulares de trabajo, por lo que ambas partes están de acuerdo que dicho día de Descanso semanal podrá cambiarlo la Empresa a su criterio y no se requiere ningún escrito ni consentimiento por escrito del TRABAJADOR porque da su consentimiento más amplio a la EMPRESA desde ahora con la firma del presente contrato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t013",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "5).- LUGAR DE PRESTACIÓN DE SERVICIOS : En el área de Central de fletes cuyo domicilio es Boulevard Circunvalación No. 1071 entre las Torres y Herreros ( C.P. 85065 ) ubicada en el parque industrial de Cd. Obregón, Sonora.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t014",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "6).- “LA EMPRESA” hace saber a “EL TRABAJADOR”, que como prestadora de servicio es de personal, sus actividades pueden requerir movilización hacia otros centros de trabajo donde se le soliciten. Por lo que EL TRABAJADOR acepta que la EMPRESA tendrá la más amplia facultad de cambiarlo a otras instalaciones sin requerir ningún consentimiento ni notificación por escrito, lugares en los que podrá designar para que desempeñe sus labores.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t015",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "6.- VACACIONES : Con fundamento en el articulo 76 de la Ley Federal del Trabajo, los trabajadores que cuenten con mas de un año de antigüedad gozaran de 6 días de vacaciones pagadas e irán aumentando en proporción a lo establecido en la ley federal del trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t016",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "7.- AGUINALDO : Con fundamento en el articulo 87 de la Ley Federal del Trabajo, tendrán derecho a un aguinaldo anual, consistente en 15 DIAS días de salario.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t017",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "C L A U S U L A S PRIMERA : TIEMPO SEMANAL DE LA JORNADA : La jornada de trabajo se sujetará a las necesidades de la EMPRESA sin establecerse horario fijo para la prestación del servicio, ya que tratándose de servicios de auto transporte, se está a lo dispuesto por el capitulo especifico de la Ley Federal del Trabajo relacionado a este tipo de contrataciones, sin dejar de pasar por alto de que para efectos de evitar confusiones al respecto, el trabajador no laborará más allá de la jornada legal y/o normal diurna establecida por la Ley Federal del Trabajo; resultando que, el TRABAJADOR acepta que no tendrá derecho a reclamar tiempo extraordinario dada la naturaleza de los servicios contratados y, en todo caso dada la condición establecida enciso. DE ACUERDO A LO ESTABLECIDO ENLOS ART. 256,Y EL 258 DE LA LEY FEDERAL DE TRABAJO EN VIGOR.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t018",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "SEGUNDA.- El PATRON contrata en este instrumento laboral al TRABAJADOR para que desempeñe el puesto indicado y quien realizara sus actividades en la forma, tiempo y lugar en que este contrato se precise, y la duración de la relación de trabajo, por exigirlo así la naturaleza de la misma se desempeñara acorde a las condiciones precisadas y declaradas en este contrato. Las partes reconocen que las causas que le da origen es ocasional y convienen en que, cumplido dicho tiempo la relación cesara en todos sus efectos, por lo que en consecuencia la única obligación para el patrón al término del presente es de pagar proporcionalmente vacaciones, prima vacacional y aguinaldo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t019",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "TERCERA.- Los servicios objeto de la relación de trabajo deben prestarse en el lugar que designen el PATRON o sus representantes, quedando el TRABAJADOR subordinado a éstos en órdenes y en servicios en todo lo concerniente al trabajo y sobre todo en la designación de las rutas en las que se realizaran los viajes correspondientes y en las que participara el TRABAJADOR como consecuencia de las labores extraordinarias para la cual ha sido contratado y que determinan la contratación por tiempo determinado de este instrumento.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t020",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "CUARTA : “EL TRABAJADOR” debe presentarse puntualmente a el desempeño de sus labores y de igual manera tiene que cumplir en tiempo el recorrido que se le asigne, únicamente realizando las paradas que necesariamente se requiera y para realizar el descanso obligatorio que marca la ley.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t021",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "QUINTA .- El TRABAJADOR manifiesta que desea ser parte integrante e ingresar al programa de FONDO DE AHORRO que se maneja por la patronal en ayuda de los trabajadores conformado por aportaciones iguales entre empresa y trabajadores, dando su autorización para que le sea descontado de su salario base el importe que corresponda a un 5 % de su salario base diario, asimismo el PATRON aportará otro 5 % del salario diario pactado con el TRABAJADOR y del patrimonio de aquel pasara a formar parte integrante del programa mencionado. El fondo de ahorro (ambas aportaciones) le será entregado por el comité administrativo del mismo al finalizar su contrato o al término del ejercicio de dicho fondo. Así mismo la empresa entregara al trabajador el equivalente a 7 % de su sueldo base en Vales de Despensa.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t022",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "SEXTA.- El TRABAJADOR se obliga a desempeñar sus labores con la intensidad, cuidado y esmero apropiados y en la forma, tiempo y lugares a que se refiere este contrato. Asimismo se establece la obligación a este y otorga su consentimiento el trabajador contratado de asistir a los cursos sesiones de grupo y demás actividades que forman parte del proceso de capacitación y adiestramiento y de cumplir con los programas respectivos que el efecto tiene la obligación el patrón de impartir a través de gente especializada.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t023",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "SEPTIMA .- Como quedó anotado en la clausula primera de este contrato, queda aclarado que por tratarse de auto transportes y una actividad relacionada con este servicio que prestara el trabajador, no se da el caso específico de trabajo extraordinario, sin embargo, queda establecido que si por alguna circunstancia hubiese confusión al respecto, únicamente se considerará como tiempo extraordinario laborado aquel que sea requerido, por escrito (cuya constancia deberá conservarla el trabajador) y con anticipación de 24 horas, cuando menos, por el representante laboral debidamente autorizado para que, el trabajador realice labores extraordinarias a las contratadas y/o labores fuera de la contratación normal establecida en este contrato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t024",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "OCTAVA- El salario se pagará directamente al TRABAJADOR en las oficinas de la empresa antes señaladas o podrá pagarse por medio de tarjeta bancaria asignada al trabajador, debiendo firmar el recibo o nómina correspondiente. Los sobres de raya o comprobantes de pago estarán a disposición del trabajador los días Sábados de cada catorcena (día en que será efectuado el pago de la nómina catorcenal) el trabajador tendrá la obligación de pasar a firmar los sobres o comprobantes de pago todos los sábados (de cada catorcena) en el departamento de nóminas de la empresa.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t025",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Cabe mencionar que en cada pago catorcenal se liquidarán los salarios ordinarios, extraordinarios si los hubiere y las prestaciones que haya devengado el “TRABAJADOR”, el cual firmará de conformidad el sobre de raya o nómina correspondiente donde se especifican cada uno de los conceptos e importes pagados. No se dejará ningún pago atrasado pendiente, por lo que en caso de que se llegara a presentar un faltante el “TRABAJADOR” deberá reclamarlo de inmediato en el preciso momento de pago para proceder a su corrección y reembolso . De no haber reclamación alguna del trabajador al momento de efectuarse el pago, se entenderá que esta conforme con el pago recibido.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t026",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "NOVENA.- El TRABAJADOR manifiesta conocer, haber tenido en sus manos, el REGLAMENTO INTERIOR DE TRABAJO que se aplica para todos y cada uno de los trabajadores que dependen de la parte patronal y, manifiesta que se entero personalmente de las obligaciones y derechos contenidas en el referido ordenamiento, obligándose a respetarlas; además de que, recibió una copia del dicho Reglamento debidamente requisitado, mismo que se obliga desde ahora a sujetarse y respetar en su totalidad.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t027",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA.- Tomando en consideración que se trata de un contrato mediante el cual el TRABAJADOR puede realizar sus labores tanto en Ciudad Obregón, Sonora, como en otras Ciudades y Estados de la República Mexicana el TRABAJADOR acepta sujetarse a la competencia en caso de interpretación o litigio de la H. JUNTA LOCAL DE CONCILIACION Y ARBITRAJE DEL SUR DEL ESTADO DE SONORA, renunciando voluntariamente a cualesquier otro grado de competencia, en los términos de la disposición contenida por la fracción II inciso a) del artículo 700 de la Ley Federal del Trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t028",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA PRIMERA : El Patrón toma a sus servicios al trabajador para que desempeñe el puesto indicado y quien desempeñara su trabajo en la forma, tiempo y lugar en que este contrato se precise, y la duración de la relación de trabajo, por exigirlo así la naturaleza de la misma, según se ha precisado en las condiciones de trabajo antes señaladas. Las partes reconocen que las causas que le dan origen a este contrato es por capacitación inicial, por lo que convienen en que cumplido dicho tiempo, o si el trabajador a criterio de la empresa no muestra la competencia necesaria, la relación cesará en todos sus efectos, por lo que en consecuencia la única obligación para el patrón al termino del presente, es de pagar proporcionalmente vacaciones, prima vacacional y aguinaldo únicamente.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t029",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA SEGUNDA : El trabajador se obliga a desempeñar sus labores con la intensidad, cuidado y esmero apropiados y en la forma, tiempo y lugar a que se refiere este contrato. Asimismo se establece la obligación de asistir a los cursos sesiones de grupo y demás actividades que forman parte del proceso de capacitación y adiestramiento, las de cumplir con los programas respectivos que el efecto tiene la obligación el patrón de impartir a través de gente especializada.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t030",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA TERCERA - Cuando la jornada deba prolongarse por circunstancias especiales, el trabajador se obliga a laborar el tiempo extra necesario, en los términos del Artículo 66 de la Ley Federal del Trabajo, en la inteligencia de que sólo se considerarán y pagarán como horas extraordinarias las que excedan del tiempo semanal pactado en este contrato y hayan sido autorizadas en forma escrita por el patrón o sus representantes.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t031",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Cuando el trabajador sea requerido por la empresa para que preste sus servicios en horas extraordinarias, NO podrá iniciar dicho trabajo en horas extras, si antes no ha recibido la correspondiente autorización por escrito del patrón. A falta de dicha orden se entenderá que no se laboro tiempo extraordinario.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t032",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Ambas partes acuerdan que en caso de que el trabajador sea requerido por escrito para la realización de jornada extraordinaria, se pagarán únicamente las que excedan de la jornada de trabajo respectiva (según sea diurna, nocturna o mixta), es decir que se sumará todo el tiempo total laborado a la semana y el excedente de la jornada legal es el que se pagará como extraordinario de acuerdo a como se estipula la ley federal de trabajo en vigor.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t033",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA CUARTA : Cuando la jornada se prolongue por siniestro o riesgo inminente, el trabajador tendrá derecho a un salario igual al que corresponda a las horas de labor ordinaria.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t034",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA QUINTA : El salario se pagará directamente al trabajador en el lugar donde preste sus servicios, o podrá pagarse por medio de tarjeta bancaria asignada al trabajador, de acuerdo a lo establecido en el articulo 101 debiendo firmar la nómina. Los sobres de raya o comprobantes de pago estarán a disposición del trabajador los días Sábados de cada catorcena (día en que será efectuado el pago de la nómina Catorcenal) : El trabajador tendrá la obligación de firmar los sobres o comprobantes de pago todos los sábados de cada catorcena ya en el departamento de Nóminas de la empresa o la oficina de su centro de trabajo mismos que le serán puestos a su disposición a través de su jefe inmediato",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t035",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Cabe mencionar que en cada pago Catorcenal se liquidarán los salarios ordinarios, extraordinarios si los hubiere y las prestaciones que haya devengado el “trabajador”, el cual firmará de conformidad el sobre de raya o nómina correspondiente donde se especifican cada uno de los conceptos e importes pagados. No se dejará ningún pago atrasado pendiente, por lo que en caso de se llegara a presentar un faltante el “trabajador” deberá reclamarlo de inmediato en el preciso momento de pago para proceder a su corrección y reembolso . De no haber reclamación alguna por parte del trabajador al momento de efectuarse el pago, se entenderá que esta conforme con el importe total recibido.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t036",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA SEXTA : Los contratantes acuerdan que la jornada de trabajo será la señalada en las condiciones de trabajo pero, también acuerdan que el patrón tendrá la más amplia facultad de cambiar el horario al trabajador, siempre y cuando sea la jornada legal. El trabajador esta de acuerdo en que no se requiere su consentimiento al momento del cambio, ya que lo otorga anticipadamente con la firma de este contrato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t037",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA SEPTIMA : El patrón tendrá la más amplia facultad para movilizar al trabajador de un puesto a otro, o bien de un lugar a otro dentro de la empresa o establecimiento, con la condición de que se respetará el salario base del trabajador para que no sufra menoscabo alguno. El trabajador esta de acuerdo en que no se requiere su consentimiento al momento del cambio, ya que lo otorga anticipadamente con la firma de este contrato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t038",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA OCTAVA : El trabajador manifiesta que se encuentra enterado y conforme con el contenido del Reglamento Interior de Trabajo que se le explico y se le dio al momento de ingreso a la empresa, manifestando su compromiso a cumplir cabalmente el mismo, sujetándose a sus disposiciones. El trabajador recibe con la firma de este contrato copia del Reglamento Interior de Trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t039",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "DECIMA NOVENA : Las partes convienen en que el trabajador será capacitado o adiestrado en los términos de los planes y programas establecidos o que se establezcan en la empresa de acuerdo a las necesidades y posibilidades de la misma, dando así cumplimiento a lo dispuesto en la Fracción XIII, apartado “A” del Artículo 123 constitucional demás disposiciones de la Ley Federal del Trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t040",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "VIGESIMA: “LA EMPRESA” y “EL TRABAJADOR” aceptan quedar sujetos, cumplir y hacer cumplir las siguientes obligaciones:",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t041",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "OBLIGACIONES DE LA EMPRESA Capacitar o adiestrar en los términos de los planes y programas que al respecto se establezcan.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t042",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Hacer el pago del salario convenido al trabajador, en cantidad y el día y hora señalado en el presente contrato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t043",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Dar de alta ante el IMSS, al trabajador al momento de ingresar al trabajo, según lo dispuesto por la LEY DEL IMSS.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t044",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Proporcionar al trabajador la herramienta y equipo necesario para el desarrollo de sus labores, así como el equipo de seguridad que se requiera, según sea solicitado por el trabajador y la naturaleza de la actividad así lo requiera por representar algún riesgo de trabajo",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t045",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En los transportes foráneos pagar los gastos de hospedaje y alimentación de los trabajadores, cuando se prolongue o retarde el viaje por causas imputables a la empresa.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t046",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Hacer las reparaciones para garantizar el buen funcionamiento del vehículo y la seguridad de los trabajadores, usuarios y público en general.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t047",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Dotar a los vehículos de la herramienta y refacciones indispensables para las reparaciones de emergencia.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t048",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Y Observar las disposiciones de los reglamentos de tránsito sobre condiciones de funcionamiento y seguridad de los vehículos.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t049",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Seguir las instrucciones que reciba del patrón en relación con la forma, lugar y tiempo en que se desarrolle el trabajo, llevando a cabo el mismo con la intensidad, cuidado y esmero apropiados.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t050",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Tomar los cursos de capacitación que sean necesarios y/o que la empresa le indique para el desempeño de sus labores.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t051",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Someterse en términos del artículo 134 fracción X a todos los reconocimientos y exámenes médicos que la empresa indique.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t052",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Dar aviso personalmente o por cualquier medio a la brevedad posible sobre faltas a su trabajo, sean justificadas o injustificadas.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t053",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Respetar, cumplir y hacer cumplir el reglamento interno de trabajo, del que queda enterado desde este momento de su existencia y aplicación en la empresa, así como de las disposiciones del presente contrato individual de trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t054",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "No incurrir en alguna de las causales previstas por el artículo 47 de la ley federal del trabajo, ya que esto daría origen a la terminación inmediata del presente contrato de trabajo, sin responsabilidad para el patrón.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t055",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Guardar con todo celo y respeto información de la empresa a que tuviere acceso, respetando el Código de moral y ética de los trabajadores de la empresa.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t056",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Manejo de la carga y unidad con estricta precaución respetando límites de velocidad .",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t057",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Cuidar el buen funcionamiento de los vehículos e informar al patrón de cualquier desperfecto que observen.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t058",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Hacer durante el viaje las reparaciones de emergencia que permitan sus conocimientos, la herramienta y refacciones de que dispongan. Si no es posible hacer las reparaciones, pero el vehículo puede continuar circulando, conducirlo hasta el poblado más próximo o hasta el lugar señalado para su reparación, y comunicar de inmediato a su jefe inmediato sobre el evento.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t059",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Observar los reglamentos de tránsito y las indicaciones técnicas que dicten las autoridades o el patrón.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t060",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "ADVERTENCIA De acuerdo a lo que estipula el Artículo 264, Son causas especiales de rescisión de las relaciones de trabajo:",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t061",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "I. La negativa a efectuar el viaje contratado o su interrupción sin causa justificada. Será considerada en todo caso causa justificada la circunstancia de que el vehículo no reúna las condiciones de seguridad indispensables para garantizar la vida de los trabajadores, usuarios y del público en general; y",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t062",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "II. La disminución importante y reiterada del volumen de ingresos, salvo que concurran circunstancias justificadas.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t063",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "VIGÉSIMA PRIMERA : Ambas partes están de acuerdo que el presente contrato de trabajo no contraviene en ningún punto a la Ley Federal del Trabajo y en defecto de lo establecido en el presente contrato, se sujetaran a las disposiciones de la Ley citada y para todo conflicto o interpretación y cumplimiento del presente contrato, ambas partes están de acuerdo en someterse a la jurisdicción de los Tribunales de Trabajo esta Ciudad de Obregón Sonora, renunciando al fuero que pudiera corresponderle por razón del domicilio presente y futuro.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t064",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "ACEPTADO el presente contrato en todos sus términos, previa lectura del mismo, las partes lo ratifican en su contenido y lo firman en CD. Obregón, Sonora el «Dia0» de «Mes0» del «Año0» .",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t065",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "OBLIGACIONES Y PROHIBICIONES ,POLITICAS DE LA EMPRESA DE ACUERDO AL DESEMPEÑO DE LAS LABORES DE OPERADOR DE TRACTOCAMION.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t066",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Para realizar un viaje local el operador deberá presentarse en la central de fletes en un horario que le permita llegar a su destino cuando menos con cuarenta y cinco minutos de anticipación.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t067",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Para viajes foráneos el operador se deberá reportarse en la central de fletes con su jefe inmediato el día que va a realizar el viaje por la mañana para recibir la documentación correspondiente, bitácora de viaje, viáticos y hora de la cita para cargar y para descargar.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t068",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es parte del trabajo de los operadores realizar maniobras de traslado de contenedores, cajas, dollys y cualquier equipo que se vaya a utilizar para la realización de un flete.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t069",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Revisar que el tracto camión y el remolque se encuentren en perfectas condiciones para realizar el viaje, así como revisar que traiga la póliza del seguro vigente, tarjetas de circulación, tarjetas de verificación mecánica y de humo, teléfono con cargador, teléfonos de emergencia, documentación del embarque (guía de tránsito, carta porte, certificados, etc.)",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t070",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En caso de multas por parte de las autoridades del autotransporte por no contar con la documentación anotada en el punto anterior, dicha multa será pagada por el operador ya que es su obligación revisar que esté disponible en su equipo y por lo tanto deberá contar con la misma.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t071",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación del operador revisar que las puertas de las jaulas donde se transportan los cerdos estén bien cerradas y flejadas; en el caso de las tolvas de alimento, verificar que las puertas de las tolvas estén cerradas, flejadas y que no hayas fugas de alimento; en el caso de los contenedores nacionales y de exportación, verificar que las puertas estén cerradas y flejadas.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t072",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación del operador que fletea cerdos, participar activamente en el conteo de los mismos al recibirlos en las granjas y al entregarlos en su destino.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t073",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En el caso de los operadores foráneos también es su obligación estar al pendiente de la carga y descarga de las diferentes mercancías que se transportan; sobre todo estar al pendiente de aquellas que necesitan refrigeración o congelación según sea el caso.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t074",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación de los operadores estarse reportando continuamente con su jefe inmediato sobre todo cuando se presenten situaciones irregulares o fuera de lo común durante el transporte de productos.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t075",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En caso de que en algún lugar a criterio del operador, exista algún riesgo para cargar o descargar cerdos, alimento, maquinaria o cualquier otro producto, este tendrá la última palabra para determinar si realiza las maniobras que sean necesarias sin poner en riesgo la integridad física de las personas, del equipo y de la carga; asimismo deberá comunicarse de inmediato con su jefe para reportar lo que está sucediendo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t076",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación de los operadores, presentar las comprobaciones de gastos a más tardar 24 horas después de haber terminado el viaje correspondiente.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t077",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación de los operadores mantener el tracto camión limpio por fuera y por dentro (tapetes limpios, tableros sin polvo, camarote aseado)",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t078",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación de los operadores presentarse a la central de fletes los días que no tenga fletes asignados.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t079",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación de los operadores, presentar a su jefe inmediato un reporte de fallas o desperfectos de cualquier índole del tracto camión y el remolque correspondiente.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t080",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores que no tengan asignado algún viaje, deberán presentarse a trabajar en la central de fletes con el jefe del taller y este a su vez reportara al área administrativa si realmente lo trabajaron.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t081",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es importante que los operadores se conduzcan siempre con buena conducta y respeto , tanto con los compañeros de trabajo como con jefes y subordinados.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t082",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Realizar el trabajo con eficiencia, evitando desperdicios de tiempo y de recursos.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t083",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Reportar al jefe inmediato cualquier irregularidad (accidente, posible riesgo de trabajo, faltas de probidad u honradez que se observen etc.) que se presente dentro del desarrollo de trabajo.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t084",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Guardar la discreción debida en el desempeño de su trabajo y no revelar a ninguna persona, sea empleado de la empresa, sea ajena a la misma, que no esté autorizada a recibirla, información alguna relativa a los negocios o asuntos de la empresa en general, o de los encomendados directamente al trabajador en particular, salvo autorización expresa del funcionario de la empresa facultado para ello.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t085",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En caso de tener autorización de la empresa para manejar o conducir vehículos propiedad de la misma, hacerlo con estricto apego a las disposiciones legales aplicables al tránsito de vehículos, al reglamento interno para uso de vehículos de la empresa, así como a las normas y prácticas que resulten de la lógica y del sentido común. Por tanto, cualesquiera infracciones a las disposiciones legales citadas, tales como multas o arrestos administrativos, serán de la cuenta y responsabilidad exclusiva del trabajador que las haya cometido.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t086",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En caso de renuncia, cese, licencia o cambio de puesto o adscripción de algún trabajador, el interesado entregará bajo inventario y conforme a acta circunstanciada, los documentos, valores o bienes que estén bajo su guarda o responsabilidad.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t087",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores que transportan cerdos y alimento tienen estrictamente prohibido pararse en el trayecto del origen al destino y viceversa; así como desviarse de la ruta asignada, salvo que por causas de fuerza mayor sea necesario, de tal manera que deberán comentarlo ampliamente con su jefe inmediato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t088",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores foráneos, que van a cualquier parte del país, tienen estrictamente prohibido hacer paradas en lugares conocidos como cachimbas o en cualquier otro lugar donde no haya seguridad.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t089",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "En caso necesario de tener que parar para descansar o hacer alguna operación al equipo de transporte; deberán hacerlo en lugares donde exista seguridad tales como gasolineras, casetas de cobro, pensiones, etc.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t090",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores foráneos y locales tienen estrictamente prohibido subir personas al tracto camión y/o remolque en cualquier momento.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t091",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Si por alguna circunstancia fuera necesario llevar un ayudante, será con la autorización por escrito de su jefe inmediato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t092",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Está prohibido tirar basura fuera del tracto camión, tales como latas, bachichas, botellas, bolsas, cascaras, etc.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t093",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores locales y foráneos tienen estrictamente prohibido manipular la carga y específicamente está prohibido venderla; A la persona que se le sorprenda realizando esta acción será despedido de inmediato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t094",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Se reitera a los operadores foráneos y locales que está prohibido sacarle diesel al tracto camión, a los termos, a los generadores y a cualquier equipo en general de la empresa.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t095",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores locales y foráneos, tienen prohibido comprar llantas usadas, muelles, usados, y en general cualquier tipo de accesorio para el tracto camión y el equipo. En caso de que sea estrictamente necesario, deberá obtener la autorización de su jefe inmediato.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t096",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores locales y foráneos tienen estrictamente prohibido prestar el tracto camión y/o el remolque.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t097",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores locales y foráneos tienen estrictamente prohibido dormirse en el camarote con el motor encendido para usar el aire acondicionado; a la persona que se le sorprenda en esta acción será sancionado y en caso de reincidir será despedido.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t098",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores foráneos y/o locales que sean infraccionados por la policía federal o municipal y cuyas multas sean por causas imputables a ellos; deberán reportarlas de inmediato a su jefe y además deberán pagarlas por su cuenta. En caso de que no lo hagan se les descontara del pago de su sueldo junto con los recargos correspondientes.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t099",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los tracto camiones foráneo y locales al momento de ingresar a los patios de la central de fletes; harán alto total en la puerta para hacerles una revisión rápida de la llantas; en seguida se moverán a una velocidad de 5 km por hora como máximo para acomodar los equipos respetando los lugares y los espacios disponibles",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t100",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Loa automóviles y motos del personal de la central de fletes, deberán estacionarlos en los lugares asignados dentro y fuera del taller.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t101",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Es obligación de los operadores foráneos y locales permitir el acceso del personal que la empresa designe, a los tracto camiones para que sean revisados.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t102",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Los operadores foráneos y locales serán revisados por el personal de vigilancia para verificar que NO tengan aliento alcohólico o que no están bajo el influjo de alguna droga.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "t103",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "Sacar herramientas, materiales o cualquier objeto propiedad de la empresa sin la autorización correspondiente del jefe de la central de fletes.",
+      "width": 540,
+      "font": "DejaVu",
+      "fontPath": "tests/PrawnSharp.Tests/fonts/DejaVuSans.ttf",
+      "size": 11,
+      "format": "plain"
+    }
+  ]
+}

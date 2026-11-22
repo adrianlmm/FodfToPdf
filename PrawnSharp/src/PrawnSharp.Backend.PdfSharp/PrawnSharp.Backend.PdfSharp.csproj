@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnSharp.Backend.PdfSharp</RootNamespace>
+    <AssemblyName>PrawnSharp.Backend.PdfSharp</AssemblyName>
+    <PackageId>PrawnSharp.Backend.PdfSharp</PackageId>
+    <Description>Backend PDFsharp 6.2.4 (MIT) para PrawnSharp.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../PrawnSharp.Abstractions/PrawnSharp.Abstractions.csproj" />
+    <ProjectReference Include="../PrawnSharp.Fonts/PrawnSharp.Fonts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PDFsharp" />
+    <PackageReference Include="System.Text.Encoding.CodePages" />
+    <PackageReference Include="SkiaSharp" />
+  </ItemGroup>
+
+</Project>

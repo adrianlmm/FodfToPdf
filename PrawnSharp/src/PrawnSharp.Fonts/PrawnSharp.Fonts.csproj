@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnSharp.Fonts</RootNamespace>
+    <AssemblyName>PrawnSharp.Fonts</AssemblyName>
+    <PackageId>PrawnSharp.Fonts</PackageId>
+    <Description>Registro de familias y fuentes base-14 de PrawnSharp.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../PrawnSharp.Abstractions/PrawnSharp.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Afm/*.afm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" />
+  </ItemGroup>
+
+</Project>

@@ -14,6 +14,10 @@ var templateQuest = QuestPdfFodtRenderer.Render(templateBytes);
 var templateQuestPath = Path.Combine(samples, "cci-alimentos-template-questpdf.pdf");
 File.WriteAllBytes(templateQuestPath, templateQuest);
 
+var templateprawnSharp = PrawnSharpFodtRenderer.Render(templateBytes);
+var templateprawnSharpPath = Path.Combine(samples, "cci-alimentos-template-prawnsharp.pdf");
+File.WriteAllBytes(templateprawnSharpPath, templateprawnSharp);
+
 var templateLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
 var templateLibreOfficePath = Path.Combine(samples, "cci-alimentos-template-libreoffice.pdf");
 File.WriteAllBytes(templateLibreOfficePath, templateLibreOffice);
@@ -90,16 +94,22 @@ var filledQuest = QuestPdfFodtRenderer.Render(filled);
 var filledQuestPath = Path.Combine(samples, "cci-alimentos-sample-questpdf.pdf");
 File.WriteAllBytes(filledQuestPath, filledQuest);
 
+var filledprawnSharp = PrawnSharpFodtRenderer.Render(filled);
+var filledprawnSharpPath = Path.Combine(samples, "cci-alimentos-sample-prawnsharp.pdf");
+File.WriteAllBytes(filledprawnSharpPath, filledprawnSharp);
+
 var filledLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
 var filledLibreOfficePath = Path.Combine(samples, "cci-alimentos-sample-libreoffice.pdf");
 File.WriteAllBytes(filledLibreOfficePath, filledLibreOffice);
 
 Console.WriteLine($"Template: {templatePath}");
 Console.WriteLine($"Template QuestPDF:    {templateQuestPath} ({templateQuest.Length} bytes)");
+Console.WriteLine($"Template PrawnSharp:    {templateprawnSharpPath} ({templateprawnSharp.Length} bytes)");
 Console.WriteLine($"Template LibreOffice: {templateLibreOfficePath} ({templateLibreOffice.Length} bytes)");
 Console.WriteLine($"Replaced text nodes: {replacements}");
 Console.WriteLine($"Filled template:     {filledPath}");
 Console.WriteLine($"Filled QuestPDF:     {filledQuestPath} ({filledQuest.Length} bytes)");
+Console.WriteLine($"Filled PrawnSharp:     {filledprawnSharpPath} ({filledprawnSharp.Length} bytes)");
 Console.WriteLine($"Filled LibreOffice:  {filledLibreOfficePath} ({filledLibreOffice.Length} bytes)");
 
 static string FindSamplesDirectory()

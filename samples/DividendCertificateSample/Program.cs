@@ -58,6 +58,10 @@ var questPdf = QuestPdfFodtRenderer.Render(filled);
 var questPdfPath = Path.Combine(samples, "dividend-certificate-sample-questpdf.pdf");
 File.WriteAllBytes(questPdfPath, questPdf);
 
+var prawnSharpPdf = PrawnSharpFodtRenderer.Render(filled);
+var prawnSharpPdfPath = Path.Combine(samples, "dividend-certificate-sample-prawnsharp.pdf");
+File.WriteAllBytes(prawnSharpPdfPath, prawnSharpPdf);
+
 var libreOfficePdf = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficePdfPath = Path.Combine(samples, "dividend-certificate-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
@@ -65,6 +69,7 @@ File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
 Console.WriteLine($"Bookmarks replaced: {replaced}");
 Console.WriteLine($"Filled template: {filledPath}");
 Console.WriteLine($"QuestPDF PDF:    {questPdfPath} ({questPdf.Length} bytes)");
+Console.WriteLine($"PrawnSharp PDF:    {prawnSharpPdfPath} ({prawnSharpPdf.Length} bytes)");
 Console.WriteLine($"LibreOffice PDF: {libreOfficePdfPath} ({libreOfficePdf.Length} bytes)");
 
 static string FindSamplesDirectory()

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:rpt="http://openoffice.org/2005/report" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:css3t="http://www.w3.org/TR/css3-text/" xmlns:officeooo="http://openoffice.org/2009/office" office:version="1.4" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:initial-creator>Documentero</meta:initial-creator><meta:keyword>html-to-docx</meta:keyword><meta:editing-cycles>3</meta:editing-cycles><meta:creation-date>2025-07-24T21:14:46.681000000</meta:creation-date><dc:date>2026-11-17T21:20:21.084774100</dc:date><meta:generator>LibreOffice/25.2.7.2$Windows_X86_64 LibreOffice_project/5cbfd1ab6520636bb5f7b99185aa69bd7456825d</meta:generator><meta:editing-duration>PT8M46S</meta:editing-duration><meta:document-statistic meta:table-count="2" meta:image-count="0" meta:object-count="0" meta:page-count="1" meta:paragraph-count="28" meta:word-count="93" meta:character-count="723" meta:non-whitespace-character-count="664"/></office:meta>
+ <office:meta><meta:initial-creator>Documentero</meta:initial-creator><meta:keyword>html-to-docx</meta:keyword><meta:editing-cycles>4</meta:editing-cycles><meta:creation-date>2025-07-24T21:14:46.681000000</meta:creation-date><dc:date>2026-11-21T16:18:04.906411200</dc:date><meta:generator>LibreOffice/25.2.7.2$Windows_X86_64 LibreOffice_project/5cbfd1ab6520636bb5f7b99185aa69bd7456825d</meta:generator><meta:editing-duration>PT8M59S</meta:editing-duration><meta:document-statistic meta:table-count="2" meta:image-count="0" meta:object-count="0" meta:page-count="1" meta:paragraph-count="28" meta:word-count="93" meta:character-count="723" meta:non-whitespace-character-count="664"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
-   <config:config-item config:name="ViewAreaTop" config:type="long">13097</config:config-item>
+   <config:config-item config:name="ViewAreaTop" config:type="long">0</config:config-item>
    <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
-   <config:config-item config:name="ViewAreaWidth" config:type="long">24310</config:config-item>
-   <config:config-item config:name="ViewAreaHeight" config:type="long">10834</config:config-item>
+   <config:config-item config:name="ViewAreaWidth" config:type="long">30660</config:config-item>
+   <config:config-item config:name="ViewAreaHeight" config:type="long">14471</config:config-item>
    <config:config-item config:name="ShowRedlineChanges" config:type="boolean">true</config:config-item>
    <config:config-item config:name="InBrowseMode" config:type="boolean">false</config:config-item>
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
-     <config:config-item config:name="ViewLeft" config:type="long">4535</config:config-item>
-     <config:config-item config:name="ViewTop" config:type="long">19741</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">7710</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">6803</config:config-item>
      <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleTop" config:type="long">13097</config:config-item>
-     <config:config-item config:name="VisibleRight" config:type="long">24308</config:config-item>
-     <config:config-item config:name="VisibleBottom" config:type="long">23929</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">0</config:config-item>
+     <config:config-item config:name="VisibleRight" config:type="long">30658</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">14469</config:config-item>
      <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutColumns" config:type="short">1</config:config-item>
      <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
@@ -84,7 +84,7 @@
    <config:config-item config:name="IgnoreTabsAndBlanksForLineCalculation" config:type="boolean">true</config:config-item>
    <config:config-item config:name="IgnoreHiddenCharsForLineCalculation" config:type="boolean">true</config:config-item>
    <config:config-item config:name="TabAtLeftIndentForParagraphsInList" config:type="boolean">true</config:config-item>
-   <config:config-item config:name="Rsid" config:type="int">1263626</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">1281266</config:config-item>
    <config:config-item config:name="RsidRoot" config:type="int">1244400</config:config-item>
    <config:config-item config:name="LoadReadonly" config:type="boolean">false</config:config-item>
    <config:config-item config:name="ClipAsCharacterAnchoredWriterFlyFrames" config:type="boolean">false</config:config-item>
@@ -167,13 +167,13 @@
  <office:styles>
   <style:default-style style:family="graphic">
    <style:graphic-properties svg:stroke-color="#3465a4" draw:fill-color="#729fcf" fo:wrap-option="no-wrap" draw:shadow-offset-x="0.3cm" draw:shadow-offset-y="0.3cm" draw:start-line-spacing-horizontal="0.283cm" draw:start-line-spacing-vertical="0.283cm" draw:end-line-spacing-horizontal="0.283cm" draw:end-line-spacing-vertical="0.283cm" style:writing-mode="lr-tb" style:flow-with-text="false"/>
-   <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" loext:tab-stop-distance="0cm" style:font-independent-line-spacing="false">
+   <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" loext:tab-stop-distance="0cm" style:writing-mode="lr-tb" style:font-independent-line-spacing="false">
     <style:tab-stops/>
    </style:paragraph-properties>
    <style:text-properties style:use-window-font-color="true" loext:opacity="0%" style:font-name="Arial" fo:font-size="11pt" fo:language="en" fo:country="US" style:letter-kerning="false" style:font-name-asian="Arial1" style:font-size-asian="11pt" style:language-asian="en" style:country-asian="US" style:font-name-complex="Lucida Sans1" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA"/>
   </style:default-style>
   <style:default-style style:family="paragraph">
-   <style:paragraph-properties fo:hyphenation-ladder-count="no-limit" fo:hyphenation-keep="auto" loext:hyphenation-keep-type="column" style:text-autospace="ideograph-alpha" style:punctuation-wrap="hanging" style:line-break="strict" style:tab-stop-distance="1.27cm" style:writing-mode="page"/>
+   <style:paragraph-properties fo:hyphenation-ladder-count="no-limit" fo:hyphenation-keep="auto" loext:hyphenation-keep-type="column" style:text-autospace="ideograph-alpha" style:punctuation-wrap="hanging" style:line-break="strict" style:tab-stop-distance="1.27cm" style:writing-mode="lr-tb"/>
    <style:text-properties style:use-window-font-color="true" loext:opacity="0%" style:font-name="Arial" fo:font-size="11pt" fo:language="en" fo:country="US" style:letter-kerning="false" style:font-name-asian="Arial1" style:font-size-asian="11pt" style:language-asian="en" style:country-asian="US" style:font-name-complex="Lucida Sans1" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA" fo:hyphenate="false" fo:hyphenation-remain-char-count="2" fo:hyphenation-push-char-count="2" loext:hyphenation-no-caps="false" loext:hyphenation-no-last-word="false" loext:hyphenation-word-char-count="5" loext:hyphenation-zone="no-limit"/>
   </style:default-style>
   <style:default-style style:family="table">
@@ -566,31 +566,40 @@
   </style:style>
   <style:style style:name="P3" style:family="paragraph" style:parent-style-name="Heading_20_2">
    <style:paragraph-properties fo:line-height="100%"/>
-   <style:text-properties fo:font-size="14pt" style:font-size-asian="14pt"/>
+   <style:text-properties fo:font-size="24pt" style:font-size-asian="24pt" style:font-size-complex="24pt"/>
   </style:style>
   <style:style style:name="P4" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="WWNum1">
    <style:paragraph-properties fo:line-height="100%"/>
+   <style:text-properties fo:font-size="24pt" style:font-size-asian="24pt" style:font-size-complex="24pt"/>
   </style:style>
-  <style:style style:name="P5" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="WWNum2">
+  <style:style style:name="P5" style:family="paragraph" style:parent-style-name="Heading_20_2">
+   <style:paragraph-properties fo:line-height="100%"/>
+   <style:text-properties fo:font-size="14pt" style:font-size-asian="14pt"/>
+  </style:style>
+  <style:style style:name="P6" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="WWNum2">
    <style:paragraph-properties fo:line-height="100%"/>
   </style:style>
-  <style:style style:name="P6" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P7" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:line-height="100%"/>
    <style:text-properties fo:color="#656d77" loext:opacity="100%" fo:font-weight="bold" style:font-weight-asian="bold"/>
   </style:style>
-  <style:style style:name="P7" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" style:line-height-at-least="0cm" fo:text-align="center" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties fo:font-size="11pt" officeooo:paragraph-rsid="0013480a" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P9" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" style:line-height-at-least="0cm" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties fo:font-size="11pt" officeooo:paragraph-rsid="0013480a" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P9" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P10" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="100%"/>
+   <style:text-properties officeooo:rsid="0013480a"/>
+  </style:style>
+  <style:style style:name="P11" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:line-height="100%"/>
    <style:text-properties officeooo:rsid="0013480a" officeooo:paragraph-rsid="0013480a"/>
   </style:style>
-  <style:style style:name="P10" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P12" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:line-height="100%"/>
    <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/>
   </style:style>
@@ -655,84 +664,84 @@
      <text:p text:style-name="P4"><text:span text:style-name="T1">Prepared By:</text:span> <text:bookmark-start text:name="prepared_by"/><text:span text:style-name="T2">prepared_by</text:span><text:bookmark-end text:name="prepared_by"/></text:p>
     </text:list-item>
    </text:list>
-   <text:h text:style-name="P3" text:outline-level="2">Summary</text:h>
+   <text:h text:style-name="P5" text:outline-level="2">Summary</text:h>
    <text:list text:style-name="WWNum2">
     <text:list-item>
-     <text:p text:style-name="P5"><text:span text:style-name="T1">Total Transactions:</text:span> <text:bookmark-start text:name="total_transactions"/><text:span text:style-name="T2">total_transactions</text:span><text:bookmark-end text:name="total_transactions"/></text:p>
+     <text:p text:style-name="P6"><text:span text:style-name="T1">Total Transactions:</text:span> <text:bookmark-start text:name="total_transactions"/><text:span text:style-name="T2">total_transactions</text:span><text:bookmark-end text:name="total_transactions"/></text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P5"><text:span text:style-name="T1">Total Revenue:</text:span> <text:bookmark-start text:name="total_revenue"/><text:span text:style-name="T2">total_revenue</text:span><text:bookmark-end text:name="total_revenue"/></text:p>
+     <text:p text:style-name="P6"><text:span text:style-name="T1">Total Revenue:</text:span> <text:bookmark-start text:name="total_revenue"/><text:span text:style-name="T2">total_revenue</text:span><text:bookmark-end text:name="total_revenue"/></text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P5"><text:span text:style-name="T1">Total Items Sold:</text:span> <text:bookmark-start text:name="total_items_sold"/><text:span text:style-name="T2">total_items_sold</text:span><text:bookmark-end text:name="total_items_sold"/></text:p>
+     <text:p text:style-name="P6"><text:span text:style-name="T1">Total Items Sold:</text:span> <text:bookmark-start text:name="total_items_sold"/><text:span text:style-name="T2">total_items_sold</text:span><text:bookmark-end text:name="total_items_sold"/></text:p>
     </text:list-item>
    </text:list>
-   <text:h text:style-name="P3" text:outline-level="2">Sales by Item</text:h>
+   <text:h text:style-name="P5" text:outline-level="2">Sales by Item</text:h>
    <table:table table:name="Tabla1" table:style-name="Tabla1">
     <table:table-column table:style-name="Tabla1.A" table:number-columns-repeated="5"/>
     <table:table-row table:style-name="Tabla1.1">
      <table:table-cell table:style-name="Tabla1.A1" office:value-type="string">
-      <text:p text:style-name="P6">Item Name</text:p>
+      <text:p text:style-name="P7">Item Name</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.A1" office:value-type="string">
-      <text:p text:style-name="P6">SKU</text:p>
+      <text:p text:style-name="P7">SKU</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.A1" office:value-type="string">
-      <text:p text:style-name="P6">Quantity Sold</text:p>
+      <text:p text:style-name="P7">Quantity Sold</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.A1" office:value-type="string">
-      <text:p text:style-name="P6">Unit Price</text:p>
+      <text:p text:style-name="P7">Unit Price</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.A1" office:value-type="string">
-      <text:p text:style-name="P6">Total Revenue</text:p>
+      <text:p text:style-name="P7">Total Revenue</text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row table:style-name="Tabla1.1">
      <table:table-cell table:style-name="Tabla1.A2" office:value-type="string">
-      <text:p text:style-name="P7"><text:span text:style-name="T3">«TableStart:It</text:span><text:span text:style-name="T4">em</text:span><text:span text:style-name="T3">s»«</text:span><text:span text:style-name="T5">itemName</text:span><text:span text:style-name="T3">»</text:span></text:p>
+      <text:p text:style-name="P8"><text:span text:style-name="T3">«TableStart:It</text:span><text:span text:style-name="T4">em</text:span><text:span text:style-name="T3">s»«</text:span><text:span text:style-name="T5">itemName</text:span><text:span text:style-name="T3">»</text:span></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.B2" office:value-type="string">
-      <text:p text:style-name="P8"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">SKU</text:span><text:span text:style-name="T3">»</text:span></text:p>
+      <text:p text:style-name="P9"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">SKU</text:span><text:span text:style-name="T3">»</text:span></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.C2" office:value-type="string">
-      <text:p text:style-name="P8"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">quantity</text:span><text:span text:style-name="T3">»</text:span></text:p>
+      <text:p text:style-name="P9"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">quantity</text:span><text:span text:style-name="T3">»</text:span></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.D2" office:value-type="string">
-      <text:p text:style-name="P8"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">unitPrice</text:span><text:span text:style-name="T3">»</text:span></text:p>
+      <text:p text:style-name="P9"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">unitPrice</text:span><text:span text:style-name="T3">»</text:span></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla1.E2" office:value-type="string">
-      <text:p text:style-name="P8"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">itemRevenue</text:span><text:span text:style-name="T3">»«Table</text:span><text:span text:style-name="T5">End</text:span><text:span text:style-name="T3">:It</text:span><text:span text:style-name="T4">em</text:span><text:span text:style-name="T3">s»</text:span></text:p>
+      <text:p text:style-name="P9"><text:span text:style-name="T3">«</text:span><text:span text:style-name="T5">itemRevenue</text:span><text:span text:style-name="T3">»«Table</text:span><text:span text:style-name="T5">End</text:span><text:span text:style-name="T3">:It</text:span><text:span text:style-name="T4">em</text:span><text:span text:style-name="T3">s»</text:span></text:p>
      </table:table-cell>
     </table:table-row>
    </table:table>
    <text:p text:style-name="P1"/>
-   <text:h text:style-name="P3" text:outline-level="2">Payment Methods Breakdown</text:h>
+   <text:h text:style-name="P5" text:outline-level="2">Payment Methods Breakdown</text:h>
    <table:table table:name="Tabla2" table:style-name="Tabla2">
     <table:table-column table:style-name="Tabla2.A" table:number-columns-repeated="3"/>
     <table:table-row table:style-name="Tabla2.1">
      <table:table-cell table:style-name="Tabla2.A1" office:value-type="string">
-      <text:p text:style-name="P6">Payment Method</text:p>
+      <text:p text:style-name="P7">Payment Method</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla2.A1" office:value-type="string">
-      <text:p text:style-name="P6">Number of Transactions</text:p>
+      <text:p text:style-name="P7">Number of Transactions</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla2.A1" office:value-type="string">
-      <text:p text:style-name="P6">Total Amount</text:p>
+      <text:p text:style-name="P7">Total Amount</text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row table:style-name="Tabla2.1">
      <table:table-cell table:style-name="Tabla2.A2" office:value-type="string">
-      <text:p text:style-name="P1"><text:bookmark-start text:name="payment_method"/><text:span text:style-name="T2">payment_method</text:span><text:bookmark-end text:name="payment_method"/></text:p>
+      <text:p text:style-name="P10"><text:bookmark-start text:name="payment_method"/>payment_method<text:bookmark-end text:name="payment_method"/></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla2.B2" office:value-type="string">
-      <text:p text:style-name="P9"><text:bookmark-start text:name="transaction_count"/>transaction_count<text:bookmark-end text:name="transaction_count"/></text:p>
+      <text:p text:style-name="P11"><text:bookmark-start text:name="transaction_count"/>transaction_count<text:bookmark-end text:name="transaction_count"/></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Tabla2.C2" office:value-type="string">
       <text:p text:style-name="P1"><text:bookmark-start text:name="amount"/>amount<text:bookmark-end text:name="amount"/>/<text:bookmark-start text:name="payment_methods"/><text:span text:style-name="T2">payment_methods</text:span><text:bookmark-end text:name="payment_methods"/></text:p>
      </table:table-cell>
     </table:table-row>
    </table:table>
-   <text:p text:style-name="P10"><text:span text:style-name="T6"/></text:p>
+   <text:p text:style-name="P12"><text:span text:style-name="T6"/></text:p>
   </office:text>
  </office:body>
 </office:document>

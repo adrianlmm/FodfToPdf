@@ -55,6 +55,10 @@ var questPdf = QuestPdfFodtRenderer.Render(filled);
 var questPdfPath = Path.Combine(samples, "supplier-invoices-sample-questpdf.pdf");
 File.WriteAllBytes(questPdfPath, questPdf);
 
+var prawnSharpPdf = PrawnSharpFodtRenderer.Render(filled);
+var prawnSharpPdfPath = Path.Combine(samples, "supplier-invoices-sample-prawnsharp.pdf");
+File.WriteAllBytes(prawnSharpPdfPath, prawnSharpPdf);
+
 var libreOfficePdf = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficePdfPath = Path.Combine(samples, "supplier-invoices-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
@@ -62,6 +66,7 @@ File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
 Console.WriteLine($"Invoice rows:    {regionRows}");
 Console.WriteLine($"Filled template: {filledPath}");
 Console.WriteLine($"QuestPDF PDF:    {questPdfPath} ({questPdf.Length} bytes)");
+Console.WriteLine($"PrawnSharp PDF:    {prawnSharpPdfPath} ({prawnSharpPdf.Length} bytes)");
 Console.WriteLine($"LibreOffice PDF: {libreOfficePdfPath} ({libreOfficePdf.Length} bytes)");
 
 static string FindSamplesDirectory()

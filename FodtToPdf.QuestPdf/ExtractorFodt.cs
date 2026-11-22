@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace FodtToPdf;
@@ -39,6 +39,9 @@ internal static class ExtractorFodt
         // style:row-height de un estilo de fila de tabla (null = no declarado)
         public double? AltoFijoFilaPt;
 
+        // fo:keep-together="always" de un estilo de fila de tabla (null = no declarado)
+        public bool? MantenerFilaJunta;
+
 
         // alto de línea (fo:line-height en cm o en %, o style:line-height-at-least en cm)
         public double? AltoLineaPt, AltoLineaPct, AltoLineaMinimoPt;
@@ -52,7 +55,7 @@ internal static class ExtractorFodt
         public bool BordeIzq, BordeDer, BordeSup, BordeInf;
         public string ColorBordeIzq, ColorBordeDer, ColorBordeSup, ColorBordeInf;
         public double GrosorBordePt;
-        public double GrosorBordeIzqPt, GrosorBordeDerPt;
+        public double GrosorBordeIzqPt, GrosorBordeDerPt, GrosorBordeSupPt, GrosorBordeInfPt;
         public string VerticalAlign;
         public double PaddingIzqPt, PaddingDerPt, PaddingSupPt, PaddingInfPt;
 
@@ -102,9 +105,10 @@ internal static class ExtractorFodt
     // Los contratos firman con draw:line y sin esto los renglones no se pintaban.
     static readonly Dictionary<string, (double Grosor, string Color)> _trazo = new();
 
-    static readonly Dictionary<string, Dictionary<int, (string Formato, string Plantilla, string Sufijo, string Vineta, double Margen, double Indent, int Inicio)>> _listas = new();
+    static readonly Dictionary<string, Dictionary<int, (string Formato, string Plantilla, string Sufijo, string Vineta, double Margen, double Indent, int Inicio, string Fuente)>> _listas = new();
     static double _sangriaPendiente;
     static double _margenPendiente;
+    static string _fuenteMarcaPendiente;
     // alto natural de una fuente respecto a su tamaÃ±o (ascendente + descendente +
     // interlineado interno). Arial: ~1.15 em; es la base del fo:line-height en %.
     const double AltoNaturalTexto = 1.15;
@@ -117,18 +121,37 @@ internal static class ExtractorFodt
     // el fo:line-height en %. MEDIDO en la tabla hhea de los TTF: Arial y Times 1,1499;
     // Calibri y Carlito 1,2207. El motor usaba 1,15 para todo y las plantillas en Calibri
     // salÃ­an con los renglones ~8 % mÃ¡s apretados que LibreOffice.
-    static double NaturalDeFuente(string fuente)
+    static readonly System.Collections.Concurrent.ConcurrentDictionary<string, double> _altoNaturalPorFuente = new(StringComparer.OrdinalIgnoreCase);
+
+    internal static double NaturalDeFuente(string fuente)
     {
-        var f = (fuente ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(fuente)) return AltoNaturalTexto;
 
-        if (f.StartsWith("Calibri", StringComparison.OrdinalIgnoreCase) ||
-            f.StartsWith("Carlito", StringComparison.OrdinalIgnoreCase))
-            return 1.22;
+        var (familia, peso) = GeneradorPdf.ResolverFuente(fuente);
+        if (string.IsNullOrWhiteSpace(familia)) return AltoNaturalTexto;
 
-        if (f.StartsWith("Trebuchet", StringComparison.OrdinalIgnoreCase))
-            return 1.161;
+        return _altoNaturalPorFuente.GetOrAdd(familia, fam =>
+        {
+            try
+            {
+                var estilo = peso > 0
+                    ? new SkiaSharp.SKFontStyle(peso, (int)SkiaSharp.SKFontStyleWidth.Normal, SkiaSharp.SKFontStyleSlant.Upright)
+                    : SkiaSharp.SKFontStyle.Normal;
+                using var tf = SkiaSharp.SKFontManager.Default.MatchFamily(fam, estilo)
+                            ?? SkiaSharp.SKFontManager.Default.MatchFamily(fam, SkiaSharp.SKFontStyle.Normal);
+                if (tf != null)
+                {
+                    using var font = new SkiaSharp.SKFont(tf, 100f);
+                    var m = font.Metrics;
+                    var alto = (-m.Ascent + m.Descent + m.Leading) / 100.0;
+                    if (alto > 0.5 && alto < 3.0)
+                        return alto;
+                }
+            }
+            catch { }
 
-        return AltoNaturalTexto;
+            return AltoNaturalTexto;
+        });
     }
 
     // fuente del primer run con texto (la que LibreOffice usa para el renglÃ³n)
@@ -152,7 +175,7 @@ internal static class ExtractorFodt
 
         foreach (var estiloLista in doc.Descendants(TEXT + "list-style"))
         {
-            var niveles = new Dictionary<int, (string Formato, string Plantilla, string Sufijo, string Vineta, double Margen, double Indent, int Inicio)>();
+            var niveles = new Dictionary<int, (string Formato, string Plantilla, string Sufijo, string Vineta, double Margen, double Indent, int Inicio, string Fuente)>();
 
             foreach (var nivel in estiloLista.Elements())
             {
@@ -163,6 +186,9 @@ internal static class ExtractorFodt
                 var margenNivel = APt((string)alineacionNivel?.Attribute(FO + "margin-left"));
                 var indentNivel = APt((string)alineacionNivel?.Attribute(FO + "text-indent"));
                 var inicioNivel = int.TryParse((string)nivel.Attribute(TEXT + "start-value"), out var sv) && sv > 0 ? sv : 1;
+                var tpNivel = nivel.Element(STYLE + "text-properties");
+                var fuenteNivel = (string)tpNivel?.Attribute(STYLE + "font-name")
+                               ?? (string)tpNivel?.Attribute(FO + "font-family");
 
                 if (nivel.Name == TEXT + "list-level-style-number")
                     niveles[num] = (
@@ -172,9 +198,10 @@ internal static class ExtractorFodt
                         null,
                         margenNivel,
                         indentNivel,
-                        inicioNivel);
+                        inicioNivel,
+                        fuenteNivel);
                 else if (nivel.Name == TEXT + "list-level-style-bullet")
-                    niveles[num] = ("", "", "", (string)nivel.Attribute(TEXT + "bullet-char") ?? "•", margenNivel, indentNivel, 1);
+                    niveles[num] = ("", "", "", (string)nivel.Attribute(TEXT + "bullet-char") ?? "•", margenNivel, indentNivel, 1, fuenteNivel);
             }
 
             _listas[((string)estiloLista.Attribute(STYLE + "name")) ?? ""] = niveles;
@@ -522,6 +549,13 @@ internal static class ExtractorFodt
         return def.Inicio > 0 ? def.Inicio : 1;
     }
 
+    static string FuenteDeLista(string estilo, int nivel)
+    {
+        if (!_listas.TryGetValue(estilo, out var niveles)) return null;
+        if (!niveles.TryGetValue(nivel, out var def)) return null;
+        return def.Fuente;
+    }
+
     static string MarcaDeLista(string estilo, int nivel, int numero)
     {
         if (!_listas.TryGetValue(estilo, out var niveles)) return null;
@@ -617,6 +651,13 @@ internal static class ExtractorFodt
                     };
 
                 p.Runs.Insert(0, runMarca);
+                if (!string.IsNullOrEmpty(_fuenteMarcaPendiente))
+                {
+                    var tamMarca = runMarca.TamanoPt > 0 ? runMarca.TamanoPt : (p.TamanoBasePt > 0 ? p.TamanoBasePt : 10);
+                    var pctMarca = p.AltoLineaPct > 0 ? p.AltoLineaPct : 1.0;
+                    var altoMarca = tamMarca * NaturalDeFuente(_fuenteMarcaPendiente) * pctMarca * FactorInterlineadoQuestPdf;
+                    if (altoMarca > p.AltoLineaPt) p.AltoMarcaPt = altoMarca;
+                }
                 // ODF 1.3 / Writer (SwTextNode::GetLeftMarginWithNum): si el estilo del
                 // párrafo declara su propia sangría francesa (fo:margin-left + fo:text-indent < 0),
                 // prevalece sobre la geometría por omisión del text:list-style.
@@ -740,12 +781,14 @@ internal static class ExtractorFodt
                 _marcaPendiente = MarcaDeLista(estiloDeLista, 1, contador);
                 _sangriaPendiente = AnchoDeMarca(estiloDeLista, 1);
                 _margenPendiente = MargenDeInciso(estiloDeLista, 1);
+                _fuenteMarcaPendiente = FuenteDeLista(estiloDeLista, 1);
 
                 foreach (var hijo in elemento.Elements())
                     RecorrerFlujo(hijo, modelo, estilos, seccionesPorEstilo, seccion, capaPorElemento);
 
                 _marcaPendiente = null;
                 _sangriaPendiente = 0;
+                _fuenteMarcaPendiente = null;
             }
 
             _contadoresLista[estiloDeLista] = contador;
@@ -1041,6 +1084,8 @@ internal static class ExtractorFodt
             ColumnWidthCm = cp?.Attribute(STYLE + "column-width")?.Value is string cw ? ACm(cw) : null,
             AltoMinimoFilaPt = fila?.Attribute(STYLE + "min-row-height")?.Value is string amh ? APt(amh) : null,
             AltoFijoFilaPt = fila?.Attribute(STYLE + "row-height")?.Value is string rh ? APt(rh) : null,
+            MantenerFilaJunta = ((string)fila?.Attribute(FO + "keep-together")) is string kt
+                ? kt == "always" : (bool?)null,
 
             // alto de línea real del párrafo (fo:line-height en cm o %, o style:line-height-at-least en cm)
             AltoLineaPt = pp?.Attribute(FO + "line-height")?.Value is string lh && !lh.EndsWith("%") ? APt(lh) : null,
@@ -1072,6 +1117,8 @@ internal static class ExtractorFodt
             }.Select(GrosorBorde).FirstOrDefault(g => g > 0.05),
             GrosorBordeIzqPt = GrosorBorde((string)cel?.Attribute(FO + "border-left") ?? bordeGeneral),
             GrosorBordeDerPt = GrosorBorde((string)cel?.Attribute(FO + "border-right") ?? bordeGeneral),
+            GrosorBordeSupPt = GrosorBorde((string)cel?.Attribute(FO + "border-top") ?? bordeGeneral),
+            GrosorBordeInfPt = GrosorBorde((string)cel?.Attribute(FO + "border-bottom") ?? bordeGeneral),
 
             PaddingIzqPt = cel?.Attribute(FO + "padding-left")?.Value is string pi ? APt(pi)
                          : cel?.Attribute(FO + "padding")?.Value is string pg2 ? APt(pg2)
@@ -1913,11 +1960,15 @@ internal static class ExtractorFodt
             // grupo del siguiente. Sin esto las filas quedaban de una sola lÃ­nea de texto.
             var nombreEstiloFila = (string)fila.Attribute(TABLE + "style-name") ?? "";
 
-            if (estilos.TryGetValue(nombreEstiloFila, out var estiloFila) && estiloFila.AltoMinimoFilaPt is double altoFila)
-                mfila.AltoMinimoPt = altoFila;
-
-            if (estilos.TryGetValue(nombreEstiloFila, out var estiloFila2) && estiloFila2.AltoFijoFilaPt is double altoFijo)
-                mfila.AltoFijoPt = altoFijo;
+            if (estilos.TryGetValue(nombreEstiloFila, out var estiloFila))
+            {
+                if (estiloFila.AltoMinimoFilaPt is double altoFila)
+                    mfila.AltoMinimoPt = altoFila;
+                if (estiloFila.AltoFijoFilaPt is double altoFijo)
+                    mfila.AltoFijoPt = altoFijo;
+                if (estiloFila.MantenerFilaJunta == true)
+                    mfila.MantenerJunta = true;
+            }
             foreach (var celda in fila.Elements(TABLE + "table-cell"))
             {
                 var mcelda = new CeldaModelo
@@ -1942,6 +1993,8 @@ internal static class ExtractorFodt
                     mcelda.GrosorBordePt = estiloCelda.GrosorBordePt;
                     mcelda.GrosorBordeIzqPt = estiloCelda.GrosorBordeIzqPt;
                     mcelda.GrosorBordeDerPt = estiloCelda.GrosorBordeDerPt;
+                    mcelda.GrosorBordeSupPt = estiloCelda.GrosorBordeSupPt;
+                    mcelda.GrosorBordeInfPt = estiloCelda.GrosorBordeInfPt;
                     mcelda.VerticalAlign = estiloCelda.VerticalAlign ?? "";
                     mcelda.PaddingIzqPt = estiloCelda.PaddingIzqPt;
                     mcelda.PaddingDerPt = estiloCelda.PaddingDerPt;
@@ -2015,6 +2068,68 @@ internal static class ExtractorFodt
             if (esEspaciadoraConSoloBordeSup)
                 foreach (var c in filaAct.Celdas)
                     c.BordeSup = false;
+        }
+
+        // Colapso vertical de bordes (table:border-model="collapsing" en ODF/Writer):
+        // cuando dos celdas vecinas en vertical comparten una arista (p.ej. border-bottom="1pt"
+        // arriba y border-top="0.75pt" abajo), el borde resultante toma el mayor grosor y
+        // ambos lados reservan la mitad de ese grosor.
+        if (modelo.Filas.Count >= 2)
+        {
+            var numFilas = modelo.Filas.Count;
+            var numCols = Math.Max(
+                modelo.ColumnasPt.Count,
+                modelo.Filas.Max(f => f.Celdas.Sum(c => Math.Max(c.SpanColumnas, 1))));
+
+            if (numCols > 0)
+            {
+                var ocupado = new bool[numFilas, numCols];
+                var inicioFila = new CeldaModelo[numFilas, numCols];
+                var finFila = new CeldaModelo[numFilas, numCols];
+
+                for (var r = 0; r < numFilas; r++)
+                {
+                    var col = 0;
+                    foreach (var c in modelo.Filas[r].Celdas)
+                    {
+                        while (col < numCols && ocupado[r, col]) col++;
+                        var spanC = Math.Max(c.SpanColumnas, 1);
+                        var spanR = Math.Max(c.SpanFilas, 1);
+                        var rFin = Math.Min(r + spanR - 1, numFilas - 1);
+                        var cFin = Math.Min(col + spanC, numCols);
+
+                        for (var rr = r; rr <= rFin; rr++)
+                            for (var cc = col; cc < cFin; cc++)
+                                ocupado[rr, cc] = true;
+
+                        for (var cc = col; cc < cFin; cc++)
+                        {
+                            inicioFila[r, cc] = c;
+                            finFila[rFin, cc] = c;
+                        }
+
+                        col += spanC;
+                    }
+                }
+
+                for (var r = 1; r < numFilas; r++)
+                {
+                    for (var cc = 0; cc < numCols; cc++)
+                    {
+                        var sup = finFila[r - 1, cc];
+                        var inf = inicioFila[r, cc];
+                        if (sup == null || inf == null || !sup.BordeInf || !inf.BordeSup) continue;
+
+                        var gSup = sup.GrosorBordeInfPt > 0.05 ? sup.GrosorBordeInfPt : sup.GrosorBordePt;
+                        var gInf = inf.GrosorBordeSupPt > 0.05 ? inf.GrosorBordeSupPt : inf.GrosorBordePt;
+                        var gMax = Math.Max(gSup, gInf);
+                        if (gMax <= 0.05) continue;
+
+                        if (gMax > sup.GrosorBordeInfPt) sup.GrosorBordeInfPt = gMax;
+                        if (gMax > inf.GrosorBordeSupPt) inf.GrosorBordeSupPt = gMax;
+                    }
+                }
+            }
         }
 
         return modelo;

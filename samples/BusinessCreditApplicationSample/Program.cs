@@ -13,6 +13,10 @@ var templateQuest = QuestPdfFodtRenderer.Render(templateBytes);
 var templateQuestPath = Path.Combine(samples, "sc-pmoral-template-questpdf.pdf");
 File.WriteAllBytes(templateQuestPath, templateQuest);
 
+var templateprawnSharp = PrawnSharpFodtRenderer.Render(templateBytes);
+var templateprawnSharpPath = Path.Combine(samples, "sc-pmoral-template-prawnsharp.pdf");
+File.WriteAllBytes(templateprawnSharpPath, templateprawnSharp);
+
 var templateLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
 var templateLibreOfficePath = Path.Combine(samples, "sc-pmoral-template-libreoffice.pdf");
 File.WriteAllBytes(templateLibreOfficePath, templateLibreOffice);
@@ -51,6 +55,10 @@ var questFilled = QuestPdfFodtRenderer.Render(filled);
 var questFilledPath = Path.Combine(samples, "sc-pmoral-sample-questpdf.pdf");
 File.WriteAllBytes(questFilledPath, questFilled);
 
+var prawnSharpFilled = PrawnSharpFodtRenderer.Render(filled);
+var prawnSharpFilledPath = Path.Combine(samples, "sc-pmoral-sample-prawnsharp.pdf");
+File.WriteAllBytes(prawnSharpFilledPath, prawnSharpFilled);
+
 var libreOfficeFilled = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficeFilledPath = Path.Combine(samples, "sc-pmoral-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficeFilledPath, libreOfficeFilled);
@@ -58,9 +66,11 @@ File.WriteAllBytes(libreOfficeFilledPath, libreOfficeFilled);
 Console.WriteLine($"Fields discovered: {fields.Count}");
 Console.WriteLine($"Fields replaced:   {replaced}");
 Console.WriteLine($"Template QuestPDF:    {templateQuestPath} ({templateQuest.Length} bytes)");
+Console.WriteLine($"Template PrawnSharp:    {templateprawnSharpPath} ({templateprawnSharp.Length} bytes)");
 Console.WriteLine($"Template LibreOffice: {templateLibreOfficePath} ({templateLibreOffice.Length} bytes)");
 Console.WriteLine($"Filled template: {filledPath}");
 Console.WriteLine($"Filled QuestPDF:    {questFilledPath} ({questFilled.Length} bytes)");
+Console.WriteLine($"Filled PrawnSharp:    {prawnSharpFilledPath} ({prawnSharpFilled.Length} bytes)");
 Console.WriteLine($"Filled LibreOffice: {libreOfficeFilledPath} ({libreOfficeFilled.Length} bytes)");
 
 static string SampleValue(string field) => field switch

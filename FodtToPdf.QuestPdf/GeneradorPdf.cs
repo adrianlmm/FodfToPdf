@@ -1249,12 +1249,21 @@ internal static class GeneradorPdf
 
             void PintarLista(IContainer cont)
             {
+                var altoMarca = p.AltoMarcaPt > p.AltoLineaPt ? p.AltoMarcaPt : p.AltoLineaPt;
+                var extraPrimeraLinea = p.AltoMarcaPt > p.AltoLineaPt && p.AltoLineaPt > 0
+                    ? (p.AltoMarcaPt - p.AltoLineaPt) / AltoNaturalFuente
+                    : 0;
+
                 cont.Row(fila =>
                 {
                     fila.ConstantItem((float)p.SangriaColgantePt)
-                        .Text(t => t.Span(marca.Texto.Trim()).Style(EstiloDe(new List<RunModelo> { marca }, p.AltoLineaPt)));
+                        .Text(t => t.Span(marca.Texto.Trim()).Style(EstiloDe(new List<RunModelo> { marca }, altoMarca)));
 
-                    fila.RelativeItem().Text(t =>
+                    var contCuerpo = fila.RelativeItem();
+                    if (extraPrimeraLinea > 0.05)
+                        contCuerpo = contCuerpo.PaddingTop((float)extraPrimeraLinea);
+
+                    contCuerpo.Text(t =>
                     {
                         AlinearTexto(t, p.Alineacion);
 
@@ -2104,9 +2113,9 @@ internal static class GeneradorPdf
             .FirstOrDefault() ?? "";
         var esCalibri = fuenteCelda.StartsWith("Calibri", StringComparison.OrdinalIgnoreCase) ||
                         fuenteCelda.StartsWith("Carlito", StringComparison.OrdinalIgnoreCase);
-        var altoNaturalNoCalibri = fuenteCelda.StartsWith("Trebuchet", StringComparison.OrdinalIgnoreCase)
-            ? 1.161
-            : 1.15;
+        var altoNaturalNoCalibri = string.IsNullOrEmpty(fuenteCelda)
+            ? 1.15
+            : ExtractorFodt.NaturalDeFuente(fuenteCelda);
 
         // Calibri/Carlito tienen altura natural ~1.22 em (Trebuchet MS ~1.161 em, Arial/Times ~1.15 em).
         // En celdas con fo:line-height en porcentaje (100%, 107%, etc.), ExtractorFodt
@@ -2183,12 +2192,12 @@ internal static class GeneradorPdf
         {
             var bordeExtSup = tabla.Filas[0].Celdas
                 .Where(c => c.BordeSup)
-                .Select(c => c.GrosorBordePt > 0 ? c.GrosorBordePt : 0.7)
+                .Select(c => c.GrosorBordeSupPt > 0.05 ? c.GrosorBordeSupPt : (c.GrosorBordePt > 0 ? c.GrosorBordePt : 0.7))
                 .DefaultIfEmpty(0).Max() / 2;
             var bordeExtInf = tabla.Filas
                 .SelectMany((f, i) => f.Celdas
                     .Where(c => c.BordeInf && i + Math.Max(c.SpanFilas, 1) >= tabla.Filas.Count)
-                    .Select(c => c.GrosorBordePt > 0 ? c.GrosorBordePt : 0.7))
+                    .Select(c => c.GrosorBordeInfPt > 0.05 ? c.GrosorBordeInfPt : (c.GrosorBordePt > 0 ? c.GrosorBordePt : 0.7)))
                 .DefaultIfEmpty(0).Max() / 2;
             if (bordeExtSup > 0) contenedor = contenedor.PaddingTop((float)bordeExtSup);
             if (bordeExtInf > 0) contenedor = contenedor.PaddingBottom((float)bordeExtInf);
@@ -2263,11 +2272,10 @@ internal static class GeneradorPdf
                     // un borde gris a todas las celdas y las tablas crecÃ­an de mÃ¡s.
                     IContainer cont = celdaTabla;
 
-                    // Evita partir a la mitad una celda corta entre páginas (p.ej. el recuadro
-                    // "Manifiesto..." de SC_PMoral dejando 1 línea en la página 1 y 3 en la 2).
-                    var textoCeldaLen = celda.Parrafos.Sum(p => p.Runs.Sum(r => r.Texto?.Length ?? 0));
-                    if (celda.SpanFilas == 1 && celda.TablasAnidadas.Count == 0 &&
-                        celda.Parrafos.Count <= 6 && textoCeldaLen <= 800)
+                    // ODF §20.200: fo:keep-together="always" en style:table-row-properties impide
+                    // partir la fila entre páginas; con "auto" (por defecto) Writer sí permite
+                    // dividir la fila entre páginas.
+                    if (fila.MantenerJunta && celda.SpanFilas == 1 && celda.TablasAnidadas.Count == 0)
                         cont = cont.ShowEntire();
                     // grosor declarado en el .fodt (0.5pt en la liquidaciones); 0.7 si no lo dice
                     var grosor = celda.GrosorBordePt > 0.05 ? (float)celda.GrosorBordePt : 0.7f;
@@ -2281,10 +2289,14 @@ internal static class GeneradorPdf
                     // Color de borde tal como lo declara el .fodt (fo:border / fo:border-*).
                     // BorderAlignmentMiddle centra el trazo sobre la arista (table:border-model="collapsing"
                     // de ODF), evitando bordes dobles entre celdas vecinas y conservando el alto visual exacto.
-                    if (celda.BordeSup) cont = cont.BorderTop(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeSup));
-                    if (celda.BordeInf) cont = cont.BorderBottom(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeInf));
-                    if (celda.BordeIzq) cont = cont.BorderLeft(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeIzq));
-                    if (celda.BordeDer) cont = cont.BorderRight(grosor).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeDer));
+                    var grosorSup = celda.GrosorBordeSupPt > 0.05 ? (float)celda.GrosorBordeSupPt : grosor;
+                    var grosorInf = celda.GrosorBordeInfPt > 0.05 ? (float)celda.GrosorBordeInfPt : grosor;
+                    var grosorIzqBorde = celda.GrosorBordeIzqPt > 0.05 ? (float)celda.GrosorBordeIzqPt : grosor;
+                    var grosorDerBorde = celda.GrosorBordeDerPt > 0.05 ? (float)celda.GrosorBordeDerPt : grosor;
+                    if (celda.BordeSup) cont = cont.BorderTop(grosorSup).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeSup));
+                    if (celda.BordeInf) cont = cont.BorderBottom(grosorInf).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeInf));
+                    if (celda.BordeIzq) cont = cont.BorderLeft(grosorIzqBorde).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeIzq));
+                    if (celda.BordeDer) cont = cont.BorderRight(grosorDerBorde).BorderAlignmentMiddle().BorderColor(ColorDe(celda.ColorBordeDer));
 
                     // El aire NO viene del padding de la celda (0.019cm = 0.5 pt): viene de
                     // los mÃ¡rgenes del pÃ¡rrafo (fo:margin-left/right). Sin ellos el texto
@@ -2374,10 +2386,10 @@ internal static class GeneradorPdf
                     var aireBordeDer = !celdaConImagen && !necesitaReducirPaddingMarca && celda.BordeDer &&
                                        grosorDer > 0.55f && celda.PaddingDerPt > 0.5 && anchoCelda > paddingIzq + paddingDer + 10
                         ? grosorDer / 2f : 0f;
-                    var aireBordeSup = !celdaConImagen && celda.BordeSup && celda.GrosorBordePt > 0.05 && fila.AltoFijoPt <= 0.5
-                        ? grosor / 2f : 0f;
-                    var aireBordeInf = !celdaConImagen && celda.BordeInf && celda.GrosorBordePt > 0.05 && fila.AltoFijoPt <= 0.5
-                        ? grosor / 2f : 0f;
+                    var aireBordeSup = !celdaConImagen && celda.BordeSup && (celda.GrosorBordeSupPt > 0.05 || celda.GrosorBordePt > 0.05) && fila.AltoFijoPt <= 0.5
+                        ? grosorSup / 2f : 0f;
+                    var aireBordeInf = !celdaConImagen && celda.BordeInf && (celda.GrosorBordeInfPt > 0.05 || celda.GrosorBordePt > 0.05) && fila.AltoFijoPt <= 0.5
+                        ? grosorInf / 2f : 0f;
 
                     paddingIzq += aireBordeIzq;
                     paddingDer += aireBordeDer;
@@ -3097,7 +3109,20 @@ internal static class GeneradorPdf
         _ => 0,
     };
 
-    static (string Familia, int Peso) ResolverFuente(string fuente)
+    static int AnchoDe(string palabra) => palabra.ToLowerInvariant() switch
+    {
+        "ultracondensed" or "compressed" => (int)SkiaSharp.SKFontStyleWidth.UltraCondensed,
+        "extracondensed" => (int)SkiaSharp.SKFontStyleWidth.ExtraCondensed,
+        "condensed" or "narrow" => (int)SkiaSharp.SKFontStyleWidth.Condensed,
+        "semicondensed" => (int)SkiaSharp.SKFontStyleWidth.SemiCondensed,
+        "semiexpanded" => (int)SkiaSharp.SKFontStyleWidth.SemiExpanded,
+        "expanded" or "extended" => (int)SkiaSharp.SKFontStyleWidth.Expanded,
+        "extraexpanded" => (int)SkiaSharp.SKFontStyleWidth.ExtraExpanded,
+        "ultraexpanded" => (int)SkiaSharp.SKFontStyleWidth.UltraExpanded,
+        _ => 0,
+    };
+
+    internal static (string Familia, int Peso) ResolverFuente(string fuente)
     {
         var limpio = NormalizarFuente(fuente);
 
@@ -3132,20 +3157,37 @@ internal static class GeneradorPdf
             if (SkiaSharp.SKFontManager.Default.MatchFamily(limpio, SkiaSharp.SKFontStyle.Normal) == null)
             {
                 // "Bodoni MT Black" -> familia "Bodoni MT" + peso 900
-                var corte = limpio.LastIndexOf(' ');
+                // "Bernard MT Condensed" -> familia "Bernard MT" (ancho Condensed en DirectWrite/Skia)
+                var actual = limpio;
+                var pesoAcumulado = 0;
+                var anchoAcumulado = 0;
 
-                while (corte > 0)
+                while (true)
                 {
-                    var familiaBase = limpio[..corte].Trim();
-                    var peso = PesoDe(limpio[(corte + 1)..]);
+                    var corte = actual.LastIndexOf(' ');
+                    if (corte <= 0) break;
 
-                    if (peso > 0 && SkiaSharp.SKFontManager.Default.MatchFamily(familiaBase, SkiaSharp.SKFontStyle.Normal) != null)
+                    var sufijo = actual[(corte + 1)..];
+                    var peso = PesoDe(sufijo);
+                    var ancho = AnchoDe(sufijo);
+                    if (peso == 0 && ancho == 0) break;
+
+                    if (peso > 0 && pesoAcumulado == 0) pesoAcumulado = peso;
+                    if (ancho > 0 && anchoAcumulado == 0) anchoAcumulado = ancho;
+
+                    var familiaBase = actual[..corte].Trim();
+                    var estiloPrueba = anchoAcumulado > 0
+                        ? new SkiaSharp.SKFontStyle(pesoAcumulado > 0 ? pesoAcumulado : 400, anchoAcumulado, SkiaSharp.SKFontStyleSlant.Upright)
+                        : SkiaSharp.SKFontStyle.Normal;
+
+                    if (SkiaSharp.SKFontManager.Default.MatchFamily(familiaBase, estiloPrueba) != null ||
+                        SkiaSharp.SKFontManager.Default.MatchFamily(familiaBase, SkiaSharp.SKFontStyle.Normal) != null)
                     {
-                        resuelta = (familiaBase, peso);
+                        resuelta = (familiaBase, pesoAcumulado);
                         break;
                     }
 
-                    corte = familiaBase.LastIndexOf(' ');
+                    actual = familiaBase;
                 }
             }
         }

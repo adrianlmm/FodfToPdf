@@ -32,6 +32,8 @@ The animation shows the original invoice template and the generated result.
 | `samples/InterestCertificateSample` | Generates the interest withholding certificate template `PlantillaIntereses.fodt` both untouched and filled with sample withholding data, in both PDF variants. |
 | `samples/PayrollReceiptSample` | Generates the payroll CFDI receipt template `ComprobantesFiscales.fodt` both untouched and filled with sample payroll data, in both PDF variants. |
 | `samples/EmployeeInformationSample` | Generates the employee information form `InformacionEmpleado.fodt` both untouched and filled with sample personal, job, and skills data, in both PDF variants. |
+| `samples/MergedTableSample` | Renders the merged-cell table template `tabla.fodt` in both PDF variants. |
+| `samples/ParagraphLayoutSample` | Renders the paragraph-layout template `parrafos.fodt` in both PDF variants. |
 | `samples/CIT18Sample` | Generates the CIT18 contract template `CIT18.fodt` both untouched and filled with sample worker data, in both PDF variants. |
 | `samples/TransferReceiptSample` | Generates the CFDI transfer receipt template `ComprobanteTraslado.fodt` both untouched and filled with header bookmarks and a repeating concept region, in both PDF variants. |
 | `samples/ExitInterviewSample` | Generates the employee exit-interview template `EntrevistaSalida.fodt` both untouched and filled with 67 fictional answers, in both PDF variants. |

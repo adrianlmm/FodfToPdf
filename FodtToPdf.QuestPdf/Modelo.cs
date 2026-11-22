@@ -179,6 +179,10 @@ internal class ParrafoModelo
     public double AltoLineaPt { get; set; }        // fo:line-height real del estilo (0 = usar tamaño*1.2)
     public double AltoLineaPct { get; set; }       // fo:line-height porcentual declarado (p.ej. 1.15 para "115%", 0 si no aplica)
 
+    // alto de línea de la viñeta/marca de lista cuando su fuente (p.ej. Symbol) es más
+    // alta que la del texto: en Writer solo afecta a la primera línea, no a las de continuación.
+    public double AltoMarcaPt { get; set; }
+
     // tamaño de fuente que declara el estilo del párrafo (0 si no declara). Sirve para
     // calcular el alto de un párrafo vacío dentro de una celda, que no tiene runs de
     // donde sacarlo y en LibreOffice ocupa una línea completa.
@@ -369,6 +373,9 @@ internal class FilaModelo
 
     // style:min-row-height del estilo de la fila (0 = sin mínimo declarado)
     public double AltoMinimoPt { get; set; }
+
+    // fo:keep-together="always" en style:table-row-properties (false = "auto", permite partir la fila)
+    public bool MantenerJunta { get; set; }
 }
 
 internal class CeldaModelo
@@ -392,6 +399,8 @@ internal class CeldaModelo
     public double GrosorBordePt { get; set; }    // fo:border "0.5pt ...": grosor en puntos (0 = 0.7 por omisión)
     public double GrosorBordeIzqPt { get; set; }
     public double GrosorBordeDerPt { get; set; }
+    public double GrosorBordeSupPt { get; set; }
+    public double GrosorBordeInfPt { get; set; }
     public string ColorBordeIzq { get; set; }
     public bool BordeDer { get; set; }
     public string ColorBordeDer { get; set; }

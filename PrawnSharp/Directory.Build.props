@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>PrawnSharp contributors</Authors>
+    <PackageTags>pdf;prawn;pdfsharp;layout;document</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!--
+      CS1591: faltan comentarios XML en el esqueleto; se irán agregando.
+      NU1902/NU1903: PDFsharp 6.2.4 arrastra System.Security.Cryptography.Pkcs 8.0.1,
+      que tiene avisos de vulnerabilidad. Se revisa antes de publicar.
+    -->
+    <NoWarn>$(NoWarn);CS1591;NU1902;NU1903</NoWarn>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Link="README.md" />
+    <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" Link="THIRD-PARTY-NOTICES.md" />
+  </ItemGroup>
+</Project>

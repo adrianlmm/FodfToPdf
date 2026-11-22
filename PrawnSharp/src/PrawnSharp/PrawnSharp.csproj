@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnSharp</RootNamespace>
+    <AssemblyName>PrawnSharp</AssemblyName>
+    <PackageId>PrawnSharp</PackageId>
+    <Description>API de generación de PDF al estilo Prawn para .NET.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../PrawnSharp.Abstractions/PrawnSharp.Abstractions.csproj" />
+    <ProjectReference Include="../PrawnSharp.Fonts/PrawnSharp.Fonts.csproj" />
+    <ProjectReference Include="../PrawnSharp.Backend.PdfSharp/PrawnSharp.Backend.PdfSharp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PrawnSharp.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnSharp</RootNamespace>
+    <AssemblyName>PrawnSharp.Abstractions</AssemblyName>
+    <PackageId>PrawnSharp.Abstractions</PackageId>
+    <Description>Contratos, geometría y opciones de PrawnSharp.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+</Project>

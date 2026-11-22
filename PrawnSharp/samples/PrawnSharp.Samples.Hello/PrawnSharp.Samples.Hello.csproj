@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PrawnSharp.Samples.Hello</RootNamespace>
+    <AssemblyName>PrawnSharp.Samples.Hello</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/PrawnSharp/PrawnSharp.csproj" />
+  </ItemGroup>
+
+</Project>

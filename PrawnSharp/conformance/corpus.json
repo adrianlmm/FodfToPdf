@@ -1,0 +1,907 @@
+{
+  "version": 1,
+  "generated": "2026-11-16",
+  "sourceRoot": "C:/soles/webfrontend6/WebFrontEnd/wwwroot/Public/Plantillas",
+  "items": [
+    {
+      "id": "p001",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "ALIMENTOS SOLES, S.A. de C.V., con domicilio en Calle Chihuahua Norte #125 3B Col. Centro C.P 85000, ciudad Obregón, en la entidad de Sonora, país México, es el responsable del uso y protección de sus datos personales, y al respecto le informamos lo siguiente:",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p002",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Los datos personales que recabamos de usted, los utilizaremos para las siguientes finalidades que son necesarias para el servicio que solicita:",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p003",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "Ser una persona moral registrada ante la Secretaria de Hacienda y Crédito Público.",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p004",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "Estar enterado que “EL PATRÓN” requiere de la prestación de su esfuerzo para sujetarse a un contrato de capacitación inicial y si esta resulta evaluada satisfactoriamente ocupar el puesto que en este contrato se indica.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p005",
+      "source": "CCI_Agropecuaria Adobe S.A. de C.V._CF.fodt",
+      "text": "El trabajador se obliga desde ahora a acatar y cumplir de forma estricta el REGLAMENTO DE BIOSEGURIDAD que a continuación se describe a fin de proteger el estado de salud del hato.",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p006",
+      "source": "CCI_Agropecuaria Adobe S.A. de C.V._CF.fodt",
+      "text": "1. Para el personal que labora en las granjas porcinas queda estrictamente prohibido el poseer cerdos en sus casas y tener contacto con cerdos fuera de granja, con el fin de evitar el contagio de enfermedades.",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p007",
+      "source": "CIT01.fodt",
+      "text": "B) SEGUNDA: Que la empresa que representa SE DEDICA FUNDAMENTALMENTE A: suministrar personal para la prestación de servicios profesionales mediante el asesoramiento, contratación de personal, capacitación y proveer personal calificado para toda clase de servicios personales independientes, en cualquiera de las ramas de la economía, oficios, trabajos o profesiones así como proporcionar orientación en actos relacionados con la materia jurídica, fiscal, laboral, contable, administrativa, financiera, de mercado, comercial, inmobiliaria o de cualquier otra",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p008",
+      "source": "CIT01.fodt",
+      "text": "El trabajador declara además al momento de ingresar a ésta empresa, no tiene ninguna demanda laboral en contra de ninguna empresa, así como ningún juicio penal.",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p009",
+      "source": "CIT02.fodt",
+      "text": "E) QUINTA: Declaran las partes respetar en todo momento las disposiciones legales laborales, siendo además su voluntad aceptar como condiciones del presente contrato de trabajo las condiciones de trabajo y las clausulas que a continuación se describen:",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p010",
+      "source": "CIT02.fodt",
+      "text": "TERCERA: El Patrón <b>toma</b> a sus servicios al trabajador para que desempeñe el puesto indicado en el punto 1 de las condiciones de trabajo y quien desempeñara su trabajo en la forma, tiempo y lugar en que este contrato se precise, y la duración de la relación de trabajo, por exigirlo así la naturaleza de la misma, según se ha precisado en las condiciones de trabajo antes señaladas.",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "inline"
+    },
+    {
+      "id": "p011",
+      "source": "CIT03.fodt",
+      "text": "CUARTA: CONTRATACION POR TIEMPO DETERMINADO: La empresa y trabajador están de acuerdo en reconocer que las causas que dan origen a este contrato son de carácter estrictamente eventual, siendo ésta la siguiente.",
+      "width": 150,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p012",
+      "source": "CIT03.fodt",
+      "text": "SEPTIMA: El trabajador declara además al momento de ingresar a ésta empresa, no tiene ninguna demanda laboral en contra de ninguna empresa, así como ningún juicio penal.",
+      "width": 180,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p013",
+      "source": "CIT04.fodt",
+      "text": "B) SEGUNDA: Que la empresa que representa SE DEDICA FUNDAMENTALMENTE A: suministrar personal para la prestación de servicios profesionales mediante el asesoramiento, contratación de personal, capacitación y proveer personal calificado para toda clase de servicios personales independientes, en cualquiera de las ramas de la economía, oficios, trabajos o profesiones así como proporcionar orientación en actos relacionados con la materia jurídica, fiscal, laboral, contable, administrativa, financiera, de mercado, comercial, inmobiliaria o de cualquier otra.",
+      "width": 220,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p014",
+      "source": "CIT04.fodt",
+      "text": "Así mismo la empresa aportará al trabajador el equivalente a 7 % de su sueldo base en Vales de Despensa, hasta el tope para el Instituto Mexicano del Seguro Social (IMSS) (siendo este de hasta el 40% del valor de la UMA vigente).",
+      "width": 260,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p015",
+      "source": "CIT05.fodt",
+      "text": "6).- HORARIO DE TRABAJO: HORARIO DE TRABAJO: El horario de labores será de 7:00 horas a 15:00 horas, de LUNES a SABADO , concediendo la empresa media hora totalmente libre de 13:00 horas a 13:30 horas para que salga a tomar sus alimentos.",
+      "width": 300,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p016",
+      "source": "CIT06.fodt",
+      "text": "QUINTA: Declaran las partes respetar en todo momento las disposiciones legales laborales, siendo además su voluntad aceptar como condiciones del presente contrato de trabajo las condiciones de trabajo y las cláusulas que a continuación se describen:",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p017",
+      "source": "CIT06.fodt",
+      "text": ". Mas sin embargo la EMPRESA declara que cada centro de trabajo tiene Necesidades y condiciones particulares de trabajo, por lo que ambas partes están de acuerdo que dicho día de Descanso semanal podrá cambiarlo la Empresa a su criterio y no se requiere ningún escrito ni consentimiento por escrito del TRABAJADOR porque da su consentimiento mas amplio ala EMPRESA desde ahora con la firma del presente contrato.",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p018",
+      "source": "CIT06_CF.fodt",
+      "text": "SEGUNDA.- El PATRON contrata en este instrumento laboral al TRABAJADOR para que desempeñe el puesto indicado y quien realizara sus actividades en la forma, tiempo y lugar en que este contrato se precise, y la duración de la relación de trabajo, por exigirlo así la naturaleza de la misma se desempeñara acorde a las condiciones precisadas y declaradas en este contrato",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p019",
+      "source": "CIT07.fodt",
+      "text": "TERCERA.- Los servicios objeto de la relación de trabajo deben prestarse en el lugar que designen el PATRON o sus representantes, quedando el TRABAJADOR subordinado a éstos en órdenes y en servicios en todo lo concerniente al trabajo y sobre todo en la designación de las rutas en las que se realizaran los viajes correspondientes y en las que participara el TRABAJADOR como consecuencia de las labores extraordinarias para la cual ha sido contratado y que determinan la contratación por capacitación objeto de este contrato.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p020",
+      "source": "CIT07.fodt",
+      "text": "Así mismo la <b>empresa</b> aportará al trabajador el equivalente a 7% de su sueldo base en Vales de Despensa, teniendo como tope máximo el establecido por el Instituto Mexicano del Seguro Social (IMSS) (siendo este de hasta el 40% del valor de la UMA vigente).",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "inline"
+    },
+    {
+      "id": "p021",
+      "source": "CIT09.fodt",
+      "text": "CUARTA: El trabajador otorga con la firma de este contrato, su consentimiento para ingresar al FONDO DE AHORRO conformado por aportaciones iguales entre empresa y trabajadores, dando su autorización para que le sea descontado de su salario base el importe que corresponda a un 9.7 % de su salario base diario, a si mismo la empresa aportará otro 9.7 % de su salario base diario al fondo de ahorro. El fondo de ahorro (ambas aportaciones) le será entregadas por el comité administrativo del mismo al finalizar su contrato o al término del ejercicio de dicho fondo.",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p022",
+      "source": "CIT09.fodt",
+      "text": "Además de las obligaciones anteriormente descritas, el trabajador se obliga desde ahora a acatar y cumplir de forma estricta el REGLAMENTO DE BUENAS PRACTICAS SANITARIAS que a continuación se describe a fin de proteger el estado de salud del hato.",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p023",
+      "source": "CIT10.fodt",
+      "text": "A) Seguir las instrucciones que reciba del patrón en relación con la forma, lugar y tiempo en que se desarrolle el trabajo, llevando a cabo el mismo con la intensidad, cuidado y esmero apropiados.",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p024",
+      "source": "CIT10.fodt",
+      "text": "d).- Todos los trabajadores (en el caso de los hombres) deberán presentarse perfectamente afeitados y con el cabello",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p025",
+      "source": "CIT10_CF.fodt",
+      "text": "Así mismo la empresa aportará al trabajador el equivalente a 7 % de su sueldo base en Vales de Despensa, hasta el tope para el Instituto Mexicano del Seguro Social (40% SM Área Geográfica).",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p026",
+      "source": "CIT12.fodt",
+      "text": "SEGUNDA: Que la empresa que representa SE DEDICA FUNDAMENTALMENTE A: Prestar servicios profesionales mediante el asesoramiento, contratación de personal, capacitación y proveer personal calificado para toda clase de servicios personales independientes, en cualquiera de las ramas de la economía, oficios, trabajos o profesiones. Proporciona además orientación en actos relacionados con la materia jurídica, fiscal, laboral, contable, administrativa, financiera, de mercado, comercial, inmobiliaria o cualquier otra.",
+      "width": 150,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p027",
+      "source": "CIT12.fodt",
+      "text": "Elaboración de sistemas de computo o programas útiles necesarios o de interés de sociedades civiles o mercantiles, mediante la venta o distribución o arrendamiento, comodato, de estos equipos. Actuar como gestor, representante, apoderado, en asuntos de carácter económico, fiscal, jurídico, administrativo o de cualquier otra rama económica, entre otros servicios que se enuncian en el acta constitutiva correspondiente.",
+      "width": 180,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p028",
+      "source": "CIT13.fodt",
+      "text": "DECIMA: El patrón tendrá la más amplia facultad para movilizar al trabajador de un puesto a otro, o bien de un lugar a otro dentro de la empresa o establecimientos, con la condición de que se respetará el salario base del trabajador para que no sufra menoscabo alguno. El trabajador esta de acuerdo en que no se requiere su consentimiento al momento del cambio, ya que lo otorga anticipadamente con la firma de este contrato.",
+      "width": 220,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p029",
+      "source": "CIT14_CF.fodt",
+      "text": "9).-AGUINALDO: Con fundamento en el artículo 87 de la Ley Federal del Trabajo, tendrán derecho a un aguinaldo anual, consistente en 30 DIAS días de salario o bien la parte proporcional que corresponda cuando el tiempo total laborado sea inferior a 1 año de labores.",
+      "width": 260,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p030",
+      "source": "CIT15_CF.fodt",
+      "text": "CUARTA: El <b>trabajador</b> otorga con la firma de este contrato, su consentimiento para ingresar al FONDO DE AHORRO conformado por aportaciones iguales entre empresa y trabajadores, dando su autorización para que le sea descontado de su salario base el importe que corresponda a un 5 % de su salario base diario, a si mismo la empresa aportará otro 5 % de su salario base diario al fondo de ahorro. El fondo de ahorro (ambas aportaciones) le será entregadas por el comité administrativo del mismo al finalizar su contrato o al término del ejercicio de dicho fondo.",
+      "width": 300,
+      "font": "Courier",
+      "size": 12,
+      "format": "inline"
+    },
+    {
+      "id": "p031",
+      "source": "CIT17_CF.fodt",
+      "text": "escrito del TRABAJADOR porque da su consentimiento más amplio a la EMPRESA desde ahora con la firma del presente contrato.",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p032",
+      "source": "CIT17_CF.fodt",
+      "text": "6).- HORARIO DE TRABAJO: El horario de labores será de 7:00 horas a 15:00 horas, de LUNES a SABADO , concediendo la empresa media hora totalmente libre de 11:00 horas a 11:30 horas para salga a tomar sus alimentos.",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p033",
+      "source": "CIT18.fodt",
+      "text": "F) SEPTIMA: Cuando la jornada deba prolongarse por circunstancias especiales, el trabajador se obliga a laborar el tiempo extra necesario, en los términos del Artículo 66 de la Ley Federal de Trabajo, en la inteligencia de que solo se considerarán y pagarán como horas extraordinarias las que excedan del tiempo semanal pactado en este contrato y hayan sido autorizadas en forma escrita por el patrón o sus representantes.",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p034",
+      "source": "CIT18.fodt",
+      "text": "G) OCTAVA: El trabajador está obligado a checar su tarjeta o a firmar las listas de asistencia, a la entrada y salida de sus labores, por lo que el incumplimiento de este requisito indicara la falta injustificada a sus labores, para todos los efectos legales.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p035",
+      "source": "CTD_Agricola Pomona S.A. de C.V._CF.fodt",
+      "text": "Ambas partes están de acuerdo con las declaraciones que anteceden y pactan a continuación las siguientes:",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p036",
+      "source": "CTD_Agricola Pomona S.A. de C.V._CF.fodt",
+      "text": "- - - PRIMERA.- El presente contrato se celebra por tiempo determinado y solo podrá ser modificado, suspendido o rescindido en los términos y condiciones que para tal efecto establece la Ley Federal del Trabajo.---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p037",
+      "source": "CTI_Agricola Pomona S.A. de C.V._CF.fodt",
+      "text": "-------------------------------------------------------------Ambas partes están de acuerdo con las declaraciones que anteceden y pactan a continuación las siguientes:",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p038",
+      "source": "CTI_Agricola Pomona S.A. de C.V._CF.fodt",
+      "text": "- - - PRIMERA. - El presente contrato se celebra por tiempo indeterminado y solo podrá ser modificado, suspendido o rescindido en los términos y condiciones que para tal efecto establece la Ley Federal del Trabajo. ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p039",
+      "source": "C_CapacitacionIniciaPGranjas.fodt",
+      "text": "SEGUNDA: Que la empresa que representa SE DEDICA FUNDAMENTALMENTE A: suministrar personal para la prestación de servicios profesionales mediante el asesoramiento, contratación de personal, capacitación y proveer personal calificado para toda clase de servicios personales independientes, en cualquiera de las ramas de la economía, oficios, trabajos o profesiones así como proporcionar orientación en actos relacionados con la materia jurídica, fiscal, laboral, contable, administrativa, financiera, de mercado, comercial, inmobiliaria o de cualquier otra",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p040",
+      "source": "C_CapacitacionIniciaPGranjas.fodt",
+      "text": "que dicho día de <b>Descanso</b> semanal podrá cambiarlo la Empresa a su criterio y no se requiere ningún escrito",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "inline"
+    },
+    {
+      "id": "p041",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "QUINTA: Al término de la capacitación inicial, de no acreditar competencia el trabajador, a juicio del patrón, se dará por terminada la relación de trabajo, sin responsabilidad para el mismo esto con fundamento en el artículo 39-B de la Ley Federal del Trabajo.",
+      "width": 150,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p042",
+      "source": "C_CapacitacionInicialPTractocamion.fodt",
+      "text": "SEXTA: El presente contrato da origen a la relación de trabajo contenida en el artículo 20 de la Ley Federal del Trabajo, y obliga a lo expresamente pactado, conforme a las disposiciones contenidas en el artículo 31 de la ley federal del trabajo.",
+      "width": 180,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p043",
+      "source": "CartaBeca.fodt",
+      "text": "Por medio de la presente me permito hacer constar que el C. Juan Pedro Lopez Meraz laboró en nuestra empresa ASISTENCIA EFICAZ, S.A. de C.V. desde el día 18 de Mayo del 2015 al 06 de Agosto del 2015, ocupando el puesto de Ayudante Acuacultura.",
+      "width": 220,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p044",
+      "source": "CartaBeca.fodt",
+      "text": "Agradecemos de antemano las atenciones que se sirvan brindarle y nos reiteramos a sus órdenes en los teléfonos ya indicados por si se desea mayor información sobre su persona.",
+      "width": 260,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p045",
+      "source": "CartaBecaConRH.fodt",
+      "text": "Por medio de la presente me permito hacer constar que el C. Juan Pedro Lopez Meraz laboró en nuestra empresa CONTRIBUCIONES, S.A. de C.V. desde el día 18 de Mayo del 2015 al 06 de Agosto del 2015, ocupando el puesto de Ayudante Acuacultura.",
+      "width": 300,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p046",
+      "source": "CartaBienvenidaRH.fodt",
+      "text": "A nombre de nuestra Dirección General, Ing. Miguel Humberto Olea Ruiz y de tu servidor, por medio de la presente me es grato darte la más cordial de las Bienvenidas a nuestra Organización. Nos complace el que a partir del día de hoy formes parte de nuestro selecto equipo de trabajo.",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p047",
+      "source": "CartaBienvenidaRH.fodt",
+      "text": "Soles es una empresa netamente regional que ha creciendo y seguirá creciendo gracias al esfuerzo, trabajo en equipo y con un enfoque total hacia nuestros Cliente.",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p048",
+      "source": "CartaGuarderia.fodt",
+      "text": "Por medio de la presente constancia, ponemos a su consideración la siguiente información para los fines que al interesado convengan.",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p049",
+      "source": "CartaGuarderia.fodt",
+      "text": "Sin más por el momento y agradeciendo de antemano la atención que se sirvan brindar a la presente se despide.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p050",
+      "source": "CartaPrestamo.fodt",
+      "text": "Por medio de la <b>presente</b> me permito hacer constar que el C. RUBEN CARMONA OLMEDO labora en nuestra empresa CONTRIBUCIONES, S.A. de C.V. Desde el día 21 de Febrero del 2013 a la fecha, ocupando el puesto de encargado de destete.",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "inline"
+    },
+    {
+      "id": "p051",
+      "source": "CartaPrestamo.fodt",
+      "text": "RUBEN CARMONA OLMEDO, percibe un sueldo mensual nominal de $ 5,813.05 Y un sueldo neto de: $ 5,352.00 (Cinco mil, trescientos cincuenta y dos pesos 00/100 M.N).",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p052",
+      "source": "CartaPrestamoAsisRH.fodt",
+      "text": "Por medio de la presente me permito hacer constar que el C. RUBEN CARMONA OLMEDO labora en nuestra empresa ASISTENCIA EFICAZ, S.A. de C.V. Desde el día 21 de Febrero del 2013 a la fecha, ocupando el puesto de encargado de destete.",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p053",
+      "source": "CartaRecomendacion.fodt",
+      "text": "Por medio de la presente me permito hacer constar que el C. ERNESTO PÉREZ GALVÁN laboró en nuestra empresa CONTRIBUCIONES, S.A. de C.V. desde el día 10 de Febrero del 2015 al 24 de Diciembre del 2016, ocupando el puesto de Chofer Repartidor",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p054",
+      "source": "CartaRecomendacionAsisRH.fodt",
+      "text": "Por medio de la presente me permito hacer constar que el C. ERNESTO PÉREZ GALVÁN laboró en nuestra empresa ASISTENCIA EFICAZ, S.A. de C.V. desde el día 10 de Febrero del 2015 al 24 de Diciembre del 2016, ocupando el puesto de Chofer Repartidor",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p055",
+      "source": "CartaRecomendacionE.fodt",
+      "text": "Cabe destacar que durante todo el tiempo que estuvo laborando en nuestro equipo de trabajo, siempre lo hizo con responsabilidad, honestidad y con un buen desempeño.",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p056",
+      "source": "CartaVisa.fodt",
+      "text": "Por medio de la presente hacemos constar que el (o la) C. MARIA EUGENIA MARTINEZ LUCERO labora actualmente en nuestra empresa CONTRIBUCIONES, S.A DE C.V desde el 25 de Noviembre del 2008 desempeñando el puesto de encargada de expendio.",
+      "width": 150,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p057",
+      "source": "CartaVisa.fodt",
+      "text": "El sueldo que percibe mensualmente nominal es de $ 9,094.80 (Nueve mil, noventa y cuatro pesos 80/100).",
+      "width": 180,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p058",
+      "source": "CartaVisaAsisRH.fodt",
+      "text": "Por medio de la presente hacemos constar que el (o la) C. MARIA EUGENIA MARTINEZ LUCERO labora actualmente en nuestra empresa ASISTENCIA EFICAZ, S.A DE C.V desde el 25 de Noviembre del 2008 desempeñando el puesto de encargada de expendio.",
+      "width": 220,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p059",
+      "source": "ComprobantesFiscales.fodt",
+      "text": "Recibí del patrón arriba mencionado, la cantidad aquí indicada por concepto de mi salario, que incluye además el",
+      "width": 260,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p060",
+      "source": "ComprobantesFiscales.fodt",
+      "text": "importe de horas <b>extras</b> trabajadas, séptimo día y todas las prestaciones a las que tengo derecho, correspondientes al",
+      "width": 300,
+      "font": "Courier",
+      "size": 12,
+      "format": "inline"
+    },
+    {
+      "id": "p061",
+      "source": "EntrevistaSalida.fodt",
+      "text": "3.- Desde su propia perspectiva, que cosas o aspectos considera debemos de mejorar como Empresa para mejorar el Ambiente de Trabajo?",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p062",
+      "source": "EntrevistaSalida.fodt",
+      "text": "4.- Su tuviera que calificar el apoyo que recibió de jefe inmediato para el buen desempeño de su",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p063",
+      "source": "Formato_PFisica.fodt",
+      "text": "Copias de la identificación oficial (IFE, pasaporte) del Dueño del negocio y Aval. (firmas igual que la credencial o no es válido para su crédito)",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p064",
+      "source": "Formato_PFisica.fodt",
+      "text": "Copia de comprobante de domicilio (luz, agua, teléfono) reciente, no mayor de 3 meses de antigüedad.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p065",
+      "source": "Formato_PMoral.fodt",
+      "text": "¿HA TENIDO ATRASOS CONSIDERABLES EN PAGOS CON CREDITOS, TARJETAS, HIPOTECAS, ETC.? SI NO NO MENCIONE LA FECHA Y CON QUE INSTITUCION",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p066",
+      "source": "Formato_PMoral.fodt",
+      "text": "¿HA ESTADO EN DEMANDAS O DESPACHOS DE ABOGADOS POR CREDITO OTORGADOS? SI NO EN CASO AFIRMATIVO, CONFIRME SI ACTUALMENTE ESTA SE LIQUIDO",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p067",
+      "source": "Formato_Pagare.fodt",
+      "text": "Valor recibido a mi (nuestra) entera satisfacción. Este pagare forma parte de una",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p068",
+      "source": "Formato_Pagare.fodt",
+      "text": "Valor recibido a mi (nuestra) entera satisfacción. Este pagare forma parte de una serie numerada del 1 al _1 , y todos están sujetos a la condición de que al no pagarse cualesquiera de ellos a su vencimiento serán exigibles los que sigan en número, además de los ya vencidos. El dicho importe causara intereses ordinarios calculados a razón del _4_ % mensual, y en caso de no ser pagados oportunamente dicho importe causara intereses moratorios a razón del _4_ % mensual a partir de la fecha de su vencimiento hasta la total liquidación del mismo, sin que por esto se entienda prorrogado el plazo.",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p069",
+      "source": "InformacionEmpleado.fodt",
+      "text": "MENCIONE AL MENOS 3 DE LAS FORTALEZAS QUE CONSIDERAS TE AYUDAN EN EL BUEN DESEMPEÑO DE TU PUESTO ACTUAL",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p070",
+      "source": "OrdenDeCompra.fodt",
+      "text": "Favor de enviar la <b>factura</b> con el archivo con extensión xml a facturacion@soles.com.mx",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "inline"
+    },
+    {
+      "id": "p071",
+      "source": "PlantillaFactura-FleteR.fodt",
+      "text": "POR ESTE PAGARE ME OBLIGO INCONDICIONALMENTE A PAGAR A LA ORDEN DE Alimentos Soles S.A de C.V. EN Celaya, Gto EL 07-05-2016. LA CANTIDAD DE $3,293.82",
+      "width": 150,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p072",
+      "source": "PlantillaFacturaCartaPorte_V3-3.fodt",
+      "text": "Mercancías: Peso Bruto Total: PesoBrutoTotalCP Unidad Peso: UnidadPesoCP Número total de mercancías: NumeroTotalMercanciasCP",
+      "width": 180,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p073",
+      "source": "PlantillaFacturaCartaPorte_V3-3.fodt",
+      "text": "Favor de referenciar en el pago los documentos que se están liquidando. Gracias.",
+      "width": 220,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p074",
+      "source": "SC_PFisica.fodt",
+      "text": "Manifiesto que los datos asentados en este documento, así como la información financiera que se acompaña , son verídicos y se pronuncian a ALIMENTOS SOLES, S.A. de C.V, con la finalidad de tramitar el (los) crédito(s) descrito(s) en la presente solicitud, autorizando a dicha institución para que compruebe su autenticidad y obtenga cualquier información adicional que estime necesaria o conveniente, por conducto de cualquier sociedad de investigación certificada, legalmente constituida y facultada para ello.",
+      "width": 260,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p075",
+      "source": "SC_PMoral.fodt",
+      "text": "REPRESENTANTE LEGAL CON FACULTAD PARA ACTOS DE ADMINISTRACION, ACTOS DE DOMINIO Y SUSCRIBIR TITULOS DE CRÉDITO (CRÉDITO DIRECTO)",
+      "width": 300,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p076",
+      "source": "SC_PMoral.fodt",
+      "text": "Manifiesto que los datos asentados en este documento, así como la información financiera que se acompaña , son verídicos y se pronuncian a ALIMENTOS SOLES, S.A. de C.V SFOL, con la finalidad de tramitar el (los) crédito(s) descrito(s) en la presente solicitud, autorizando a dicha institución para que compruebe su autenticidad y obtenga cualquier información adicional que estime necesaria o conveniente, por conducto de cualquier sociedad de investigación certificada, legalmente constituida y facultada para ello.",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p077",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "De manera adicional, utilizaremos su información personal para las siguientes finalidades secundarias que no son necesarias para el servicio solicitado, pero que nos permiten y facilitan brindarle una mejor atención:",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p078",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "En caso de que no desee que sus datos personales se utilicen para estos fines secundarios, indíquelo a continuación:",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p079",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "La negativa para el uso de sus datos personales para estas finalidades no podrá ser un motivo para que le neguemos los servicios y productos que solicita o contrata con nosotros.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p080",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Para llevar a cabo <b>las</b> finalidades descritas en el presente aviso de privacidad, utilizaremos los siguientes datos personales:",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "inline"
+    },
+    {
+      "id": "p081",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "¿Cómo puede acceder, rectificar o cancelar sus datos personales, oponerse a su uso o revocar el consentimiento?",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p082",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Para el ejercicio de cualquiera de los derechos ARCO o revocación de consentimiento, usted deberá presentar la solicitud respectiva a través del siguiente medio:",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p083",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Los datos de contacto de la persona o departamento de datos personales, que está a cargo de dar trámite a las solicitudes de derechos ARCO o revocación del consentimiento son los siguientes:",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p084",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Departamento de Nómina con domicilio en Calle Chihuahua Norte #125 3B Col. Centro C.P 85000, ciudad Obregón, en la entidad de Sonora, país México o correo electrónico: protecciondedatos@soles.com.mx",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p085",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Usted puede revocar el consentimiento que, en su caso, nos haya otorgado para el tratamiento de sus datos personales. Sin embargo, es importante que tenga en cuenta que no en todos los casos podremos atender su solicitud o concluir el uso de forma inmediata, ya que es posible que por alguna obligación legal requiramos seguir tratando sus datos personales. Asimismo, usted deberá considerar que para ciertos fines, la revocación de su consentimiento implicará que no le podamos seguir prestando el servicio que nos solicitó, o la conclusión de su relación con nosotros.",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p086",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Con objeto de que usted pueda limitar el uso y divulgación de su información personal, le ofrecemos los siguientes medios:",
+      "width": 150,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p087",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Favor de enviar correo electrónico a protecciondedatos@soles.com.mx para agregarlo a nuestra lista de exclusión si no desea recibir correo electrónico con fines de publicidad y propaganda.",
+      "width": 180,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p088",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "El presente aviso de privacidad puede sufrir modificaciones, cambios o actualizaciones derivadas de nuevos requerimientos legales; de nuestras propias necesidades por los productos o servicios que ofrecemos; de nuestras prácticas de privacidad; de cambios en nuestro modelo de negocio, o por otras causas.",
+      "width": 220,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p089",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Nos comprometemos a mantenerlo informado sobre los cambios que pueda sufrir el presente aviso de privacidad, mediante una circular vía correo electrónico.",
+      "width": 260,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p090",
+      "source": "ALIMENTOS SOLES-aviso de privacidad CLIENTES.fodt",
+      "text": "Consiento que mis <b>datos</b> personales sean tratados de conformidad con los términos y condiciones informados en el presente aviso de privacidad. Favor de marcar con X si consiente. [ ]",
+      "width": 300,
+      "font": "Courier",
+      "size": 12,
+      "format": "inline"
+    },
+    {
+      "id": "p091",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "“EL TRABAJADOR” durante el tiempo que dure la relación laboral que por este medio se pacta, disfrutara de salario, la garantía de seguridad social y de las prestaciones de la categoría o puesto que desempeñe.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.",
+      "width": 150,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p092",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "- - - DECIMA CUARTA.- Toda la información acerca de procedimientos de trabajos, costos de materiales, precios de ventas, y cualquier información financiera, será considerada confidencial y bajo la tutela de las disposiciones expresas que se realicen en el presente instrumento legal.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "width": 180,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p093",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "- - - DÉCIMA NOVENA.- Lo no previsto por este contrato se regirá por las disposiciones de la Ley Federal del Trabajo, así como el Reglamento Interior de Trabajo.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "width": 220,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p094",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "Por medio de la presente otorgo mi consentimiento para que si esta empresa deseara pagar mis salarios y cualesquier otra prestación por medio de DEPOSITO BANCARIO, y si necesitare abrir la cuenta correspondiente, sin importar la institución bancaria que la empresa decida, manifiesto mi conformidad, lisa y llana para firmar la documentación que para este fin sea requerida y desde luego para que así se me cubra el salario y/o prestaciones derivadas de la prestación de servicios.",
+      "width": 260,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p095",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "De igual manera desde este momento me hago sabedor de que en caso de incurrir en el supuesto de que sea revelado por mi persona información de cualquier tipo, sea confidencial o no, si esto ocasiona un perjuicio a la empresa, estaré incurriendo en la causal de despido justificado sin responsabilidad para el patrón la cual se encuentra prevista y especificada en el artículo 47 fracción ix, de la ley federal del trabajo, la cual a la letra dice:",
+      "width": 300,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p096",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "“Articulo 47.- son causas de rescisión de la relación de trabajo sin responsabilidad para el patrón:",
+      "width": 150,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p097",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "IX.- Revelar el trabajador los secretos de fabricación o dar a conocer asuntos de carácter reservado, con perjuicio de la empresa.”",
+      "width": 180,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "plain"
+    },
+    {
+      "id": "p098",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "De igual manera me permito manifestar que en el caso de que llegara a dejar la empresa por los motivos que estos fueren, me comprometo desde ahora a no sustraer ninguna información propiedad de la empresa por ningún medio. Por otro lado, manifiesto mi conformidad en hacer entrega de toda la información que se me requiera por parte de la empresa que está siendo resguardada por mí, ya sea por medios impresos, electrónicos o de cualquier otro medio.",
+      "width": 220,
+      "font": "Times-Roman",
+      "size": 11,
+      "format": "plain"
+    },
+    {
+      "id": "p099",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "De la misma forma, me comprometo desde ahora a hacer entrega de todo el equipo que se me entregó para su custodia, o para el desempeño de mi trabajo.",
+      "width": 260,
+      "font": "Courier",
+      "size": 12,
+      "format": "plain"
+    },
+    {
+      "id": "p100",
+      "source": "CCIT_Contribuciones S.A. de C.V._CF.fodt",
+      "text": "Lo anterior sin la <b>limitante</b> de que se ejerzan acciones penales en mi contra por dicha acción, ya que desde este momento me hago sabedor de que la revelación de secretos es un delito previsto y sancionado por la ley penal federal la cual en su código respectivo en su artículo 210 dice:",
+      "width": 300,
+      "font": "Helvetica",
+      "size": 10,
+      "format": "inline"
+    }
+  ]
+}
