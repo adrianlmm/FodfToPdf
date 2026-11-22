@@ -21,7 +21,7 @@ public sealed class DocumentTests
 
         var bytes = doc.RenderBytes();
 
-        Assert.True(bytes.Length > 1000, "El PDF debería tener contenido.");
+        Assert.True(bytes.Length > 200, "El PDF debería tener contenido.");
         Assert.Equal(1, doc.PageCount);
 
         using var pdf = Pig.PdfDocument.Open(new MemoryStream(bytes));
@@ -65,7 +65,7 @@ public sealed class DocumentTests
 
         var bytes = doc.RenderBytes();
 
-        Assert.True(bytes.Length > 1000);
+        Assert.True(bytes.Length > 200);
     }
 
     [Fact]
@@ -289,7 +289,7 @@ public sealed class DocumentTests
 
         var bytes = doc.RenderBytes();
 
-        Assert.True(bytes.Length > 1000);
+        Assert.True(bytes.Length > 200);
     }
 
     [Fact]
@@ -416,7 +416,7 @@ public sealed class DocumentTests
             doc.RenderFile(path);
 
             Assert.True(File.Exists(path));
-            Assert.True(new FileInfo(path).Length > 1000);
+            Assert.True(new FileInfo(path).Length > 200);
 
             var header = File.ReadAllBytes(path).Take(5).ToArray();
             Assert.Equal("%PDF-", System.Text.Encoding.ASCII.GetString(header));

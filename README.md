@@ -31,6 +31,7 @@ The animation shows the original invoice template and the generated result.
 | `samples/DepositApplicationSample` | Generates the deposit application template `PlantillaDepositos.fodt` both untouched and filled with invoice/deposit rows, in both PDF variants. |
 | `samples/InterestCertificateSample` | Generates the interest withholding certificate template `PlantillaIntereses.fodt` both untouched and filled with sample withholding data, in both PDF variants. |
 | `samples/PayrollReceiptSample` | Generates the payroll CFDI receipt template `ComprobantesFiscales.fodt` both untouched and filled with sample payroll data, in both PDF variants. |
+| `samples/PaymentComplementSample` | Generates the payment receipt/complement template `PlantillaComprobantePago.fodt` both untouched and filled with sample payment data, in QuestPDF, LibreOffice, and PrawnSharp variants. |
 | `samples/EmployeeInformationSample` | Generates the employee information form `InformacionEmpleado.fodt` both untouched and filled with sample personal, job, and skills data, in both PDF variants. |
 | `samples/MergedTableSample` | Renders the merged-cell table template `tabla.fodt` in both PDF variants. |
 | `samples/ParagraphLayoutSample` | Renders the paragraph-layout template `parrafos.fodt` in both PDF variants. |

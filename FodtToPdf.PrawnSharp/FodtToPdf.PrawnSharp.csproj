@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Generador de PDF con PrawnSharp (PDFsharp 6.2.4 MIT) para FodtToPdf.
+    Generador de PDF con PrawnSharp + PrawnPure (100% C# puro, sin PDFsharp ni SkiaSharp) para FodtToPdf.
     Controla directamente métricas TTF/OTF, cuantización en twips, línea base,
     cortes de línea y división de filas de tabla para igualar a LibreOffice Writer.
   -->
@@ -16,9 +16,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FodtToPdf\FodtToPdf.csproj" />
-    <ProjectReference Include="..\PrawnSharp\src\PrawnSharp\PrawnSharp.csproj" />
     <ProjectReference Include="..\PrawnSharp\src\PrawnSharp.Abstractions\PrawnSharp.Abstractions.csproj" />
-    <ProjectReference Include="..\PrawnSharp\src\PrawnSharp.Backend.PdfSharp\PrawnSharp.Backend.PdfSharp.csproj" />
+    <ProjectReference Include="..\PrawnSharp\src\PrawnSharp\PrawnSharp.csproj" />
+    <ProjectReference Include="..\PrawnPure\src\PrawnPure.Backend\PrawnPure.Backend.csproj" />
   </ItemGroup>
 
 </Project>

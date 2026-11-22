@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageReference Include="PdfPig" Version="0.1.16" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PrawnPure.PdfCore\PrawnPure.PdfCore.csproj" />
+    <ProjectReference Include="..\..\src\PrawnPure.TTFunk\PrawnPure.TTFunk.csproj" />
+    <ProjectReference Include="..\..\src\PrawnPure.Backend\PrawnPure.Backend.csproj" />
+    <ProjectReference Include="..\..\..\PrawnSharp\src\PrawnSharp\PrawnSharp.csproj" />
+    <ProjectReference Include="..\..\..\PrawnSharp\src\PrawnSharp.Abstractions\PrawnSharp.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\PrawnSharp\src\PrawnSharp.Fonts\PrawnSharp.Fonts.csproj" />
+    <ProjectReference Include="..\..\..\PrawnSharp\src\PrawnSharp.Backend.PdfSharp\PrawnSharp.Backend.PdfSharp.csproj" />
+  </ItemGroup>
+
+</Project>

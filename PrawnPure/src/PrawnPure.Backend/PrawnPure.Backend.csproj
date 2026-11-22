@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnPure.Backend</RootNamespace>
+    <AssemblyName>PrawnPure.Backend</AssemblyName>
+    <Description>Pure C# IPdfBackend implementation for PrawnSharp backed by PrawnPure.PdfCore and PrawnPure.TTFunk (zero PDFsharp, zero SkiaSharp).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PrawnPure.PdfCore\PrawnPure.PdfCore.csproj" />
+    <ProjectReference Include="..\PrawnPure.TTFunk\PrawnPure.TTFunk.csproj" />
+    <ProjectReference Include="..\..\..\PrawnSharp\src\PrawnSharp.Abstractions\PrawnSharp.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\PrawnSharp\src\PrawnSharp.Fonts\PrawnSharp.Fonts.csproj" />
+  </ItemGroup>
+
+</Project>

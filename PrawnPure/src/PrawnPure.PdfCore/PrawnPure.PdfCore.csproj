@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnPure.PdfCore</RootNamespace>
+    <AssemblyName>PrawnPure.PdfCore</AssemblyName>
+    <Description>Pure C# port of Ruby pdf-core, prawn/images and prawn/security (zero external PDF dependencies).</Description>
+  </PropertyGroup>
+
+</Project>

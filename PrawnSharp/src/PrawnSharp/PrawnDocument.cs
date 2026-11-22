@@ -1,5 +1,5 @@
 using System.Numerics;
-using PrawnSharp.Backend.PdfSharp;
+using PrawnPure.Backend;
 using PrawnSharp.Fonts;
 
 namespace PrawnSharp;
@@ -24,9 +24,9 @@ public sealed class PrawnDocument : IDisposable
     private bool _disposed;
     private readonly List<Action<PrawnDocument>> _repeaters = [];
 
-    /// <summary>Crea un documento con el backend PDFsharp por omisión.</summary>
+    /// <summary>Crea un documento con el backend nativo PrawnPure por omisión.</summary>
     public PrawnDocument(DocumentOptions? options = null)
-        : this(options, new PdfSharpBackend())
+        : this(options, new PurePdfBackend())
     {
     }
 

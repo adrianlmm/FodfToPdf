@@ -130,9 +130,12 @@ internal static class ExtractorFodt
 
     internal static double ATwipsPt(double pt) => Math.Round(pt * 20.0, MidpointRounding.AwayFromZero) / 20.0;
 
-    // fuente del primer run con texto (la que LibreOffice usa para el renglÃ³n)
+    // fuente del primer run con texto (la que LibreOffice usa para el renglón)
     static string FuenteDelRun(ParrafoModelo p)
-        => p.Runs.Select(x => x.Fuente).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+        => p.Runs.Where(x => !string.IsNullOrWhiteSpace(x.Texto))
+                 .Select(x => x.Fuente)
+                 .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
+           ?? p.Runs.Select(x => x.Fuente).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
 
     // Caja de lÃ­nea de un pÃ¡rrafo VACÃO dentro de una celda: LibreOffice no tiene glifos
     // que posicionar y usa la lÃ­nea completa de la fuente. MEDIDO en las filas en blanco
@@ -1851,6 +1854,26 @@ internal static class ExtractorFodt
                     mfila.AltoFijoPt = altoFijo;
                 if (estiloFila.MantenerFilaJunta == true)
                     mfila.MantenerJunta = true;
+            }
+
+            // En tablas con rowspan > 1 convertidas desde Word/ODF, las <table:covered-table-cell>
+            // pueden conservar estilos propios con border-top/border-bottom que Writer suma al
+            // modelo de bordes colapsados de esa fila (p.ej. PlantillaComprobantePago.fodt).
+            foreach (var cubierta in fila.Elements(TABLE + "covered-table-cell"))
+            {
+                var nombreCub = (string)cubierta.Attribute(TABLE + "style-name") ?? "";
+                if (string.IsNullOrEmpty(nombreCub) || !estilos.TryGetValue(nombreCub, out var estCub)) continue;
+                var gDef = estCub.GrosorBordePt > 0.05 ? estCub.GrosorBordePt : 0.7;
+                if (estCub.BordeSup)
+                {
+                    var gs = estCub.GrosorBordeSupPt > 0.05 ? estCub.GrosorBordeSupPt : gDef;
+                    if (gs > mfila.MaxBordeSupCubiertoPt) mfila.MaxBordeSupCubiertoPt = gs;
+                }
+                if (estCub.BordeInf)
+                {
+                    var gi = estCub.GrosorBordeInfPt > 0.05 ? estCub.GrosorBordeInfPt : gDef;
+                    if (gi > mfila.MaxBordeInfCubiertoPt) mfila.MaxBordeInfCubiertoPt = gi;
+                }
             }
             foreach (var celda in fila.Elements(TABLE + "table-cell"))
             {

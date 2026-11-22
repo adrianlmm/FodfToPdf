@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../PrawnSharp.Abstractions/PrawnSharp.Abstractions.csproj" />
+    <EmbeddedResource Include="Afm/*.afm" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Afm/*.afm" />
+    <ProjectReference Include="../PrawnSharp.Abstractions/PrawnSharp.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

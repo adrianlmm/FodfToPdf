@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PrawnPure.TTFunk</RootNamespace>
+    <AssemblyName>PrawnPure.TTFunk</AssemblyName>
+    <Description>Pure C# port of Ruby ttfunk TrueType parser, Unicode subsetter, and PDF Type0/CIDFontType2 + ToUnicode CMap emitter.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PrawnPure.PdfCore\PrawnPure.PdfCore.csproj" />
+  </ItemGroup>
+
+</Project>

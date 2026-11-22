@@ -1,12 +1,12 @@
 using System.Globalization;
 using System.Numerics;
+using PrawnPure.Backend;
 using PrawnSharp;
-using PrawnSharp.Backend.PdfSharp;
 
 namespace FodtToPdf;
 
 /// <summary>
-/// Motor de maquetación y renderizado ODF sobre PrawnSharp (PDFsharp 6.2.4 MIT).
+/// Motor de maquetación y renderizado ODF sobre PrawnSharp + PrawnPure (sin PDFsharp ni SkiaSharp).
 /// Controla directamente la cuantización en twips, la posición exacta de la línea base,
 /// el corte de línea con kerning TTF, los bordes colapsados y la división de filas entre páginas.
 /// </summary>
@@ -14,11 +14,11 @@ internal sealed class PrawnSharpGeneradorPdf
 {
     private readonly ModeloPlantilla _modelo;
     private readonly bool _dibujarTablasAnidadas;
-    private readonly PdfSharpBackend _backend;
+    private readonly PurePdfBackend _backend;
     private readonly Dictionary<FontFace, IFontMetrics> _metricsCache = new();
     private readonly Dictionary<string, ImageData> _imageCache = new(StringComparer.Ordinal);
     private readonly List<PaginaEstado> _paginas = [];
-    private readonly Dictionary<int, (PaginaEstado Pagina, double Y)> _anclasBloque = new();
+    private readonly Dictionary<int, (PaginaEstado Pagina, double X, double Y)> _anclasBloque = new();
     private readonly HashSet<CapaModelo> _capasFondoDibujadas = [];
 
     private PaginaEstado _paginaActual;
@@ -86,7 +86,7 @@ internal sealed class PrawnSharpGeneradorPdf
     {
         _modelo = modelo;
         _dibujarTablasAnidadas = dibujarTablasAnidadas;
-        _backend = new PdfSharpBackend { Compress = true };
+        _backend = new PurePdfBackend { Compress = true };
     }
 
     public static byte[] Generar(ModeloPlantilla modelo, bool dibujarTablasAnidadas = true)
@@ -341,9 +341,11 @@ internal sealed class PrawnSharpGeneradorPdf
                 {
                     Nombre = capa.Nombre,
                     Tipo = capa.Tipo,
-                    XPt = capa.HorizontalRel is "paragraph" or "paragraph-content" or "page-content"
-                        ? ancla.Pagina.Layout.MargenIzqPt + capa.XPt
-                        : capa.XPt,
+                    XPt = capa.HorizontalRel is "paragraph" or "paragraph-content"
+                        ? ancla.X + capa.XPt
+                        : capa.HorizontalRel == "page-content"
+                            ? ancla.Pagina.Layout.MargenIzqPt + capa.XPt
+                            : capa.XPt,
                     YPt = ancla.Y + capa.YPt,
                     AnchoPt = capa.AnchoPt,
                     AltoPt = capa.AltoPt,
@@ -657,7 +659,7 @@ internal sealed class PrawnSharpGeneradorPdf
 
         if (bloque.Tipo == "espacio")
         {
-            _anclasBloque[indice] = (_paginaActual, _cursorY);
+            _anclasBloque[indice] = (_paginaActual, xBase, _cursorY);
             var altoLinea = Math.Max(bloque.AltoPt, 0.05);
             double mSup = 0, mInf = 0;
             if (bloque.Parrafo is ParrafoModelo pe)
@@ -672,6 +674,11 @@ internal sealed class PrawnSharpGeneradorPdf
                     string.Equals(pe.EstiloComun, sigP.EstiloComun, StringComparison.Ordinal);
                 mSup = mismoPrev ? 0 : Math.Max(pe.MargenSupPt, 0);
                 mInf = mismoSig ? 0 : Math.Max(pe.MargenInfPt, 0);
+                altoLinea += pe.PaddingSupParrafoPt + pe.PaddingInfParrafoPt;
+                if (pe.BordeParrafo)
+                    altoLinea += 2.0 * Math.Max(pe.GrosorBordeParrafoPt, 0.5);
+                else if (pe.BordeInferiorParrafo)
+                    altoLinea += Math.Max(pe.GrosorBordeParrafoPt, 0.5);
             }
             var mSupEf = (_paginas.Count == 1 || _cursorY > _areaSup + 0.5 || _saltoExplicitoPagina) ? mSup : 0;
             _saltoExplicitoPagina = false;
@@ -739,7 +746,7 @@ internal sealed class PrawnSharpGeneradorPdf
                     NuevaPagina();
             }
 
-            _anclasBloque[indice] = (_paginaActual, _cursorY);
+            _anclasBloque[indice] = (_paginaActual, xBase, _cursorY);
             RenderizarParrafoPaginado(pm, xBase, ancho, permitirSaltoPagina);
         }
     }
@@ -1213,13 +1220,12 @@ internal sealed class PrawnSharpGeneradorPdf
 
         if (conTexto.Count > 0)
         {
-            var mezclaBaseNormal = conTexto.Any(s => s.Run.Posicion != "super" && s.Run.Posicion != "sub");
             foreach (var seg in conTexto)
             {
-                // En Writer (SwTextPortion::Format), cuando un run con style:text-position="sub/super XX%"
-                // convive con texto normal en la misma línea (p.ej. "CFDI" 34pt sub 58% + "Comprobante..." 9pt
-                // en formatoDividendos), la altura de línea y la línea base se reservan con el tamaño SIN escalar.
-                var tamMetrica = (mezclaBaseNormal && seg.Run.EscalaPosicion is double esc && esc > 0 && esc < 100)
+                // En Writer (SwTextPortion::Format), un run con style:text-position="sub/super XX%"
+                // siempre reserva su caja de línea y línea base con el tamaño SIN escalar (tanto si
+                // convive con texto normal como si toda la línea es super/sub, p.ej. CartaPorte).
+                var tamMetrica = (seg.Run.EscalaPosicion is double esc && esc > 0 && esc < 100)
                     ? seg.TamanoPt * 100.0 / esc
                     : seg.TamanoPt;
                 var nat = tamMetrica * seg.Fuente.Metrics.NaturalHeightRatio;
@@ -1265,9 +1271,15 @@ internal sealed class PrawnSharpGeneradorPdf
         // - Con fo:line-height=100% (alto ≈ natural): baseline = ascent + lineGap.
         // - Con interlineado proporcional > 100%, el espacio extra va debajo de la línea base.
         // - Con alto fijo menor que el natural, la línea base se ajusta proporcionalmente.
-        var baseline = alto < maxNatural - 0.1 && maxNatural > 0
-            ? maxBaseline * (alto / maxNatural)
-            : maxBaseline;
+        // - Con alto fijo mayor que el natural (p.ej. 0.353cm sobre Arial 5-6pt en CartaPorte),
+        //   Writer distribuye el interlineado extra encima de la línea base (~75% sobre la base).
+        double baseline;
+        if (alto < maxNatural - 0.1 && maxNatural > 0)
+            baseline = maxBaseline * (alto / maxNatural);
+        else if (p.AltoLineaFijo && alto > maxNatural + 0.2 && maxNatural > 0)
+            baseline = maxBaseline + (alto - maxNatural) * 0.75;
+        else
+            baseline = maxBaseline;
 
         linea.AltoPt = alto;
         linea.AltoNaturalPt = (!p.AltoLineaFijo && p.AltoLineaPct > 1.001)
@@ -1517,20 +1529,18 @@ internal sealed class PrawnSharpGeneradorPdf
                     var color = (seg.Run.ColorAutomatico && fondoOscuro)
                         ? PdfColor.White
                         : ParseColor(seg.Run.Color);
-                    // Sólo elevar/bajar super/subíndice cuando la línea mezcla texto en línea base normal
-                    // con super/subíndice (p.ej. "Complemento Carta Porte" + "Versión: 2.0"); en celdas donde
-                    // todos los runs declaran "super 58%" (CartaPorte), el texto sólo reduce tamaño sin elevarse.
-                    var mezclaBaseNormal = linea.Segmentos.Any(s =>
-                        !s.EsEspacio && !s.EsTab && !string.IsNullOrWhiteSpace(s.Texto) &&
-                        s.Run.Posicion != "super" && s.Run.Posicion != "sub");
-                    var textRise = mezclaBaseNormal
-                        ? seg.Run.Posicion switch
-                        {
-                            "super" => seg.TamanoPt * 0.42,
-                            "sub" => -seg.TamanoPt * 0.22,
-                            _ => 0,
-                        }
-                        : 0;
+                    // En LibreOffice Writer (DFLT_ESC_AUTO_SUPER / DFLT_ESC_AUTO_SUB),
+                    // super/subíndice desplaza la línea base en proporción al tamaño SIN escalar
+                    // incluso cuando toda la línea es super/sub (p.ej. CartaPorte T14 super vs T15 sub).
+                    var tamSinEscalar = (seg.Run.EscalaPosicion is double escPos && escPos > 0 && escPos < 100)
+                        ? seg.TamanoPt * 100.0 / escPos
+                        : seg.TamanoPt;
+                    var textRise = seg.Run.Posicion switch
+                    {
+                        "super" => tamSinEscalar * 0.35,
+                        "sub" => -tamSinEscalar * 0.14,
+                        _ => 0,
+                    };
 
                     page.DrawText(new TextRun(txt, handle, seg.TamanoPt, color,
                                               CharacterSpacing: seg.Run.EspaciadoCaracteresPt,
@@ -1574,8 +1584,11 @@ internal sealed class PrawnSharpGeneradorPdf
         public double Ancho { get; init; }
         public double PadIzq { get; init; }
         public double PadDer { get; init; }
-        public double PadSup { get; init; }
-        public double PadInf { get; init; }
+        public double PadSup { get; set; }
+        public double PadInf { get; set; }
+        public double PadSupBase { get; init; }
+        public double PadInfBase { get; init; }
+        public bool CeldaConImagen { get; init; }
         public double GrosorSup { get; init; }
         public double GrosorInf { get; init; }
         public double GrosorIzq { get; init; }
@@ -1701,8 +1714,10 @@ internal sealed class PrawnSharpGeneradorPdf
                 var padIzq = omitirPadHorizImg ? 0 : celda.PaddingIzqPt + aireIzq;
                 var padDer = omitirPadHorizImg ? 0 : celda.PaddingDerPt + aireDer;
                 var padSupDecl = Math.Min(celda.PaddingSupPt, 6.0);
-                var padSup = (celdaConImagen ? 0 : (celda.BordeSup && spanR == 1 ? Math.Max(padSupDecl, padSupFilaMax) : padSupDecl)) + aireSup;
-                var padInf = (celdaConImagen ? 0 : Math.Min(celda.PaddingInfPt, 6.0)) + aireInf;
+                var padSupBase = celdaConImagen ? 0 : (celda.BordeSup && spanR == 1 ? Math.Max(padSupDecl, padSupFilaMax) : padSupDecl);
+                var padInfBase = celdaConImagen ? 0 : Math.Min(celda.PaddingInfPt, 6.0);
+                var padSup = padSupBase + aireSup;
+                var padInf = padInfBase + aireInf;
 
                 var cp = new CeldaPosicionada
                 {
@@ -1717,6 +1732,9 @@ internal sealed class PrawnSharpGeneradorPdf
                     PadDer = padDer,
                     PadSup = padSup,
                     PadInf = padInf,
+                    PadSupBase = padSupBase,
+                    PadInfBase = padInfBase,
+                    CeldaConImagen = celdaConImagen,
                     GrosorSup = gSup,
                     GrosorInf = gInf,
                     GrosorIzq = gIzq,
@@ -1774,6 +1792,47 @@ internal sealed class PrawnSharpGeneradorPdf
             }
         }
 
+        // Modelo unificado de bordes horizontales colapsados (table:border-model="collapsing" en ODF/Writer):
+        // bordeHoriz[k] es el grosor del borde compartido entre la fila k-1 y la fila k (0 <= k <= numFilas),
+        // considerando celdas reales, el borde inferior propagado por celdas con rowspan > 1 a sus subfilas
+        // y los estilos propios conservados en <table:covered-table-cell>. Cada fila reserva la mitad del
+        // borde superior (bordeHoriz[r]/2) y la mitad del inferior (bordeHoriz[r+1]/2).
+        var bordeHoriz = new double[numFilas + 1];
+        for (var k = 0; k <= numFilas; k++)
+        {
+            double g = 0;
+            if (k > 0)
+            {
+                if (tabla.Filas[k - 1].MaxBordeInfCubiertoPt > g)
+                    g = tabla.Filas[k - 1].MaxBordeInfCubiertoPt;
+                foreach (var c in posicionadas)
+                {
+                    if (c.Fila <= k - 1 && k - 1 < c.Fila + c.SpanFilas && c.GrosorInf > g)
+                        g = c.GrosorInf;
+                }
+            }
+            if (k < numFilas)
+            {
+                if (tabla.Filas[k].MaxBordeSupCubiertoPt > g)
+                    g = tabla.Filas[k].MaxBordeSupCubiertoPt;
+                foreach (var c in posicionadas)
+                {
+                    if (c.Fila == k && c.GrosorSup > g)
+                        g = c.GrosorSup;
+                }
+            }
+            bordeHoriz[k] = g > 0.05 ? g : 0;
+        }
+
+        // Propagar las reservas verticales del borde colapsado de cada fila al padding superior/inferior
+        // de sus celdas (en Writer el contenido de todas las celdas de la fila baja por bordeHoriz[r]/2).
+        foreach (var cp in posicionadas)
+        {
+            if (cp.CeldaConImagen || tabla.Filas[cp.Fila].AltoFijoPt > 0.5) continue;
+            cp.PadSup = cp.PadSupBase + bordeHoriz[cp.Fila] / 2.0;
+            cp.PadInf = cp.PadInfBase + bordeHoriz[cp.Fila + cp.SpanFilas] / 2.0;
+        }
+
         // Calcular alturas de fila
         var rowHeights = new double[numFilas];
         for (var r = 0; r < numFilas; r++)
@@ -1786,17 +1845,11 @@ internal sealed class PrawnSharpGeneradorPdf
             }
 
             var celdasFila = posicionadas.Where(c => c.Fila == r && c.SpanFilas == 1).ToList();
-            // En Writer (table:border-model="collapsing"), las celdas cubiertas de una celda
-            // con rowspan > 1 heredan los bordes de la celda maestra, así que la reserva vertical
-            // de borde de la fila considera también las celdas que la atraviesan verticalmente.
-            var celdasQueCubren = posicionadas.Where(c => c.Fila <= r && r < c.Fila + c.SpanFilas).ToList();
-            var bordeFilaVert = celdasQueCubren.Count > 0
-                ? celdasQueCubren.Max(c => (c.GrosorSup > 0.05 ? c.GrosorSup / 2.0 : 0) + (c.GrosorInf > 0.05 ? c.GrosorInf / 2.0 : 0))
-                : 0;
+            var bordeFilaVert = (bordeHoriz[r] + bordeHoriz[r + 1]) / 2.0;
             var h = fila.AltoMinimoPt > 0.5 ? fila.AltoMinimoPt + bordeFilaVert : 0;
             foreach (var cp in celdasFila)
             {
-                var bordeCp = (cp.GrosorSup > 0.05 ? cp.GrosorSup / 2.0 : 0) + (cp.GrosorInf > 0.05 ? cp.GrosorInf / 2.0 : 0);
+                var bordeCp = cp.CeldaConImagen ? 0 : bordeFilaVert;
                 var extraBorde = Math.Max(bordeFilaVert - bordeCp, 0);
                 h = Math.Max(h, cp.AltoTotalRequerido + extraBorde);
             }
@@ -2094,7 +2147,9 @@ internal sealed class PrawnSharpGeneradorPdf
             for (var rr = cp.Fila; rr < cp.Fila + cp.SpanFilas; rr++) hCell += rowHeights[rr];
 
             var fila = tabla.Filas[cp.Fila];
-            var recortar = fila.AltoFijoPt > 0.5 && cp.SpanFilas == 1;
+            // Sólo recortar celdas de alto fijo cuando el contenido realmente excede el alto de la fila;
+            // si el contenido cabe, no recortar ascendentes/superíndices (p.ej. CartaPorte T14 super 58%).
+            var recortar = fila.AltoFijoPt > 0.5 && cp.SpanFilas == 1 && cp.AltoTotalRequerido > hCell + 0.5;
 
             if (recortar)
             {
@@ -2226,7 +2281,10 @@ internal sealed class PrawnSharpGeneradorPdf
                               bool kerning = true, double espaciadoCaracteresPt = 0)
     {
         if (string.IsNullOrEmpty(texto) || tamanoPt <= 0) return 0;
-        var w = GetMetrics(resolved.Face).WidthOf(texto, tamanoPt, kerning: kerning);
+        var met = GetMetrics(resolved.Face);
+        var w = met is PureFontMetrics pfm
+            ? pfm.ExactWidthOf(texto, tamanoPt, kerning: kerning)
+            : met.WidthOf(texto, tamanoPt, kerning: kerning);
         if (Math.Abs(espaciadoCaracteresPt) > 1e-6)
             w += espaciadoCaracteresPt * texto.Length;
         return Math.Max(0, w);

@@ -4,9 +4,6 @@ internal static class Calibracion
 {
     static readonly Dictionary<string, (double dx, double dy)> Deltas = new()
     {
-        ["Text Box 15"] = (35.31, -34.59),
-        ["Text Box 8"] = (35.31, -35.59),
-        ["Text Box 9"] = (293.20, -48.55),
         ["logotipo"] = (35.16, -24.84),
         ["QRCode"] = (33.70, -470.10),
         ["Imagen 4"] = (28.10, -157.10),

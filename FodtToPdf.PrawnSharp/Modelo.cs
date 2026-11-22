@@ -221,6 +221,8 @@ internal class FilaModelo
     public double AltoFijoPt { get; set; }
     public double AltoMinimoPt { get; set; }
     public bool MantenerJunta { get; set; }
+    public double MaxBordeSupCubiertoPt { get; set; }
+    public double MaxBordeInfCubiertoPt { get; set; }
 }
 
 internal class CeldaModelo

@@ -2,46 +2,26 @@
   "version": 2,
   "dependencies": {
     "net8.0": {
-      "Microsoft.Extensions.DependencyInjection.Abstractions": {
-        "type": "Transitive",
-        "resolved": "8.0.2",
-        "contentHash": "3iE7UF7MQkCv1cxzCahz+Y/guQbTqieyxyaWKhrRO91itI9cOKO76OHeQDahqG4MmW5umr3CcCvGmK92lWNlbg=="
-      },
-      "Microsoft.Extensions.Logging.Abstractions": {
-        "type": "Transitive",
-        "resolved": "8.0.3",
-        "contentHash": "dL0QGToTxggRLMYY4ZYX5AMwBb+byQBd/5dMiZE07Nv73o6I5Are3C7eQTh7K2+A4ct0PVISSr7TZANbiNb2yQ==",
+      "prawnpure.backend": {
+        "type": "Project",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+          "PrawnPure.PdfCore": "[1.0.0, )",
+          "PrawnPure.TTFunk": "[1.0.0, )",
+          "PrawnSharp.Abstractions": "[1.0.0, )",
+          "PrawnSharp.Fonts": "[1.0.0, )"
         }
       },
-      "SkiaSharp.NativeAssets.macOS": {
-        "type": "Transitive",
-        "resolved": "3.119.0",
-        "contentHash": "YE1vNn0Nyw2PWtv7hw1PYkKJO0itFiQp9vSqGppZUKzQJqwp28a2jgdCMPfYtOiR8KCnDgZqQoynqJRRaE2ZVg=="
+      "prawnpure.pdfcore": {
+        "type": "Project"
       },
-      "SkiaSharp.NativeAssets.Win32": {
-        "type": "Transitive",
-        "resolved": "3.119.0",
-        "contentHash": "IwC9yx36lOdXVT2DjgmWHl1qkVspfj8ctd4+li8CNnvqdfaTolXCOh6TLznURcPAvzatx9K/tLOB7zT6T8EA9w=="
-      },
-      "System.Security.Cryptography.Pkcs": {
-        "type": "Transitive",
-        "resolved": "8.0.1",
-        "contentHash": "CoCRHFym33aUSf/NtWSVSZa99dkd0Hm7OCZUxORBjRB16LNhIEOf8THPqzIYlvKM0nNDAPTRBa1FxEECrgaxxA=="
+      "prawnpure.ttfunk": {
+        "type": "Project",
+        "dependencies": {
+          "PrawnPure.PdfCore": "[1.0.0, )"
+        }
       },
       "prawnsharp.abstractions": {
         "type": "Project"
-      },
-      "prawnsharp.backend.pdfsharp": {
-        "type": "Project",
-        "dependencies": {
-          "PDFsharp": "[6.2.4, 6.2.4]",
-          "PrawnSharp.Abstractions": "[1.0.0, )",
-          "PrawnSharp.Fonts": "[1.0.0, )",
-          "SkiaSharp": "[3.119.0, )",
-          "System.Text.Encoding.CodePages": "[8.0.0, )"
-        }
       },
       "prawnsharp.fonts": {
         "type": "Project",
@@ -50,26 +30,14 @@
           "System.Text.Encoding.CodePages": "[8.0.0, )"
         }
       },
-      "PDFsharp": {
+      "System.Text.Encoding.CodePages": {
         "type": "CentralTransitive",
-        "requested": "[6.2.4, 6.2.4]",
-        "resolved": "6.2.4",
-        "contentHash": "GhTr9F1uOYXHCIEOB5PXIgqn5a8WLsJL2m0eewTA0IvY1j6N4HGXHKKmEyB90/N6vrjmYamf41V9zbmdW2HY3g==",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
-          "System.Security.Cryptography.Pkcs": "8.0.1"
-        }
-      },
-      "SkiaSharp": {
-        "type": "CentralTransitive",
-        "requested": "[3.119.0, )",
-        "resolved": "3.119.0",
-        "contentHash": "gR9yVoOta2Mc1Rxt15LD65AckfHMfwjIs/3kkD59C9bT2nYYISsE6uz3t4aMPNHA6CgsIL0Ssn+jE5OVilZ1yw==",
-        "dependencies": {
-          "SkiaSharp.NativeAssets.Win32": "3.119.0",
-          "SkiaSharp.NativeAssets.macOS": "3.119.0"
-        }
-      },
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "OZIsVplFGaVY90G2SbpgU7EnCoOO5pw1t4ic21dBF3/1omrJFpAGoNAVpPyMVOC90/hvgkGG3VFqR13YgZMQfg=="
+      }
+    },
+    "net8.0/win-x64": {
       "System.Text.Encoding.CodePages": {
         "type": "CentralTransitive",
         "requested": "[8.0.0, )",

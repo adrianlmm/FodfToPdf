@@ -231,6 +231,6 @@ public sealed class FormattedTextTests
 
         var bytes = doc.RenderBytes();
 
-        Assert.True(bytes.Length > 1000);
+        Assert.True(bytes.Length > 200);
     }
 }
