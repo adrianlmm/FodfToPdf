@@ -118,4 +118,4 @@ Each sample creates a filled `.fodt` and two PDFs, one for each backend:
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+This project is licensed under the GNU General Public License v2.0 only. See [LICENSE](LICENSE).
