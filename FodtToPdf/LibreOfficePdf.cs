@@ -3,44 +3,45 @@ using System.Diagnostics;
 namespace FodtToPdf;
 
 /// <summary>
-/// Converts a filled .fodt document to PDF with headless LibreOffice.
+/// Converts a filled .fodt document to PDF using a registered PDF generator
+/// (such as PrawnSharpFodtRenderer) or headless LibreOffice as fallback.
 /// The converter is independent of LogicaSAP and Aspose.
 ///
 /// Usage:
 ///     byte[] pdf = LibreOfficePdf.ConvertToPdf(fodtBytes);
 /// or:
-///     byte[] pdf = QuestPdfFodtRenderer.RenderWithLibreOffice(fodtBytes);
+///     byte[] pdf = PrawnSharpFodtRenderer.RenderWithLibreOffice(fodtBytes);
 /// </summary>
 public static class LibreOfficePdf
 {
-    private static Func<byte[], bool, byte[]> _generadorQuestPdf;
+    private static Func<byte[], bool, byte[]> _pdfGenerator;
 
-    /// <summary>Gets whether QuestPdfFodtRenderer has registered a QuestPDF generator.</summary>
-    public static bool HasQuestPdfGenerator => _generadorQuestPdf != null;
+    /// <summary>Gets whether an in-process PDF generator has been registered.</summary>
+    public static bool HasPdfGenerator => _pdfGenerator != null;
 
     /// <summary>
-    /// Registers the QuestPDF generator used by <see cref="ConvertToPdf"/>.
-    /// The FodtToPdf.QuestPdf assembly registers it with QuestPdfFodtRenderer.UseQuestPdf().
+    /// Registers the in-process PDF generator used by <see cref="ConvertToPdf"/>.
+    /// The FodtToPdf.PrawnSharp assembly registers it with PrawnSharpFodtRenderer.UsePrawnSharp().
     /// </summary>
-    public static void SetQuestPdfGenerator(Func<byte[], bool, byte[]> generator)
+    public static void SetPdfGenerator(Func<byte[], bool, byte[]> generator)
     {
-        _generadorQuestPdf = generator;
+        _pdfGenerator = generator;
     }
 
-    /// <summary>Clears the QuestPDF generator and falls back to LibreOffice.</summary>
-    public static void ClearQuestPdfGenerator()
+    /// <summary>Clears the registered PDF generator and falls back to LibreOffice.</summary>
+    public static void ClearPdfGenerator()
     {
-        _generadorQuestPdf = null;
+        _pdfGenerator = null;
     }
 
     /// <summary>
-    /// Generates the PDF with QuestPDF when a generator has been registered; otherwise
+    /// Generates the PDF with the registered in-process generator when set; otherwise
     /// uses LibreOffice.
     /// </summary>
     public static byte[] ConvertToPdf(byte[] fodtBytes, bool nestedTables = true)
     {
-        if (_generadorQuestPdf != null)
-            return _generadorQuestPdf(fodtBytes, nestedTables);
+        if (_pdfGenerator != null)
+            return _pdfGenerator(fodtBytes, nestedTables);
 
         return ConvertWithLibreOffice(fodtBytes);
     }

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Núcleo de FodtToPdf: conversión a PDF con LibreOffice y edición de plantillas .fodt.
-    El generador QuestPDF vive en FodtToPdf.QuestPdf para no arrastrar QuestPDF aquí.
+    Núcleo de FodtToPdf: edición de plantillas .fodt y punto de entrada de conversión a PDF
+    (generador en proceso registrado por FodtToPdf.PrawnSharp, con respaldo a LibreOffice).
   -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>

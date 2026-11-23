@@ -13,20 +13,15 @@ using (var memory = new MemoryStream())
     templateBytes = memory.ToArray();
 }
 
-var questPdf = QuestPdfFodtRenderer.Render(templateBytes);
-var questPdfPath = Path.Combine(samples, "parrafos-questpdf.pdf");
-File.WriteAllBytes(questPdfPath, questPdf);
-
 var prawnSharpPdf = PrawnSharpFodtRenderer.Render(templateBytes);
 var prawnSharpPdfPath = Path.Combine(samples, "parrafos-prawnsharp.pdf");
 File.WriteAllBytes(prawnSharpPdfPath, prawnSharpPdf);
 
-var libreOfficePdf = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var libreOfficePdf = PrawnSharpFodtRenderer.RenderWithLibreOffice(templateBytes);
 var libreOfficePdfPath = Path.Combine(samples, "parrafos-libreoffice.pdf");
 File.WriteAllBytes(libreOfficePdfPath, libreOfficePdf);
 
 Console.WriteLine($"Template: {templatePath}");
-Console.WriteLine($"QuestPDF PDF:     {questPdfPath} ({questPdf.Length} bytes)");
 Console.WriteLine($"PrawnSharp PDF:     {prawnSharpPdfPath} ({prawnSharpPdf.Length} bytes)");
 Console.WriteLine($"LibreOffice PDF:  {libreOfficePdfPath} ({libreOfficePdf.Length} bytes)");
 

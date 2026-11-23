@@ -1,8 +1,8 @@
 namespace FodtToPdf;
 
 /// <summary>
-/// Punto de entrada público: convierte un documento .fodt combinado a PDF usando PrawnSharp
-/// (PDFsharp 6.2.4 MIT) sin requerir LibreOffice ni QuestPDF.
+/// Punto de entrada público: convierte un documento .fodt combinado a PDF usando PrawnSharp + PrawnPure
+/// (100% C# puro, sin PDFsharp, sin SkiaSharp ni LibreOffice).
 ///
 /// Uso:
 ///     byte[] pdf = PrawnSharpFodtRenderer.Render(fodtBytes);
@@ -19,8 +19,6 @@ public static class PrawnSharpFodtRenderer
             throw new ArgumentException("El .fodt está vacío.", nameof(fodtBytes));
 
         var modelo = ExtractorFodt.Extraer(fodtBytes);
-        Calibracion.Aplicar(modelo);
-
         return PrawnSharpGeneradorPdf.Generar(modelo, nestedTables);
     }
 
@@ -51,20 +49,18 @@ public static class PrawnSharpFodtRenderer
     /// <summary>Registra PrawnSharp en LibreOfficePdf para que ConvertToPdf use este motor.</summary>
     public static void UsePrawnSharp()
     {
-        LibreOfficePdf.SetQuestPdfGenerator((fodt, nestedTables) => Render(fodt, nestedTables));
+        LibreOfficePdf.SetPdfGenerator((fodt, nestedTables) => Render(fodt, nestedTables));
     }
 
     /// <summary>Desregistra el generador y vuelve a LibreOffice.</summary>
     public static void DisablePrawnSharp()
     {
-        LibreOfficePdf.ClearQuestPdfGenerator();
+        LibreOfficePdf.ClearPdfGenerator();
     }
 
     /// <summary>Extrae el modelo intermedio del .fodt (diagnóstico).</summary>
     internal static ModeloPlantilla ExtractModel(byte[] fodtBytes)
     {
-        var modelo = ExtractorFodt.Extraer(fodtBytes);
-        Calibracion.Aplicar(modelo);
-        return modelo;
+        return ExtractorFodt.Extraer(fodtBytes);
     }
 }

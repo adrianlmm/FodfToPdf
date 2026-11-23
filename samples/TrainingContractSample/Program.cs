@@ -9,15 +9,11 @@ var templatePath = Path.Combine(samples, "C_CapacitacionInicialPTractocamion.fod
 var templateBytes = File.ReadAllBytes(templatePath);
 
 // Template-only output
-var questTemplate = QuestPdfFodtRenderer.Render(templateBytes);
-var questTemplatePath = Path.Combine(samples, "training-contract-template-questpdf.pdf");
-File.WriteAllBytes(questTemplatePath, questTemplate);
-
 var prawnSharpTemplate = PrawnSharpFodtRenderer.Render(templateBytes);
 var prawnSharpTemplatePath = Path.Combine(samples, "training-contract-template-prawnsharp.pdf");
 File.WriteAllBytes(prawnSharpTemplatePath, prawnSharpTemplate);
 
-var libreOfficeTemplate = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var libreOfficeTemplate = PrawnSharpFodtRenderer.RenderWithLibreOffice(templateBytes);
 var libreOfficeTemplatePath = Path.Combine(samples, "training-contract-template-libreoffice.pdf");
 File.WriteAllBytes(libreOfficeTemplatePath, libreOfficeTemplate);
 
@@ -72,25 +68,19 @@ var filled = template.ToBytes();
 var filledPath = Path.Combine(samples, "training-contract-sample-filled.fodt");
 File.WriteAllBytes(filledPath, filled);
 
-var questFilled = QuestPdfFodtRenderer.Render(filled);
-var questFilledPath = Path.Combine(samples, "training-contract-sample-questpdf.pdf");
-File.WriteAllBytes(questFilledPath, questFilled);
-
 var prawnSharpFilled = PrawnSharpFodtRenderer.Render(filled);
 var prawnSharpFilledPath = Path.Combine(samples, "training-contract-sample-prawnsharp.pdf");
 File.WriteAllBytes(prawnSharpFilledPath, prawnSharpFilled);
 
-var libreOfficeFilled = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
+var libreOfficeFilled = PrawnSharpFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficeFilledPath = Path.Combine(samples, "training-contract-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficeFilledPath, libreOfficeFilled);
 
 Console.WriteLine($"Source template: {templatePath}");
-Console.WriteLine($"Template QuestPDF:    {questTemplatePath} ({questTemplate.Length} bytes)");
 Console.WriteLine($"Template PrawnSharp:    {prawnSharpTemplatePath} ({prawnSharpTemplate.Length} bytes)");
 Console.WriteLine($"Template LibreOffice: {libreOfficeTemplatePath} ({libreOfficeTemplate.Length} bytes)");
 Console.WriteLine($"Fields replaced: {replaced}");
 Console.WriteLine($"Filled template: {filledPath}");
-Console.WriteLine($"Filled QuestPDF:    {questFilledPath} ({questFilled.Length} bytes)");
 Console.WriteLine($"Filled PrawnSharp:    {prawnSharpFilledPath} ({prawnSharpFilled.Length} bytes)");
 Console.WriteLine($"Filled LibreOffice: {libreOfficeFilledPath} ({libreOfficeFilled.Length} bytes)");
 

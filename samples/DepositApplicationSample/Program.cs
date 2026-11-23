@@ -8,15 +8,11 @@ var templatePath = Path.Combine(samples, "PlantillaDepositos.fodt");
 var templateBytes = File.ReadAllBytes(templatePath);
 
 // 1. Template-only PDFs
-var templateQuest = QuestPdfFodtRenderer.Render(templateBytes);
-var templateQuestPath = Path.Combine(samples, "deposit-application-template-questpdf.pdf");
-File.WriteAllBytes(templateQuestPath, templateQuest);
-
 var templateprawnSharp = PrawnSharpFodtRenderer.Render(templateBytes);
 var templateprawnSharpPath = Path.Combine(samples, "deposit-application-template-prawnsharp.pdf");
 File.WriteAllBytes(templateprawnSharpPath, templateprawnSharp);
 
-var templateLibreOffice = QuestPdfFodtRenderer.RenderWithLibreOffice(templateBytes);
+var templateLibreOffice = PrawnSharpFodtRenderer.RenderWithLibreOffice(templateBytes);
 var templateLibreOfficePath = Path.Combine(samples, "deposit-application-template-libreoffice.pdf");
 File.WriteAllBytes(templateLibreOfficePath, templateLibreOffice);
 
@@ -54,24 +50,18 @@ var filled = template.ToBytes();
 var filledPath = Path.Combine(samples, "deposit-application-sample-filled.fodt");
 File.WriteAllBytes(filledPath, filled);
 
-var questFilled = QuestPdfFodtRenderer.Render(filled);
-var questFilledPath = Path.Combine(samples, "deposit-application-sample-questpdf.pdf");
-File.WriteAllBytes(questFilledPath, questFilled);
-
 var prawnSharpFilled = PrawnSharpFodtRenderer.Render(filled);
 var prawnSharpFilledPath = Path.Combine(samples, "deposit-application-sample-prawnsharp.pdf");
 File.WriteAllBytes(prawnSharpFilledPath, prawnSharpFilled);
 
-var libreOfficeFilled = QuestPdfFodtRenderer.RenderWithLibreOffice(filled);
+var libreOfficeFilled = PrawnSharpFodtRenderer.RenderWithLibreOffice(filled);
 var libreOfficeFilledPath = Path.Combine(samples, "deposit-application-sample-libreoffice.pdf");
 File.WriteAllBytes(libreOfficeFilledPath, libreOfficeFilled);
 
-Console.WriteLine($"Template QuestPDF:    {templateQuestPath} ({templateQuest.Length} bytes)");
 Console.WriteLine($"Template PrawnSharp:    {templateprawnSharpPath} ({templateprawnSharp.Length} bytes)");
 Console.WriteLine($"Template LibreOffice: {templateLibreOfficePath} ({templateLibreOffice.Length} bytes)");
 Console.WriteLine($"Invoice rows: {regionRows}");
 Console.WriteLine($"Filled template: {filledPath}");
-Console.WriteLine($"Filled QuestPDF:    {questFilledPath} ({questFilled.Length} bytes)");
 Console.WriteLine($"Filled PrawnSharp:    {prawnSharpFilledPath} ({prawnSharpFilled.Length} bytes)");
 Console.WriteLine($"Filled LibreOffice: {libreOfficeFilledPath} ({libreOfficeFilled.Length} bytes)");
 

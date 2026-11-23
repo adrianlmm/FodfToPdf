@@ -296,16 +296,12 @@ internal sealed class PrawnSharpGeneradorPdf
         foreach (var marca in marcasImg)
             DibujarCapa(estado, marca, esFondo: true);
 
-        // Imágenes de marca de agua o capas ancladas a página con wrap=run-through / watermark
+        // Imágenes de marca de agua en el fondo de cada página
         foreach (var capa in _modelo.Capas)
         {
             if (capa.EnFlujo || capa.AnclaEnTabla) continue;
             if (capa.EsNumeroPaginaActual) continue;
-
-            var esMarcaAgua = string.Equals(capa.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase);
-            var esFondoDividendo = capa.Nombre == "Imagen1" && capa.Ancla.Contains("calibrada");
-            if (!esMarcaAgua && !esFondoDividendo) continue;
-            if (esFondoDividendo && estado.NumeroPagina != 1) continue;
+            if (!string.Equals(capa.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase)) continue;
 
             DibujarCapa(estado, capa, esFondo: true);
         }
@@ -321,7 +317,6 @@ internal sealed class PrawnSharpGeneradorPdf
             if (capa.EsNumeroPaginaActual) continue;
             if (_capasFondoDibujadas.Contains(capa)) continue;
             if (string.Equals(capa.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase)) continue;
-            if (capa.Nombre == "Imagen1" && capa.Ancla.Contains("calibrada")) continue;
 
             var tieneTexto = capa.Parrafos.Any(p => p.Runs.Any(r => !string.IsNullOrWhiteSpace(r.Texto)));
             var tieneContenido = tieneTexto || !string.IsNullOrEmpty(capa.ImagenBase64) ||
@@ -609,6 +604,11 @@ internal sealed class PrawnSharpGeneradorPdf
             {
                 NuevaPagina(cambiaMaestra ? bloque.Parrafo.PaginaMaestra : null);
                 _saltoExplicitoPagina = true;
+                if (cambiaMaestra)
+                {
+                    xBase = _areaIzq;
+                    ancho = _areaDer - _areaIzq;
+                }
             }
             else if (cambiaMaestra && _paginas.Count == 1 && _cursorY <= _areaSup + 0.5)
             {
@@ -624,7 +624,6 @@ internal sealed class PrawnSharpGeneradorPdf
             if (capaBg.EnFlujo || capaBg.AnclaEnTabla || capaBg.EsNumeroPaginaActual) continue;
             if (_capasFondoDibujadas.Contains(capaBg)) continue;
             if (string.Equals(capaBg.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase)) continue;
-            if (capaBg.Nombre == "Imagen1" && capaBg.Ancla.Contains("calibrada")) continue;
             if (!string.Equals(capaBg.RunThrough, "background", StringComparison.OrdinalIgnoreCase)) continue;
             if (capaBg.BloqueAncla != indice) continue;
 
@@ -699,6 +698,57 @@ internal sealed class PrawnSharpGeneradorPdf
 
         if (bloque.Tipo == "tabla" && bloque.Tabla != null)
         {
+            // Capas de fondo (style:run-through="background") ancladas justo después de esta tabla con
+            // svg:y negativo (p.ej. Imagen1 en formatoDividendos): suben por detrás de la tabla, así que
+            // se calcula la altura de la tabla y se pintan ANTES para que queden debajo del texto.
+            var capasFondoSobreTabla = _modelo.Capas
+                .Where(c => !c.EnFlujo && !c.AnclaEnTabla && !c.EsNumeroPaginaActual &&
+                            !_capasFondoDibujadas.Contains(c) &&
+                            !string.Equals(c.ModoColor, "watermark", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(c.RunThrough, "background", StringComparison.OrdinalIgnoreCase) &&
+                            c.YPt < -0.5 && c.BloqueAncla == indice + 1)
+                .ToList();
+
+            if (capasFondoSobreTabla.Count > 0 && bloque.Tabla.Filas.Count > 0)
+            {
+                var (_, _, _, rhPre, extSupPre, extInfPre) =
+                    PrepararTabla(bloque.Tabla, xBase, ancho, esFlujo: true, _paginaActual.NumeroPagina, 0);
+                var yAnclaSig = _cursorY + extSupPre + rhPre.Sum() + extInfPre;
+
+                foreach (var capaBg in capasFondoSobreTabla)
+                {
+                    var capaEf = new CapaModelo
+                    {
+                        Nombre = capaBg.Nombre,
+                        Tipo = capaBg.Tipo,
+                        XPt = capaBg.HorizontalRel is "paragraph" or "paragraph-content"
+                            ? xBase + capaBg.XPt
+                            : capaBg.HorizontalRel == "page-content"
+                                ? _paginaActual.Layout.MargenIzqPt + capaBg.XPt
+                                : capaBg.XPt,
+                        YPt = yAnclaSig + capaBg.YPt,
+                        AnchoPt = capaBg.AnchoPt,
+                        AltoPt = capaBg.AltoPt,
+                        Ancla = capaBg.Ancla + " calibrada",
+                        Parrafos = capaBg.Parrafos,
+                        Tablas = capaBg.Tablas,
+                        ImagenBase64 = capaBg.ImagenBase64,
+                        ColorRelleno = capaBg.ColorRelleno,
+                        ColorTrazo = capaBg.ColorTrazo,
+                        GrosorTrazoPt = capaBg.GrosorTrazoPt,
+                        BordeCaja = capaBg.BordeCaja,
+                        ColorBorde = capaBg.ColorBorde,
+                        GrosorBordePt = capaBg.GrosorBordePt,
+                        PaddingIzqPt = capaBg.PaddingIzqPt,
+                        PaddingDerPt = capaBg.PaddingDerPt,
+                        PaddingSupPt = capaBg.PaddingSupPt,
+                        PaddingInfPt = capaBg.PaddingInfPt,
+                    };
+                    DibujarCapa(_paginaActual, capaEf, esFondo: true);
+                    _capasFondoDibujadas.Add(capaBg);
+                }
+            }
+
             RenderizarTablaFlujo(bloque.Tabla, xBase, ancho, permitirSaltoPagina);
 
             // Capas ancladas dentro de esta tabla: dibujarlas justo después
@@ -1145,7 +1195,7 @@ internal sealed class PrawnSharpGeneradorPdf
                 var remText = pos == 0 ? s : s[pos..];
                 var remWidth = pos == 0 ? tok.AnchoPt : MedirTexto(tok.Fuente, remText, tok.TamanoPt, tok.Run.Kerning, tok.Run.EspaciadoCaracteresPt);
 
-                if (remWidth <= restante + 0.05)
+                if (remWidth <= restante + 0.01)
                 {
                     actual.Segmentos.Add(new SegmentoLinea
                     {
@@ -1165,7 +1215,7 @@ internal sealed class PrawnSharpGeneradorPdf
                 while (pos + len < s.Length)
                 {
                     var nextW = MedirTexto(tok.Fuente, s.Substring(pos, len + 1), tok.TamanoPt, tok.Run.Kerning, tok.Run.EspaciadoCaracteresPt);
-                    if (nextW > restante + 0.05) break;
+                    if (nextW > restante + 0.01) break;
                     w = nextW;
                     len++;
                 }
@@ -1846,7 +1896,18 @@ internal sealed class PrawnSharpGeneradorPdf
 
             var celdasFila = posicionadas.Where(c => c.Fila == r && c.SpanFilas == 1).ToList();
             var bordeFilaVert = (bordeHoriz[r] + bordeHoriz[r + 1]) / 2.0;
-            var h = fila.AltoMinimoPt > 0.5 ? fila.AltoMinimoPt + bordeFilaVert : 0;
+            // En LibreOffice Writer (SwRowFrame + InvertBorderSpacing), style:min-row-height suma
+            // únicamente el grosor del borde superior declarado explícitamente en la propia fila
+            // (no el borde inferior ni el propagado desde la fila anterior por colapso).
+            var bordeSupFilaDecl = fila.MaxBordeSupCubiertoPt;
+            foreach (var cp in posicionadas)
+            {
+                if (cp.Fila == r && cp.GrosorSup > bordeSupFilaDecl)
+                    bordeSupFilaDecl = cp.GrosorSup;
+            }
+            var h = fila.AltoMinimoPt > 0.5
+                ? fila.AltoMinimoPt + (bordeSupFilaDecl > 0.05 ? bordeSupFilaDecl : 0)
+                : 0;
             foreach (var cp in celdasFila)
             {
                 var bordeCp = cp.CeldaConImagen ? 0 : bordeFilaVert;

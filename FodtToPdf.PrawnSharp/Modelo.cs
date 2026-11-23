@@ -106,7 +106,7 @@ internal class ParrafoModelo
     public string PaginaMaestra { get; set; }
     public bool SaltoColumnaAntes { get; set; }
 
-    // Alto de línea REAL en puntos PDF (sin factor artificial de QuestPDF).
+    // Alto de línea real en puntos PDF.
     public double AltoLineaPt { get; set; }
     public double AltoLineaPct { get; set; }
     public double AltoMarcaPt { get; set; }

@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FodtToPdf\FodtToPdf.csproj" />
-    <ProjectReference Include="..\..\FodtToPdf.QuestPdf\FodtToPdf.QuestPdf.csproj" />
     <ProjectReference Include="..\..\FodtToPdf.PrawnSharp\FodtToPdf.PrawnSharp.csproj" />
   </ItemGroup>
 </Project>

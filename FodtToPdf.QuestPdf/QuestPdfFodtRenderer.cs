@@ -80,13 +80,13 @@ public static class QuestPdfFodtRenderer
     /// <summary>Registers this renderer in LibreOfficePdf so ConvertToPdf uses QuestPDF.</summary>
     public static void UseQuestPdf()
     {
-        LibreOfficePdf.SetQuestPdfGenerator((fodt, nestedTables) => Render(fodt, nestedTables));
+        LibreOfficePdf.SetPdfGenerator((fodt, nestedTables) => Render(fodt, nestedTables));
     }
 
     /// <summary>Clears the QuestPDF registration and falls back to LibreOffice.</summary>
     public static void DisableQuestPdf()
     {
-        LibreOfficePdf.ClearQuestPdfGenerator();
+        LibreOfficePdf.ClearPdfGenerator();
     }
 
     /// <summary>Renders a .fodt file to PDF with headless LibreOffice.</summary>

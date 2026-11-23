@@ -119,9 +119,6 @@ internal static class ExtractorFodt
     // interlineado interno). Arial: ~1.15 em; es la base del fo:line-height en %.
     const double AltoNaturalTexto = 1.15;
 
-    // En PrawnSharp el interlineado se controla directamente en puntos reales (sin factor artificial).
-    const double FactorInterlineadoQuestPdf = 1.0;
-
     internal static double NaturalDeFuente(string fuente)
     {
         if (string.IsNullOrWhiteSpace(fuente)) return AltoNaturalTexto;
@@ -936,8 +933,8 @@ internal static class ExtractorFodt
 
         if (Pct(partes[0]) == null) return null;
 
-        // los 370 "-6% 100%" de los contratos caen aquÃ­: escala 100 % y sÃ³lo se mueve la
-        // lÃ­nea base 6 %, un desplazamiento que QuestPDF no sabe expresar (mÃ­nimo ~33 %).
+        // los 370 "-6% 100%" de los contratos caen aquí: escala 100 % con un desplazamiento
+        // mínimo de la línea base (6 %), que no se trata como sub/superíndice.
         return (partes.Length > 1 ? Pct(partes[1]) ?? 100 : 100, null);
     }
 
@@ -1415,10 +1412,7 @@ internal static class ExtractorFodt
             }
         }
 
-        // <text:tab/> avanza hasta la siguiente parada de tabulador. QuestPDF no tiene
-        // tabuladores: se convierten en espacios contados (el avance lo da la parada, no
-        // el nÃºmero de espacios). Sin esto la segunda lÃ­nea del bloque Â«UbicaciÃ³nÂ» quedaba
-        // 35 pt a la izquierda (el ancho de la parada por omisiÃ³n).
+        // <text:tab/> avanza hasta la siguiente parada de tabulador declarada en el estilo.
         if (paradasTab != null && paradasTab.Count > 0)
             modelo.Tabs = paradasTab;
 
@@ -1559,9 +1553,9 @@ internal static class ExtractorFodt
             });
         }
 
-        // Ãšltima pasada: quitar los glifos del Ã¡rea privada (viÃ±etas Symbol) que hacen
-        // abortar a QuestPDF. Se hace aquÃ­ para cubrir tambiÃ©n los textos que se pegan
-        // directamente a un run (text:s, text:tab, marcas de combinaciÃ³n).
+        // Última pasada: normalizar los glifos del área de uso privado (viñetas Symbol/Wingdings)
+        // a equivalentes Unicode estándar. Se hace aquí para cubrir también los textos que se pegan
+        // directamente a un run (text:s, text:tab, marcas de combinación).
         foreach (var runParrafo in modelo.Runs)
             runParrafo.Texto = LimpiarGlifos(runParrafo.Texto);
 
@@ -1958,9 +1952,8 @@ internal static class ExtractorFodt
 
         // Borde superior redundante en filas espaciadoras vacías (sin bordes laterales ni
         // inferior) inmediatamente después de una fila que ya declara borde inferior en todas
-        // sus celdas: en el modelo colapsado de ODF es la misma línea, pero en QuestPDF dibuja
-        // un borde doble o deja una línea huérfana arriba de la página siguiente si el salto cae
-        // entre ambas filas.
+        // sus celdas: en el modelo colapsado de ODF es la misma línea y sin quitarlo deja
+        // una línea huérfana arriba de la página siguiente si el salto cae entre ambas filas.
         for (var r = 1; r < modelo.Filas.Count; r++)
         {
             var filaPrev = modelo.Filas[r - 1];
@@ -2065,10 +2058,9 @@ internal static class ExtractorFodt
 
     static double ACm(string v) => APt(v) / CM_PT;
 
-    // Los .doc convertidos traen viÃ±etas en el Ã¡rea de uso privado (Symbol/Wingdings):
-    // U+F0B7 es la "â€¢" del Symbol. Si se pasan tal cual, QuestPDF aborta el documento
-    // entero ("1 glyph(s) that are not available"). Se traducen las conocidas y se
-    // descartan las demÃ¡s: una viÃ±eta invisible es mejor que no generar el PDF.
+    // Los .doc convertidos traen viñetas en el área de uso privado (Symbol/Wingdings):
+    // U+F0B7 es la "•" del Symbol. Se traducen las conocidas a Unicode estándar y se
+    // descartan las demás para evitar glifos faltantes (.notdef) en la fuente incrustada.
     static string LimpiarGlifos(string texto)
     {
         if (string.IsNullOrEmpty(texto)) return texto;
